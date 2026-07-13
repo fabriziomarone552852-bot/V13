@@ -1,0 +1,193 @@
+// src/hooks/shopping/useShoppingMutations.ts
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  shoppingQueryKeys,
+  createShoppingList,
+  updateShoppingList,
+  deleteShoppingList,
+  createShoppingListItem,
+  updateShoppingListItem,
+  deleteShoppingListItem,
+  toggleShoppingListItemPurchased,
+  createShoppingSupplier,
+  updateShoppingSupplier,
+  deleteShoppingSupplier,
+  createShoppingPrice,
+  updateShoppingPrice,
+  deleteShoppingPrice,
+  type ShoppingListCreatePayload,
+  type ShoppingListUpdatePayload,
+  type ShoppingListItemCreatePayload,
+  type ShoppingListItemUpdatePayload,
+  type ToggleShoppingListItemPurchasedPayload,
+  type ShoppingSupplierCreatePayload,
+  type ShoppingSupplierUpdatePayload,
+  type ShoppingPriceUpdatePayload,
+} from '../../api/shoppingApi';
+import type { ShoppingPriceCreatePayload } from '../../types/shopping';
+
+export const useShoppingMutations = () => {
+  const queryClient = useQueryClient();
+
+  const invalidateAllShopping = async () => {
+    await queryClient.invalidateQueries({ queryKey: shoppingQueryKeys.all });
+  };
+
+  const invalidateListItems = async (listId: number) => {
+    await queryClient.invalidateQueries({
+      queryKey: shoppingQueryKeys.items(listId),
+    });
+  };
+
+  const invalidateLists = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: shoppingQueryKeys.lists(),
+    });
+  };
+
+  const invalidateBootstrap = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: shoppingQueryKeys.bootstrap(),
+    });
+  };
+
+  const createList = useMutation({
+    mutationFn: (payload: ShoppingListCreatePayload) =>
+      createShoppingList(payload),
+    onSuccess: async () => {
+      await invalidateLists();
+    },
+  });
+
+  const updateList = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ShoppingListUpdatePayload }) =>
+      updateShoppingList(id, data),
+    onSuccess: async (_data, vars) => {
+      await invalidateLists();
+      await queryClient.invalidateQueries({
+        queryKey: shoppingQueryKeys.listDetail(vars.id),
+      });
+    },
+  });
+
+  const deleteList = useMutation({
+    mutationFn: (id: number) => deleteShoppingList(id),
+    onSuccess: async () => {
+      await invalidateLists();
+    },
+  });
+
+  const createItem = useMutation({
+    mutationFn: (payload: ShoppingListItemCreatePayload) =>
+      createShoppingListItem(payload),
+    onSuccess: async (_data, vars) => {
+      await invalidateLists();
+      await invalidateListItems(vars.shoppingListId);
+    },
+  });
+
+  const updateItem = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ShoppingListItemUpdatePayload }) =>
+      updateShoppingListItem(id, data),
+    onSuccess: async (data) => {
+      await invalidateLists();
+      await invalidateListItems(data.shoppingListId);
+    },
+  });
+
+  const deleteItem = useMutation({
+    mutationFn: ({ id }: { id: number; shoppingListId: number }) =>
+      deleteShoppingListItem(id),
+    onSuccess: async (_data, vars) => {
+      await invalidateLists();
+      await invalidateListItems(vars.shoppingListId);
+    },
+  });
+
+  const togglePurchased = useMutation({
+    mutationFn: ({
+      id,
+      shoppingListId,
+      data,
+    }: {
+      id: number;
+      shoppingListId: number;
+      data: ToggleShoppingListItemPurchasedPayload;
+    }) => toggleShoppingListItemPurchased(id, data),
+    onSuccess: async (_data, vars) => {
+      await invalidateLists();
+      await invalidateListItems(vars.shoppingListId);
+    },
+  });
+
+  const createSupplier = useMutation({
+    mutationFn: (payload: ShoppingSupplierCreatePayload) =>
+      createShoppingSupplier(payload),
+    onSuccess: async () => {
+      await invalidateBootstrap();
+    },
+  });
+
+  const updateSupplier = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ShoppingSupplierUpdatePayload }) =>
+      updateShoppingSupplier(id, data),
+    onSuccess: async () => {
+      await invalidateBootstrap();
+    },
+  });
+
+  const deleteSupplier = useMutation({
+    mutationFn: (id: number) => deleteShoppingSupplier(id),
+    onSuccess: async () => {
+      await invalidateBootstrap();
+    },
+  });
+
+  const addPrice = useMutation({
+    mutationFn: (payload: ShoppingPriceCreatePayload) =>
+      createShoppingPrice(payload),
+    onSuccess: async (_data, vars) => {
+      await invalidateLists();
+      await invalidateListItems(vars.shoppingListId);
+    },
+  });
+
+  const updatePrice = useMutation({
+    mutationFn: ({ priceId, data }: { priceId: number; data: ShoppingPriceUpdatePayload }) =>
+      updateShoppingPrice(priceId, data),
+    onSuccess: async () => {
+      await invalidateAllShopping();
+    },
+  });
+
+  const deletePrice = useMutation({
+    mutationFn: (priceId: number) => deleteShoppingPrice(priceId),
+    onSuccess: async () => {
+      await invalidateAllShopping();
+    },
+  });
+
+  return {
+    createList: createList.mutateAsync,
+    updateList: updateList.mutateAsync,
+    deleteList: deleteList.mutateAsync,
+
+    createItem: createItem.mutateAsync,
+    updateItem: updateItem.mutateAsync,
+    deleteItem: (id: number, shoppingListId: number) =>
+      deleteItem.mutateAsync({ id, shoppingListId }),
+    togglePurchased: (
+      id: number,
+      shoppingListId: number,
+      data: ToggleShoppingListItemPurchasedPayload
+    ) => togglePurchased.mutateAsync({ id, shoppingListId, data }),
+
+    createSupplier: createSupplier.mutateAsync,
+    updateSupplier: updateSupplier.mutateAsync,
+    deleteSupplier: deleteSupplier.mutateAsync,
+
+    addPrice: addPrice.mutateAsync,
+    updatePrice: updatePrice.mutateAsync,
+    deletePrice: deletePrice.mutateAsync,
+  };
+};
