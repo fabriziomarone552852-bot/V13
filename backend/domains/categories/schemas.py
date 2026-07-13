@@ -81,4 +81,4 @@ class CategoryResponse(ORMBaseModel):
     name: str
     colore: Optional[str] = None
     user_id: int
-    genre: int
+    genre: CategoryGenre
