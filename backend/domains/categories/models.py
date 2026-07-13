@@ -15,7 +15,6 @@ from backend.core.database import Base
 if TYPE_CHECKING:
     from backend.domains.users.models import User
 
-# y
 
 class CategoryGenre(IntEnum):
     """Category type enumeration."""

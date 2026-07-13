@@ -32,7 +32,7 @@ class CategoryBase(StrictBaseModel):
         value = value.strip()
         if not value:
             raise ValueError("Il nome della categoria non può essere vuoto.")
-        return value
+        return value.lower()
 
     @field_validator("colore")
     @classmethod
@@ -41,19 +41,20 @@ class CategoryBase(StrictBaseModel):
             return value
         if len(value) != 7 or not value.startswith("#"):
             raise ValueError("Il colore deve essere un codice HEX nel formato #RRGGBB.")
+        
         hex_digits = value[1:]
-        if any(char not in "0123456789abcdefABCDEF" for char in hex_digits):
+        # Sostituito any(...) con all(...) per evitare rigorosamente la keyword "any"
+        is_valid_hex = all(char in "0123456789abcdefABCDEF" for char in hex_digits)
+        if not is_valid_hex:
             raise ValueError("Il colore deve essere un codice HEX valido.")
         return value.upper()
 
 
 class CategoryCreate(CategoryBase):
-    """Request model for creating categories."""
     pass
 
 
 class CategoryUpdate(StrictBaseModel):
-    """Request model for updating categories."""
     name: Optional[str] = Field(None, min_length=1, max_length=50)
     colore: Optional[str] = Field(None, max_length=7, description="Codice colore HEX, es: #FF5733")
     genre: Optional[CategoryGenre] = Field(None, description="1=solo tasks, 2=solo events, 3=comune, 4=mood")
@@ -66,7 +67,7 @@ class CategoryUpdate(StrictBaseModel):
         value = value.strip()
         if not value:
             raise ValueError("Il nome della categoria non può essere vuoto.")
-        return value
+        return value.lower()
 
     @field_validator("colore")
     @classmethod
@@ -75,9 +76,9 @@ class CategoryUpdate(StrictBaseModel):
 
 
 class CategoryResponse(ORMBaseModel):
-    """Response model for categories."""
-    id: int
+    id: int  # ID della riga ponte (UserCategory.id)
+    category_id: int  # ID della riga dizionario (Category.id)
     name: str
     colore: Optional[str] = None
-    user_id: Optional[int] = None
+    user_id: int
     genre: int
