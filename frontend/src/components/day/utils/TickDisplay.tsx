@@ -1,7 +1,7 @@
 // src/components/day/utils/TickDisplay.tsx
-import React, { useState, useEffect } from 'react';
-import { calculateTimeLeft, pad } from '../../../utils/dateUtils';
-import { useCurrentTime } from '../../../hooks/useCurrentTime';
+import React from 'react';
+import { calculateTimeLeft, pad } from '@/utils/dateUtils';
+import { useCurrentTime } from '@/hooks/useCurrentTime';
 
 interface TickDisplayProps {
   targetDateStr: string;
@@ -18,13 +18,15 @@ export const TickDisplay: React.FC<TickDisplayProps> = ({ targetDateStr, variant
   if (timeLeft.finished) {
     if (variant === 'modal') {
       return (
-        <div className="p-6 border-4 border-green-500 rounded-full mt-4 transform rotate-[-15deg]">
-           <span className="text-3xl font-black text-green-400 uppercase tracking-widest drop-shadow-md">Concluso</span>
+        <div className="mt-4 flex justify-center items-center">
+           <span className="text-4xl font-black text-white uppercase tracking-widest drop-shadow-lg">
+             Concluso
+           </span>
         </div>
       );
     }
     return (
-      <span className="text-green-400 font-black text-sm uppercase tracking-widest drop-shadow-md">Concluso</span>
+      <span className="text-white/90 font-black text-sm uppercase tracking-widest drop-shadow-md">Concluso</span>
     );
   }
 

@@ -16,7 +16,7 @@ export interface Task {
   descrizione?: string | null;
   data_start: string;
   data_scadenza?: string | null;
-  priorita: 'Alta' | 'Media' | 'Bassa'; // Mappato dal PrioritaEnum del backend
+  priorita: 'Alta' | 'Media' | 'Bassa';
   category_id?: number | null;
   category?: Category | null;
   category_name?: string | null;
@@ -25,11 +25,33 @@ export interface Task {
   data_fatto?: string | null;
   user_id: number;
   parent_id?: number | null;
-  subtasks?: Task[];
+  subtasks: Task[]; 
+}
+
+export interface TaskSummary {
+  id: number;
+  title: string;
+  deadline: string;
+  dateStr: string;
+  done: boolean;
+  priority: 'Alta' | 'Media' | 'Bassa';
+  category: string;
+  categoryColor?: string;
+  description: string;
+  location: string;
+  parent_id?: number | null;
+  isUrgentFromSubtask?: boolean;
+  hasActiveSubtasks?: boolean;
+  isPromotedSubtask?: boolean;
+  data_fatto?: string | null;
+}
+
+export interface UITask extends Task {
+  subtasks: UITask[]; 
 }
 
 // --- EVENTI ---
-export interface Event {
+export interface DbEvent {
   id: number;
   titolo: string;
   descrizione?: string | null;
@@ -44,24 +66,77 @@ export interface Event {
   rrule?: string | null;
 }
 
+export interface CalendarEvent {
+  id: number | string;   
+  originalId?: number;
+  time?: string;
+  endTime?: string;
+  dateStr?: string;
+  endDateStr?: string;
+  title: string;
+  category: string;
+  categoryColor?: string; 
+  description?: string;
+  location?: string;
+  tutto_il_giorno?: boolean;
+  rrule?: string;
+}
+
 // --- DAILY ENTRIES (Obiettivi, Priorità, Note, Countdown) ---
 export interface DailyEntry {
   id: number;
   user_id: number;
-  data_riferimento: string; // Formato YYYY-MM-DD
-  tipo: 'Obiettivo' | 'Priorità' | 'Nota'; // Mappato da VALID_DAILY_ENTRY_TYPES
+  data_riferimento: string; 
+  tipo: DailyEntryType;
   testo: string;
   immagine_url?: string | null;
 }
+export interface LocalNoteEntry extends DailyEntry {
+  isNew?: boolean;
+}
+
+export interface MoodEvent {
+  id: number;
+  title: string;
+  type: MoodEventType;
+  date: string;
+}
+
+// Struttura del payload per la creazione
+export interface CreateMoodPayload {
+  tipo: MoodEventType;
+  testo: string;
+  data_riferimento: string;
+}
+
+export type MoodEventType = 'EP' | 'EN';
+
+export type DailyEntryType = 'OD' | 'PD' | 'OW' | 'PW' | MoodEventType | NoteVariant;
+
+// --- NOTE ---
+
+export type NoteVariant = 'N1' | 'N2' | 'N3' | 'N4';
+
+export interface NoteItem {
+  id: number;
+  text: string;
+  dateStr: string;
+  variant: NoteVariant;
+  isNew?: boolean; 
+}
+
+export const isNoteVariant = (tipo: string): tipo is NoteVariant => {
+  return ['N1', 'N2', 'N3', 'N4'].includes(tipo);
+};
 
 export interface Countdown {
   id: number;
   user_id: number;
   title: string;
-  target_date: string; // Formato YYYY-MM-DD
-  status: 'active' | 'closed'; // Mappato da VALID_COUNTDOWN_STATUS
+  target_date: string; 
+  status: 'active' | 'closed';
   immagine_url?: string | null;
-  created_at: string; // ISO datetime
+  created_at: string; 
   updated_at?: string | null;
   closed_at?: string | null;
   reopened_at?: string | null;
@@ -69,10 +144,10 @@ export interface Countdown {
 
 export interface RawCountdown {
   id: number;
-  title?: string;             // Proveniente dal nuovo modello Countdown
-  testo?: string;             // Proveniente dal vecchio modello DailyEntry
-  target_date?: string;       // Proveniente dal nuovo modello Countdown
-  data_riferimento?: string;  // Proveniente dal vecchio modello DailyEntry
+  title?: string;             
+  testo?: string;             
+  target_date?: string;       
+  data_riferimento?: string;  
   immagine_url?: string | null;
 }
 
@@ -96,19 +171,60 @@ export interface Habit {
   id: number;
   user_id: number;
   titolo: string;
-  tipo: 'R' | 'H'; // R = Routine, H = Habit
+  tipo: 'R' | 'H'; 
   rrule?: string | null;
   immagine_url?: string | null;
+  
+  // Rigorosi: sono sempre array!
   periods: HabitPeriod[];
   logs: HabitLog[];
 }
 
-export interface NoteItem {
-  id: number;
-  text: string;
-  dateStr: string;
-  color: string;
-  isNew?: boolean; // Il punto interrogativo significa che è opzionale
+export interface HabitFormData {
+  titolo: string;
+  tipo: 'R' | 'H'; // R = Routine, H = Habit
+  rrule?: string | null;
+  immagine_url?: string | null;
+  data_inizio?: string;
+  data_fine?: string | null;
+  target_completamenti?: number;
+  periodId?: number;
+  periods?: Array<{
+    data_inizio: string;
+    data_fine?: string | null;
+    target: number;
+  }>;
+}
+
+export interface SaveHabitPayload {
+  existingId?: number;
+  data: HabitFormData; 
+}
+
+
+// ---- SYNC ----
+
+
+export interface SyncDayResponse {
+  tasks: Task[];
+  habits: Habit[];
+  events?: DbEvent[];
+  countdowns?: Countdown[];
+  obiettivi?: DailyEntry[];
+  priorita?: DailyEntry[];
+  note?: DailyEntry[];
+}
+
+export interface SyncWeekResponse {
+  start_date: string;
+  end_date: string;
+  obiettivo_settimanale: DailyEntry | null;
+  priorita_settimanali: DailyEntry[];
+  eventi_positivi: DailyEntry[];
+  eventi_negativi: DailyEntry[];
+  note: DailyEntry[];
+  events: DbEvent[]; 
+  tasks: Task[];   
 }
 
 export const CategoryGenre = {

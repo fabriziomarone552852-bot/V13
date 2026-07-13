@@ -1,6 +1,6 @@
 // src/components/shared/dialog/BaseModal.tsx
 import React, { type ReactNode } from 'react';
-import { CloseIcon, LoadingIcon } from '../utils/Icons';
+import { CloseIcon, LoadingIcon } from '@/components/shared/utils/Icons';
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface BaseModalProps {
   sidePanel?: ReactNode;
   headerActions?: ReactNode; 
   hideDefaultClose?: boolean; 
+  overflowVisible?: boolean;
   
   // --- NUOVE PROPS MAGICHE PER IL FOOTER AUTOMATICO ---
   onConfirm?: (e?: React.MouseEvent) => void;
@@ -29,7 +30,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
   sidePanel, headerActions, hideDefaultClose = false,
   onConfirm, onCancel, confirmText = 'Salva', cancelText = 'Annulla', 
   isConfirmDisabled = false, formId,
-  isLoading = false
+  isLoading = false, overflowVisible = false
 }) => {
   if (!isOpen) return null;
 
@@ -90,14 +91,14 @@ const BaseModal: React.FC<BaseModalProps> = ({
               {headerActions}
               {headerActions && <div className="w-px h-5 bg-gray-300 mx-1"></div>}
               {!hideDefaultClose && (
-                <button type="button" disabled={isConfirmDisabled || isLoading} onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isLoading ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:bg-gray-200 hover:text-red-500'}`}>
+                <button type="button" disabled={isLoading} onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isLoading ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:bg-gray-200 hover:text-red-500'}`}>
                   <CloseIcon className="h-5 w-5" />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="p-6 overflow-y-auto custom-scrollbar">{children}</div>
+          <div className={`p-6 custom-scrollbar ${overflowVisible ? 'overflow-visible' : 'overflow-y-auto'}`}>{children}</div>
 
           {activeFooter && <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl shrink-0">{activeFooter}</div>}
           

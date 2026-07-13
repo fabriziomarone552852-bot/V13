@@ -4,7 +4,7 @@ Pydantic models for authentication request and response payloads.
 """
 from __future__ import annotations
 
-from backend.core.schemas import ORMBaseModel, StrictBaseModel
+from backend.core.schemas import StrictBaseModel
 
 
 class Token(StrictBaseModel):

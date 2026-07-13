@@ -1,216 +1,164 @@
-// src/utils/taskUtils.ts
-import type { Task } from '../types';
-import type { TaskTodo } from '../components/shared/TodoColumn';
-import { formatToItalianShortDate } from './dateUtils'; 
+// frontend/src/utils/taskUtils.ts
+import type { DbTask, TaskSummary, UITask } from '@/types';
 
-// ------------------------------------------------------------------
-// 1. FUNZIONI DI ORDINAMENTO E MAPPING BASE
-// ------------------------------------------------------------------
+// 2. MAPPATURA SINGOLA SICURA
+export const mapTaskToSummary = (
+  t: DbTask, 
+  extraProps: Partial<TaskSummary> = {}
+): TaskSummary => {
+  const cleanScadenza = t.data_scadenza ? t.data_scadenza.substring(0, 10) : "";
+  const cleanStart = t.data_start ? t.data_start.substring(0, 10) : "";
 
-export const sortTasks = (tasks: TaskTodo[], sortMode: 'chrono' | 'priority'): TaskTodo[] => {
-  const priorityWeights = { Alta: 3, Media: 2, Bassa: 1 };
-
-  return [...tasks].sort((a, b) => {
-    if (a.done !== b.done) return a.done ? 1 : -1;
-
-    if (sortMode === 'priority') {
-      const diff = priorityWeights[b.priority] - priorityWeights[a.priority];
-      if (diff !== 0) return diff;
-    }
-    
-    const dateA = new Date(a.dateStr).getTime() || Infinity;
-    const dateB = new Date(b.dateStr).getTime() || Infinity;
-    return dateA - dateB;
-  });
-};
-
-export const mapTaskToTodo = (
-  t: Task, 
-  hasActiveSubtasks: boolean, 
-  extraProps: Partial<TaskTodo> = {}
-): TaskTodo => {
-  const dateVal = t.data_scadenza ? t.data_scadenza.substring(0, 10) : '';
   return {
     id: t.id,
     title: t.titolo,
-    deadline: dateVal ? formatToItalianShortDate(dateVal) : 'Nessuna',
-    dateStr: dateVal || (t.data_start ? t.data_start.substring(0, 10) : ''),
+    deadline: cleanScadenza, 
+    dateStr: cleanStart, 
     done: t.fatto,
+    data_fatto: t.data_fatto,
     priority: t.priorita,
-    category: t.category?.name || t.category_name || 'Generico',
-    categoryColor: t.category?.colore || '#9ca3af',
-    description: t.descrizione || '',
-    location: t.luogo || '',
+    // 🪄 MAGIA: Sostituiti tutti i || con ??
+    category: t.category?.name ?? t.category_name ?? 'Generico',
+    categoryColor: t.category?.colore ?? '#9ca3af',
+    description: t.descrizione ?? "",
+    location: t.luogo ?? "",
     parent_id: t.parent_id,
-    hasActiveSubtasks,
+    hasActiveSubtasks: !!t.subtasks && t.subtasks.some(st => !st.fatto),
     ...extraProps
   };
 };
 
-// 🪄 IL CAPOLAVORO: Schwartzian Transform dal tuo Secondo Snippet
-export const getUpcomingTasks = (todos: TaskTodo[], days: number = 30, limit: number = 6): TaskTodo[] => {
+export const mapTasksToSummaries = (tasks: DbTask[] | undefined): TaskSummary[] => {
+  if (!tasks || !Array.isArray(tasks)) return [];
+  return tasks.map(t => mapTaskToSummary(t));
+};
+
+// 3. WIDGET DASHBOARD
+export const getUpcomingTasks = (tasks: DbTask[] | undefined, days: number = 30, limit: number = 6): TaskSummary[] => {
+  if (!tasks || !Array.isArray(tasks)) return [];
+
   const now = Date.now();
   const timeLimit = days * 24 * 60 * 60 * 1000;
   
-  return todos
-    .filter(t => !t.done && t.deadline !== 'Nessuna' && t.dateStr)
+  return tasks
+    .filter(t => !t.fatto && !!t.data_scadenza)
     .map(t => ({
-      task: t,
-      time: new Date(t.dateStr!).getTime() // Calcolato UNA volta
+      task: mapTaskToSummary(t),
+      time: t.data_scadenza ? new Date(t.data_scadenza.substring(0, 10)).getTime() : 0
     }))
     .filter(item => {
       const diff = item.time - now;
       return diff >= 0 && diff <= timeLimit;
     })
-    .sort((a, b) => a.time - b.time) // Sorting O(1) leggerissimo
+    .sort((a, b) => a.time - b.time) 
     .slice(0, limit)
     .map(item => item.task);
 };
 
-// ------------------------------------------------------------------
-// 2. FUNZIONI OTTIMIZZATE DI RICERCA (Complessità O(1))
-// ------------------------------------------------------------------
+// 4. ALBERO DEI TASK
+export const buildTaskTree = (flatTasks: DbTask[] | undefined): UITask[] => {
+  if (!flatTasks || !Array.isArray(flatTasks) || flatTasks.length === 0) return [];
 
-export const getAncestorsOptimized = (taskId: number, taskById: Map<number, Task>): Task[] => {
-  const ancestors: Task[] = []; 
-  let current = taskById.get(taskId);
-  
-  while (current && current.parent_id != null) {
-    const parent = taskById.get(current.parent_id);
-    if (parent) {
-      ancestors.push(parent);
-      current = parent;
-    } else {
-      break;
-    }
-  }
-  return ancestors;
-};
+  const taskMap = new Map<number, UITask>();
+  const roots: UITask[] = [];
 
-// 🪄 IL CAPOLAVORO: Accumulatore in memoria per evitare Garbage Collection
-export const getAllActiveSubtasksOptimized = (
-  parentId: number, 
-  tasksByParent: Map<number | null, Task[]>,
-  accumulator: Task[] = []
-): Task[] => {
-  const children = tasksByParent.get(parentId) || [];
-  const activeChildren = children.filter(c => !c.fatto);
-  
-  accumulator.push(...activeChildren);
-  
-  activeChildren.forEach(c => {
-    getAllActiveSubtasksOptimized(c.id, tasksByParent, accumulator);
-  });
-  
-  return accumulator;
-};
-
-// ------------------------------------------------------------------
-// 3. MOTORI DI MAPPING PRINCIPALI (Primo Snippet pulito)
-// ------------------------------------------------------------------
-
-export const mapTasksToTodos = (allTasks: Task[], oggiStr: string): TaskTodo[] => {
-  if (!allTasks || !Array.isArray(allTasks)) return [];
-  const taskDaMostrare: TaskTodo[] = [];
-
-  const tasksByParent = new Map<number | null, Task[]>();
-  allTasks.forEach(t => {
-    const pId = t.parent_id ?? null;
-    if (!tasksByParent.has(pId)) tasksByParent.set(pId, []);
-    tasksByParent.get(pId)!.push(t);
+  flatTasks.forEach((task) => {
+    taskMap.set(task.id, { ...mapTaskToSummary(task), subtasks: [] });
   });
 
-  const taskPadre = allTasks.filter((t) => {
-    if (t.parent_id) return false; 
-    if (t.fatto) {
-      const dataFattoStr = t.data_fatto ? t.data_fatto.substring(0, 10) : null;
-      if (dataFattoStr !== oggiStr) return false; 
-    }
-    return true; 
-  });
+  flatTasks.forEach((task) => {
+    const uiTask = taskMap.get(task.id);
+    if (!uiTask) return;
 
-  taskPadre.forEach((t) => {
-    let scadenzaPadreStr = t.data_scadenza ? t.data_scadenza.substring(0, 10) : null;
-    const tempoPadre = scadenzaPadreStr ? new Date(scadenzaPadreStr).getTime() : Infinity;
-
-    const sottotaskAttive = getAllActiveSubtasksOptimized(t.id, tasksByParent); 
-    let sottotaskPromossePerData: Task[] = [];
-    let sottotaskUrgentiSenzaData: Task[] = [];
-
-    if (sottotaskAttive.length > 0) {
-      const sottotaskConScadenza = sottotaskAttive.filter(sub => sub.data_scadenza);
-      let tempoMinimo = Infinity;
-      
-      sottotaskConScadenza.forEach(sub => {
-        const tSub = new Date(sub.data_scadenza!.substring(0, 10)).getTime();
-        if (tSub < tempoPadre && tSub < tempoMinimo) tempoMinimo = tSub;
-      });
-
-      if (tempoMinimo < tempoPadre) {
-        sottotaskPromossePerData = sottotaskConScadenza.filter(sub => new Date(sub.data_scadenza!.substring(0, 10)).getTime() === tempoMinimo);
+    if (task.parent_id && taskMap.has(task.parent_id)) {
+      const parent = taskMap.get(task.parent_id)!; 
+      parent.subtasks.push(uiTask);
+      if (!uiTask.done) {
+        parent.hasActiveSubtasks = true;
       }
-      sottotaskUrgentiSenzaData = sottotaskAttive.filter(sub => !sub.data_scadenza && sub.priorita === 'Alta');
-    }
-
-    const hasActiveSubtasks = sottotaskAttive.length > 0;
-
-    if (sottotaskPromossePerData.length > 0) {
-      sottotaskPromossePerData.forEach(sub => {
-        taskDaMostrare.push(mapTaskToTodo(sub, false, { isPromotedSubtask: true }));
-      });
     } else {
-      taskDaMostrare.push(mapTaskToTodo(t, hasActiveSubtasks));
-    }
-
-    if (sottotaskUrgentiSenzaData.length > 0) {
-      sottotaskUrgentiSenzaData.forEach(sub => {
-        taskDaMostrare.push(mapTaskToTodo(sub, false, { isPromotedSubtask: true, isUrgentFromSubtask: true }));
-      });
+      roots.push(uiTask);
     }
   });
 
-  return taskDaMostrare; 
+  return roots;
 };
 
-export const mapDayTasksToTodos = (allTasks: Task[], targetDateStr: string): TaskTodo[] => {
-  const tasksToShow: TaskTodo[] = [];
+const getLocalDateStr = (isoString?: string | null): string => {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  // Se per caso la data non è valida, facciamo un fallback sicuro
+  if (isNaN(d.getTime())) return isoString.substring(0, 10); 
+  const offset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offset).toISOString().substring(0, 10);
+};
 
-  const taskById = new Map<number, Task>();
-  const tasksByParent = new Map<number | null, Task[]>();
+// 5. FILTRAGGIO ED ORDINAMENTO ALBERO
+export const filterAndSortTree = (
+  tasks: UITask[] | undefined, 
+  hideCompleted: boolean,
+  sortMode: 'chrono' | 'priority',
+  referenceDateStr?: string
+): UITask[] => {
+  if (!tasks) return [];
+  
+  const priorityWeights: Record<string, number> = { Alta: 3, Media: 2, Bassa: 1 };
 
-  allTasks.forEach(t => {
-    taskById.set(t.id, t);
-    const pId = t.parent_id ?? null;
-    if (!tasksByParent.has(pId)) tasksByParent.set(pId, []);
-    tasksByParent.get(pId)!.push(t);
-  });
+  // 🪄 Calcoliamo la data di oggi in formato YYYY-MM-DD locale per il confronto
+  const getLocalTodayStr = () => {
+    const d = new Date();
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - offset).toISOString().substring(0, 10);
+  };
+  
+  const todayStr = getLocalTodayStr();
+  const isPastDay = referenceDateStr ? referenceDateStr < todayStr : false;
 
-  const isDueTodayOrPast = (t: Task) => t.data_scadenza && t.data_scadenza.substring(0, 10) <= targetDateStr;
-  const hasNoDate = (t: Task) => !t.data_scadenza;
+  return tasks.reduce<UITask[]>((acc, task) => {
+    // Calcoliamo prima le sottotask in modo ricorsivo
+    const filteredSubtasks = filterAndSortTree(task.subtasks, hideCompleted, sortMode, referenceDateStr);
 
-  allTasks.forEach((t: Task) => {
-    if (t.fatto && t.data_fatto?.substring(0, 10) !== targetDateStr) return;
+    // 🪄 Usiamo il nostro Helper per leggere sempre e solo la vera data italiana!
+    const dataFattoStr = getLocalDateStr(task.data_fatto);
 
-    const ancestors = getAncestorsOptimized(t.id, taskById);
-    let shouldShow = false;
+    // --- 🕰️ LOGICA ARCHIVIO (Giorni Passati) ---
+    if (isPastDay) {
+      const completedOnThisDay = task.done && dataFattoStr === referenceDateStr;
 
-    if (isDueTodayOrPast(t)) {
-      shouldShow = !ancestors.some(isDueTodayOrPast);
-    } else if (hasNoDate(t)) {
-      if (t.priorita === 'Alta') {
-        shouldShow = true; 
-      } else {
-        shouldShow = !ancestors.some(isDueTodayOrPast) && !ancestors.some(hasNoDate);
+      // Includiamo la task SOLO se è stata completata in questo giorno, 
+      // OPPURE se ha delle sottotask che sono state completate in questo giorno!
+      if (completedOnThisDay || filteredSubtasks.length > 0) {
+        acc.push({ ...task, subtasks: filteredSubtasks });
+      }
+      return acc;
+    }
+
+    // --- 📅 LOGICA NORMALE (Oggi o Futuro) ---
+    if (hideCompleted && task.done) return acc;
+
+    if (task.done && task.data_fatto && referenceDateStr) {
+      // Nascondiamo le task completate nei giorni precedenti
+      if (dataFattoStr < referenceDateStr) {
+        return acc;
       }
     }
 
-    if (shouldShow) {
-      const children = tasksByParent.get(t.id) || [];
-      const hasActiveSubtasks = children.some(sub => !sub.fatto);
-      
-      tasksToShow.push(mapTaskToTodo(t, hasActiveSubtasks));
-    }
-  });
+    acc.push({ ...task, subtasks: filteredSubtasks });
+    return acc;
+  }, [])
 
-  return tasksToShow;
+  .sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+
+    if (sortMode === 'priority') {
+      const weightA = priorityWeights[a.priority] ?? 0;
+      const weightB = priorityWeights[b.priority] ?? 0;
+      const diff = weightB - weightA;
+      if (diff !== 0) return diff;
+    }
+    
+    const dateA = a.dateStr ? new Date(a.dateStr).getTime() : Infinity;
+    const dateB = b.dateStr ? new Date(b.dateStr).getTime() : Infinity;
+    return dateA - dateB;
+  });
 };

@@ -1,54 +1,58 @@
 """
-Shopping domain - Collaborative shopping and price tracking.
+Shopping domain - Collaborative shopping and inventory tracking.
 """
-from backend.domains.shopping.models import (
+from .models.groups import (
     ShoppingGroup,
     ShoppingGroupMember,
+)
+from .models.inventory import InventoryBatch
+from .models.lists import (
     ShoppingList,
     ShoppingListItem,
-    ShoppingPrice,
-    ShoppingSupplier,
 )
-from backend.domains.shopping.schemas import (
-    PriceHistoryPoint,
+from .models.catalog import ShoppingProduct, ShoppingSupplier
+from .schemas.config import ConfigOption, ShoppingConfigBundle
+from .schemas.groups import (
     ShoppingGroupCreate,
     ShoppingGroupMemberCreate,
     ShoppingGroupMemberInvite,
     ShoppingGroupMemberResponse,
     ShoppingGroupMemberRoleUpdate,
-    ShoppingGroupMemberUpdate,
     ShoppingGroupResponse,
     ShoppingGroupUpdate,
+)
+from .schemas.inventory import (
+    InventoryBatchCreate,
+    InventoryBatchResponse,
+    InventoryBatchUpdate,
+)
+from .schemas.lists import (
     ShoppingListCreate,
     ShoppingListItemCreate,
     ShoppingListItemResponse,
     ShoppingListItemUpdate,
     ShoppingListResponse,
     ShoppingListUpdate,
-    ShoppingPriceCreate,
-    ShoppingPriceResponse,
-    ShoppingPriceUpdate,
+)
+from .schemas.catalog import (
     ShoppingSupplierCreate,
     ShoppingSupplierResponse,
     ShoppingSupplierUpdate,
-    SupplierPriceSummary,
-    VALID_SHOPPING_GROUP_ROLE_CODES,
 )
 
 __all__ = [
-    "VALID_SHOPPING_GROUP_ROLE_CODES",
     "ShoppingGroup",
     "ShoppingGroupMember",
     "ShoppingList",
     "ShoppingListItem",
-    "ShoppingPrice",
+    "ShoppingProduct",
+    "InventoryBatch",
     "ShoppingSupplier",
     "ShoppingGroupCreate",
     "ShoppingGroupMemberCreate",
     "ShoppingGroupMemberInvite",
     "ShoppingGroupMemberResponse",
     "ShoppingGroupMemberRoleUpdate",
-    "ShoppingGroupMemberUpdate",
     "ShoppingGroupResponse",
     "ShoppingGroupUpdate",
     "ShoppingListCreate",
@@ -57,12 +61,12 @@ __all__ = [
     "ShoppingListItemUpdate",
     "ShoppingListResponse",
     "ShoppingListUpdate",
-    "ShoppingPriceCreate",
-    "ShoppingPriceResponse",
-    "ShoppingPriceUpdate",
+    "InventoryBatchCreate",
+    "InventoryBatchUpdate",
+    "InventoryBatchResponse",
     "ShoppingSupplierCreate",
     "ShoppingSupplierResponse",
     "ShoppingSupplierUpdate",
-    "SupplierPriceSummary",
-    "PriceHistoryPoint",
+    "ConfigOption",
+    "ShoppingConfigBundle",
 ]

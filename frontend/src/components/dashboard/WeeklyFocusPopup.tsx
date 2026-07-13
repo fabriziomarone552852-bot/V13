@@ -1,15 +1,15 @@
 // src/components/dashboard/WeeklyFocusPopup.tsx
 import React, { useMemo } from 'react';
-import type { CalendarEvent } from './CalendarColumn';
-import { getHexColor, getDynamicStyles } from '../../utils/uiUtils';
-import { pad } from '../../utils/dateUtils';
-import { calculateDailyEventLayout, type DayEventItem } from '../../utils/eventUtils';
+import type { CalendarEvent } from '@/types';
+import { getHexColor, getDynamicStyles } from '@/utils/uiUtils';
+import { pad } from '@/utils/dateUtils';
+import { calculateDailyEventLayout, type DayEventItem } from '@/utils/eventUtils';
 
 interface WeeklyFocusPopupProps {
   dayNameShort: string;
   dayNum: number;
   monthNum: number;
-  rawDayEvents: DayEventItem[]; // 2. Usiamo l'interfaccia importata!
+  rawDayEvents: DayEventItem[]; 
   popupRect: { left: number; width: number };
   onSelectEvent: (ev: CalendarEvent) => void;
   closePopup: () => void;
@@ -19,15 +19,44 @@ const WeeklyFocusPopup: React.FC<WeeklyFocusPopupProps> = ({
   dayNameShort, dayNum, monthNum, rawDayEvents, popupRect, onSelectEvent, closePopup 
 }) => {
   
-  // 3. LA MAGIA: Tutto il calcolo è ridotto a questa singola riga di useMemo!
   const { totalHeight, hourY, expandedHours, highlightedHours, overlayEvents } = useMemo(() => {
     return calculateDailyEventLayout(rawDayEvents);
   }, [rawDayEvents]);
 
+  // 🪄 LA TUA INTUIZIONE: Posizionamento intelligente (Sincrono e a prova di bomba)
+  const positionStyles = useMemo(() => {
+    // clientWidth ignora la scrollbar
+    const screenWidth = typeof document !== 'undefined' ? document.documentElement.clientWidth : 1200;
+    
+    // Controlliamo se la colonna è nella metà destra dello schermo
+    const isRightHalf = popupRect.left > (screenWidth / 2);
+
+    if (isRightHalf) {
+      // Domenica, Sabato, ecc -> Lo ancoriamo a destra, si apre verso sinistra
+      return {
+        right: screenWidth - (popupRect.left + popupRect.width), // Allineato al bordo destro della colonna
+        left: 'auto',
+        transform: 'none'
+      };
+    } else {
+      // Lunedì, Martedì, ecc -> Lo ancoriamo a sinistra, si apre verso destra
+      return {
+        left: popupRect.left, // Allineato al bordo sinistro della colonna
+        right: 'auto',
+        transform: 'none'
+      };
+    }
+  }, [popupRect]);
+
   return (
     <div 
       className="fixed z-[100] transition-all duration-200 ease-out animate-fadeIn shadow-[0_25px_70px_rgba(0,0,0,0.55)] rounded-2xl border border-gray-700 bg-gray-900 overflow-hidden flex flex-col cursor-default"
-      style={{ top: '5vh', height: '90vh', left: popupRect.left + (popupRect.width / 2), width: '26rem', transform: 'translateX(-50%)' }}
+      style={{ 
+        top: '5vh', 
+        height: '90vh', 
+        width: '26rem', 
+        ...positionStyles // 🪄 Applichiamo la nostra magia qui!
+      }}
       onClick={(e) => e.stopPropagation()} 
     >
       <div className="p-4 border-b border-gray-800 bg-gray-950 shrink-0 shadow-sm z-10">
@@ -37,7 +66,7 @@ const WeeklyFocusPopup: React.FC<WeeklyFocusPopupProps> = ({
         </p>
       </div>
       
-      <div className="flex-1 overflow-y-auto bg-gray-950 relative custom-scrollbar">
+      <div className="flex-1 z-[100] overflow-visible bg-gray-950 relative custom-scrollbar">
         <div className="relative w-full" style={{ height: totalHeight }}>
           {Array.from({ length: 24 }).map((_, h) => (
               <div key={h} className={`absolute w-full flex border-t border-gray-900/40 transition-colors ${highlightedHours.has(h) ? 'bg-blue-900/20' : ''}`} style={{ top: hourY[h], height: expandedHours.has(h) ? 96 : 24 }}>

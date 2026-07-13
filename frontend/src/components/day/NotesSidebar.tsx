@@ -1,46 +1,49 @@
 // src/components/day/NotesSidebar.tsx
 import React, { useState, useEffect } from 'react';
-import type { NoteItem } from '../../types';
-import { CloseIcon, TrashIcon, PlusIcon } from '../shared/utils/Icons';
-import { useAutoResizeTextArea } from '../../hooks/useAutoResizeTextArea';
-import { useDebounce } from '../../hooks/useDebounce';
+import type { NoteItem, NoteVariant } from '@/types';
+import { CloseIcon, TrashIcon, PlusIcon, NoteIcon } from '@/components/shared/utils/Icons';
+import { useAutoResizeTextArea } from '@/hooks/useAutoResizeTextArea';
+import { useDebounce } from '@/hooks/useDebounce';
 
-// --- MICRO-COMPONENTE INTELLIGENTE (SMART COMPONENT) ---
+// Mappatura tipizzata delle varianti ai colori dei veri Post-it (Niente 'any'!)
+const NOTE_STYLES: Record<NoteVariant, { card: string; ring: string; text: string; placeholder: string; btnHover: string; btnBg: string; btnText: string }> = {
+  N1: { card: 'bg-yellow-100', ring: 'ring-yellow-400/50', text: 'text-yellow-900', placeholder: 'placeholder-yellow-800/40', btnBg: 'bg-yellow-300/30', btnHover: 'hover:bg-yellow-300/80', btnText: 'text-yellow-800/40 hover:text-red-600' }, // Giallo
+  N2: { card: 'bg-green-100', ring: 'ring-green-400/50', text: 'text-green-900', placeholder: 'placeholder-green-800/40', btnBg: 'bg-green-300/30', btnHover: 'hover:bg-green-300/80', btnText: 'text-green-800/40 hover:text-red-600' },   // Verde
+  N3: { card: 'bg-blue-100', ring: 'ring-blue-400/50', text: 'text-blue-900', placeholder: 'placeholder-blue-800/40', btnBg: 'bg-blue-300/30', btnHover: 'hover:bg-blue-300/80', btnText: 'text-blue-800/40 hover:text-red-600' },   // Azzurro
+  N4: { card: 'bg-pink-100', ring: 'ring-pink-400/50', text: 'text-pink-900', placeholder: 'placeholder-pink-800/40', btnBg: 'bg-pink-300/30', btnHover: 'hover:bg-pink-300/80', btnText: 'text-pink-800/40 hover:text-red-600' },   // Rosa
+};
+
 const SmartNoteCard: React.FC<{
   nota: NoteItem;
   isInitiallyEditing: boolean;
-  onAutoSave: (id: number, text: string, isNew?: boolean) => void;
+  onAutoSave: (id: number, text: string, variant: NoteVariant, isNew?: boolean) => void;
   onDelete: (id: number, isNew?: boolean) => void;
-  clearNewStatus: () => void; // Serve per dire "Ok, sto scrivendo, non è più 'nuova'"
+  clearNewStatus: () => void;
 }> = ({ nota, isInitiallyEditing, onAutoSave, onDelete, clearNewStatus }) => {
-  // Lo stato del testo vive SOLO qui dentro. La digitazione è fulminea!
   const [isEditing, setIsEditing] = useState(isInitiallyEditing);
   const [text, setText] = useState(nota.text);
   
-  // Il Debounce aspetta 1 secondo (1000ms) dall'ultima battuta sulla tastiera
   const debouncedText = useDebounce(text, 1000);
   const textareaRef = useAutoResizeTextArea(text);
+  const styles = NOTE_STYLES[nota.variant];
 
-  // LA MAGIA DELL'AUTO-SAVE
   useEffect(() => {
-    // Se il testo è cambiato rispetto all'originale
     if (debouncedText !== nota.text) {
       if (debouncedText.trim() === "") {
         onDelete(nota.id, nota.isNew);
       } else {
-        onAutoSave(nota.id, debouncedText, nota.isNew);
-        clearNewStatus(); // Togliamo il flag isNew per non creare cloni
+        onAutoSave(nota.id, debouncedText, nota.variant, nota.isNew);
+        clearNewStatus();
       }
     }
-  }, [debouncedText]); // Non mettiamo nota.text nelle dipendenze per evitare loop
+  }, [debouncedText]);
 
   const handleBlur = () => {
     setIsEditing(false);
-    // Se esce sùbito dall'input senza aspettare il secondo del debounce:
     if (text.trim() === "") {
       onDelete(nota.id, nota.isNew);
     } else if (text !== nota.text) {
-      onAutoSave(nota.id, text, nota.isNew);
+      onAutoSave(nota.id, text, nota.variant, nota.isNew);
       clearNewStatus();
     }
   };
@@ -48,14 +51,13 @@ const SmartNoteCard: React.FC<{
   return (
     <div 
       onClick={() => { if (!isEditing) setIsEditing(true); }} 
-      className={`p-4 rounded-br-2xl rounded-tl-lg rounded-tr-lg rounded-bl-lg shadow-md relative group min-h-[5rem] transition-colors ${nota.color} ${isEditing ? 'cursor-text ring-2 ring-yellow-400/50' : 'cursor-pointer hover:shadow-lg'}`}
+      className={`p-4 rounded-br-2xl rounded-tl-lg rounded-tr-lg rounded-bl-lg shadow-md relative group min-h-[5rem] transition-colors ${styles.card} ${isEditing ? `cursor-text ring-2 ${styles.ring}` : 'cursor-pointer hover:shadow-lg'}`}
     >
       <div className="absolute bottom-0 right-0 w-4 h-4 bg-black/10 rounded-tl-lg rounded-br-2xl pointer-events-none"></div>
       
-      {/* Bottone elimina protetto per non far partire l'edit mode */}
       <button 
         onClick={(e) => { e.stopPropagation(); onDelete(nota.id, nota.isNew); }} 
-        className="absolute top-2 right-2 text-yellow-800/40 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-yellow-300/30 hover:bg-yellow-300/80 z-10" 
+        className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full z-10 ${styles.btnText} ${styles.btnBg} ${styles.btnHover}`} 
         title="Elimina nota"
       >
         <TrashIcon className="w-4 h-4" />
@@ -70,12 +72,12 @@ const SmartNoteCard: React.FC<{
           onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
           onBlur={handleBlur}
           placeholder="Scrivi qui la tua nota..."
-          className="w-full bg-transparent border-none focus:ring-0 resize-none outline-none text-sm font-medium leading-relaxed font-mono placeholder-yellow-800/40 p-0 overflow-hidden pr-6 custom-scrollbar"
+          className={`w-full bg-transparent border-none focus:ring-0 resize-none outline-none text-sm font-medium leading-relaxed font-mono p-0 overflow-hidden pr-6 custom-scrollbar ${styles.text} ${styles.placeholder}`}
           rows={1}
         />
       ) : (
-        <p className="text-sm font-medium leading-relaxed font-mono whitespace-pre-wrap break-words pr-6">
-          {text || <span className="text-yellow-800/40 italic">Nota vuota... Clicca per scrivere.</span>}
+        <p className={`text-sm font-medium leading-relaxed font-mono whitespace-pre-wrap break-words pr-6 ${styles.text}`}>
+          {text || <span className="italic opacity-60">Nota vuota... Clicca per scrivere.</span>}
         </p>
       )}
     </div>
@@ -88,9 +90,8 @@ interface NotesSidebarProps {
   editingNoteId: number | null;
   onOpen: () => void;
   onClose: () => void;
-  onAddNote: () => void;
-  // Guarda come si sono semplificate le prop!
-  onAutoSaveNote: (id: number, text: string, isNew?: boolean) => void;
+  onAddNote: (variant: NoteVariant) => void;
+  onAutoSaveNote: (id: number, text: string, variant: NoteVariant, isNew?: boolean) => void;
   onDeleteNote: (id: number, isNew?: boolean) => void;
   clearEditingNoteId: () => void;
 }
@@ -98,17 +99,25 @@ interface NotesSidebarProps {
 const NotesSidebar: React.FC<NotesSidebarProps> = ({ 
   isOpen, notes, editingNoteId, onOpen, onClose, onAddNote, onAutoSaveNote, onDeleteNote, clearEditingNoteId 
 }) => {
+  
+  // Sceglie a caso una chiave tra N1, N2, N3, N4
+  const handleAddNewNoteRandom = () => {
+    const varianti: NoteVariant[] = ['N1', 'N2', 'N3', 'N4'];
+    const randomVariant = varianti[Math.floor(Math.random() * varianti.length)];
+    onAddNote(randomVariant);
+  };
+
   return (
     <>
-      <div onClick={onOpen} className="fixed right-0 top-1/2 -translate-y-1/2 translate-x-8 hover:translate-x-0 w-20 hover:w-28 h-14 bg-[#fde047] hover:bg-[#facc15] text-yellow-900 rounded-l-2xl shadow-[-5px_0_15px_rgba(0,0,0,0.1)] flex items-center justify-start pl-3 cursor-pointer transition-all duration-300 z-30 border border-y-yellow-300 border-l-yellow-300 group">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+      <div onClick={onOpen} className="fixed right-0 top-1/2 -translate-y-1/2 translate-x-8 hover:translate-x-0 w-20 hover:w-28 h-14 bg-[#fde047] hover:bg-[#facc15] text-yellow-900 rounded-l-2xl shadow-[-5px_0_15px_rgba(0,0,0,0.1)] flex items-center justify-start pl-3 cursor-pointer transition-all duration-300 z-60 border border-y-yellow-300 border-l-yellow-300 group">
+        <NoteIcon className="w-6 h-6" />
         <span className="ml-2 font-black text-sm uppercase opacity-0 group-hover:opacity-100 transition-opacity delay-100">Note</span>
       </div>
 
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-70 transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <h2 className="text-xl font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
-            <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+            <NoteIcon className="w-5 h-5 text-yellow-500" />
             Note
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
@@ -117,7 +126,7 @@ const NotesSidebar: React.FC<NotesSidebarProps> = ({
         </div>
         
         <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-50/50 custom-scrollbar">
-          <button onClick={onAddNote} className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 active:scale-95 active:bg-blue-100 transition-all flex justify-center items-center font-bold text-sm gap-2">
+          <button onClick={handleAddNewNoteRandom} className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 active:scale-95 active:bg-blue-100 transition-all flex justify-center items-center font-bold text-sm gap-2">
             <PlusIcon />
             Nuova Nota
           </button>
@@ -134,7 +143,7 @@ const NotesSidebar: React.FC<NotesSidebarProps> = ({
           ))}
         </div>
       </div>
-      {isOpen && <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity" onClick={onClose}></div>}
+      {isOpen && <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-60 transition-opacity" onClick={onClose}></div>}
     </>
   );
 };

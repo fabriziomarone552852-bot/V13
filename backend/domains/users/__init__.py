@@ -3,6 +3,7 @@ Users domain - User account management and authentication.
 """
 from backend.domains.users.models import User
 from backend.domains.users.schemas import (
+    UserAdminResponse,
     UserCreate,
     UserPublicResponse,
     UserResponse,
@@ -17,4 +18,5 @@ __all__ = [
     "UserPublicResponse",
     "UserSettingsResponse",
     "UserSettingsUpdate",
+    "UserAdminResponse",
 ]

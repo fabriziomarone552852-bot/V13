@@ -3,7 +3,7 @@ DEPRECATED: Central schemas module - use domain-specific schemas instead.
 
 This file exists for backward compatibility only.
 All schemas have been moved to their respective domain modules:
-- backend.domains.config.schemas
+- backend.domains.config.schemas sostiutito da backend.domains.catalogs.schemas
 - backend.domains.users.schemas
 - backend.domains.categories.schemas
 - backend.domains.tasks.schemas
@@ -33,7 +33,7 @@ from backend.domains.categories.schemas import (  # noqa: F401
     CategoryResponse,
     CategoryUpdate,
 )
-from backend.domains.config.schemas import (  # noqa: F401
+from backend.domains.catalogs.schemas import (  # noqa: F401
     ConfigCodeCreate,
     ConfigCodeResponse,
     ConfigCodeUpdate,
@@ -72,6 +72,9 @@ from backend.domains.planning.schemas import (  # noqa: F401
     DailyEntryUpdate,
 )
 from backend.domains.shopping.schemas import (  # noqa: F401
+    InventoryBatchCreate,
+    InventoryBatchResponse,
+    InventoryBatchUpdate,
     ShoppingGroupCreate,
     ShoppingGroupMemberCreate,
     ShoppingGroupMemberInvite,
@@ -86,9 +89,9 @@ from backend.domains.shopping.schemas import (  # noqa: F401
     ShoppingListItemUpdate,
     ShoppingListResponse,
     ShoppingListUpdate,
-    ShoppingPriceCreate,
-    ShoppingPriceResponse,
-    ShoppingPriceUpdate,
+    ShoppingProductCreate,
+    ShoppingProductResponse,
+    ShoppingProductUpdate,
     ShoppingSupplierCreate,
     ShoppingSupplierResponse,
     ShoppingSupplierUpdate,
@@ -151,12 +154,15 @@ __all__ = [
     "ShoppingListItemCreate",
     "ShoppingListItemUpdate",
     "ShoppingListItemResponse",
-    "ShoppingPriceCreate",
-    "ShoppingPriceUpdate",
-    "ShoppingPriceResponse",
+    "ShoppingProductCreate",
+    "ShoppingProductUpdate",
+    "ShoppingProductResponse",
     "ShoppingSupplierCreate",
     "ShoppingSupplierUpdate",
     "ShoppingSupplierResponse",
+    "InventoryBatchCreate",
+    "InventoryBatchUpdate",
+    "InventoryBatchResponse",
     # Audit
     "SharedActivityLogResponse",
     # Notifications

@@ -67,10 +67,16 @@ class TaskUpdate(StrictBaseModel):
 
     @model_validator(mode="after")
     def validate_dates_and_completion(self) -> "TaskUpdate":
-        if self.data_start and self.data_scadenza and self.data_scadenza < self.data_start:
-            raise ValueError("data_scadenza non può essere precedente a data_start.")
-        if self.fatto is False and self.data_fatto is not None:
-            raise ValueError("Un task non completato non può avere data_fatto valorizzata.")
+        if getattr(self, 'data_start', None) and getattr(self, 'data_scadenza', None):
+            start_date = self.data_start.date() if hasattr(self.data_start, 'date') else self.data_start
+            end_date = self.data_scadenza.date() if hasattr(self.data_scadenza, 'date') else self.data_scadenza
+        
+            if end_date < start_date:
+                raise ValueError("La data di scadenza non può essere precedente alla data di inizio")
+        if getattr(self, 'fatto', False) and not getattr(self, 'data_fatto', None):
+            from datetime import datetime
+            self.data_fatto = datetime.now()
+            
         return self
 
 

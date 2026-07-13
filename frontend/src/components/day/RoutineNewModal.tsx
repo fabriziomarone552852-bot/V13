@@ -1,11 +1,11 @@
 // src/components/day/RoutineNewModal.tsx
 import React, { useState, useEffect } from 'react';
-import type { RoutineItem } from './RoutineColumn';
-import DatePicker from '../shared/utils/DatePicker'; 
-import { getLocalDateString } from '../../utils/dateUtils'; 
-import { parseRRule, buildRRule } from '../../utils/rruleUtils'; 
-import BaseModal from '../shared/dialog/BaseModal';
-import { RecurrenceEditor } from '../shared/utils/RecurrenceEditor';
+import type { RoutineItem } from '@/components/day/RoutineColumn';
+import DatePicker from '@/components/shared/utils/DatePicker'; 
+import { getLocalDateString } from '@/utils/dateUtils'; 
+import { parseRRule, buildRRule } from '@/utils/rruleUtils'; 
+import BaseModal from '@/components/shared/dialog/BaseModal';
+import { RecurrenceEditor } from '@/components/shared/utils/RecurrenceEditor';
 
 export interface RoutineSavePayload {
   titolo: string;
@@ -108,11 +108,12 @@ const RoutineNewModal: React.FC<RoutineNewModalProps> = ({ isOpen, onClose, rout
       isOpen={isOpen}
       onClose={onClose}
       title={routineToEdit ? 'Modifica Routine' : 'Nuova Routine'}
-      maxWidthClass="max-w-lg" // <--- Importante per le routine!
+      maxWidthClass="max-w-xl" // <--- Importante per le routine!
       formId="routine-form"
       confirmText={routineToEdit ? 'Aggiorna' : 'Crea Routine'}
       isConfirmDisabled={!form.titolo.trim()}
       isLoading={isSaving}
+      overflowVisible={true}
     >
       <form id="routine-form" onSubmit={handleSubmit} className="space-y-5">
           
@@ -133,10 +134,21 @@ const RoutineNewModal: React.FC<RoutineNewModalProps> = ({ isOpen, onClose, rout
                 onClose={() => setIsDatePickerOpen(false)}
                 placeholder="Oggi"
               />
-            </div>
+            </div> 
 
             <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Immagine di Sfondo (URL)</label>
+            <input type="url" value={form.immagine_url} onChange={e => setForm({...form, immagine_url: e.target.value})} placeholder="Incolla l'URL di un'immagine..." className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" />
+            <p className="text-[10px] text-gray-400 font-medium mt-1.5 ml-1">Verrà usata per decorare la card.</p>
+          </div>
+          
+          </div>
+            
+
+
+            <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200">
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ricorrenza</label>
+              
               <RecurrenceEditor 
                 isRecurrent={form.isRecurrent}
                 onRecurrentChange={(val) => setForm({...form, isRecurrent: val})}
@@ -147,7 +159,7 @@ const RoutineNewModal: React.FC<RoutineNewModalProps> = ({ isOpen, onClose, rout
                 untilDate={form.rruleUntil}
                 onUntilDateChange={(val) => setForm({...form, rruleUntil: val})}
               />
-            </div>
+            
           </div>
 
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -176,11 +188,7 @@ const RoutineNewModal: React.FC<RoutineNewModalProps> = ({ isOpen, onClose, rout
             )}
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Immagine di Sfondo (URL)</label>
-            <input type="url" value={form.immagine_url} onChange={e => setForm({...form, immagine_url: e.target.value})} placeholder="Incolla l'URL di un'immagine..." className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" />
-            <p className="text-[10px] text-gray-400 font-medium mt-1.5 ml-1">Verrà usata per decorare la card.</p>
-          </div>
+          
 
         </form>
     </BaseModal>

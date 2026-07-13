@@ -127,3 +127,67 @@ export const formatTimeToServer = (oraStr?: string): string | null => {
   return `${pad(h)}:${pad(m)}`;
 
 };
+
+export const getMonday = (d: Date): Date => {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
+};
+
+export const getSunday = (d: Date): Date => {
+  const monday = getMonday(d);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return sunday;
+};
+
+export const getISOWeekNumber = (d: Date): number => {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
+export const getLocalTodayStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  export const generateWeeksGrid = (
+  firstDayIdx: number, 
+  daysInMo: number
+): (number | null)[][] => {
+  const cells: (number | null)[] = [
+    ...Array(firstDayIdx).fill(null),
+    ...Array.from({ length: daysInMo }, (_, i) => i + 1)
+  ];
+  
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
+  
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7));
+  }
+  
+  return weeks;
+};
+
+
+//  Genera le etichette per l'header della pagina (es. "OGGI", "12 ottobre 2023")
+
+export const getAgendaDateLabels = (targetDate: Date) => {
+  const isToday = new Date().toDateString() === targetDate.toDateString();
+  const displayName = isToday 
+    ? "OGGI" 
+    : targetDate.toLocaleDateString('it-IT', { weekday: 'long' }).toUpperCase();
+  const formattedDate = targetDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  return { isToday, displayName, formattedDate };
+};

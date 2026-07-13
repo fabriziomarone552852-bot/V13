@@ -1,7 +1,7 @@
 // src/hooks/useAgendaMutations.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
-import type { Task, Event } from '../types';
+import type { Task, Event } from '@/types';
 
 export const useAgendaMutations = () => {
   const api = useApi();
@@ -29,9 +29,11 @@ export const useAgendaMutations = () => {
       
       const previousTasks = queryClient.getQueryData(['tasks']);
       
-      queryClient.setQueryData(['tasks'], (oldData: any) => {
+      queryClient.setQueryData(['tasks'], (oldData: Task[] | undefined) => {
         if (!oldData) return oldData;
-        return oldData.map((t: any) => t.id === id ? { ...t, ...data } : t);
+        return oldData.map((t: Task) => 
+          t.id === id ? { ...t, ...data } : t
+        );
       });
       
       return { previousTasks };

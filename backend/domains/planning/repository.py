@@ -12,10 +12,16 @@ def list_for_user(
     user_id: int,
     data_riferimento: Optional[date] = None,
     tipo: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
 ) -> List[DailyEntry]:
     query = db.query(DailyEntry).filter(DailyEntry.user_id == user_id)
     if data_riferimento is not None:
         query = query.filter(DailyEntry.data_riferimento == data_riferimento)
+    if start_date is not None:
+        query = query.filter(DailyEntry.data_riferimento >= start_date)
+    if end_date is not None:
+        query = query.filter(DailyEntry.data_riferimento <= end_date)
     if tipo is not None:
         query = query.filter(DailyEntry.tipo == tipo)
     return query.order_by(
@@ -32,20 +38,22 @@ def get_owned(db: Session, entry_id: int, user_id: int) -> Optional[DailyEntry]:
     )
 
 
-def goal_exists(
-    db: Session,
-    user_id: int,
-    data_riferimento: date,
-    exclude_id: Optional[int] = None,
+def entry_exists_by_type(
+    db: Session, 
+    user_id: int, 
+    data_riferimento: date, 
+    tipo: str, 
+    exclude_id: int = None
 ) -> bool:
     query = db.query(DailyEntry).filter(
         DailyEntry.user_id == user_id,
         DailyEntry.data_riferimento == data_riferimento,
-        DailyEntry.tipo == "Obiettivo",
+        DailyEntry.tipo == tipo 
     )
     if exclude_id is not None:
         query = query.filter(DailyEntry.id != exclude_id)
-    return query.first() is not None
+        
+    return db.query(query.exists()).scalar()
 
 
 def add(db: Session, entry: DailyEntry) -> DailyEntry:

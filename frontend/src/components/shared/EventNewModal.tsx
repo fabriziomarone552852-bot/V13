@@ -1,21 +1,21 @@
 // src/components/dashboard/EventNewModal.tsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { type Category, CategoryGenre } from '../../types';
-import type { CalendarEvent } from '../dashboard/CalendarColumn';
-import DatePicker from './utils/DatePicker'; 
-import { getLocalDateString, smontaOrario, pad, formatTimeToServer } from '../../utils/dateUtils'; 
-import CategorySelect from '../shared/utils/CategorySelect';
-import BaseModal from '../shared/dialog/BaseModal';
-import { useConfirm } from '../../context/ConfirmContext';
-import { CancelIcon } from '../shared/utils/Icons';
-import { combineDateAndTime } from '../../utils/dateUtils';
-import { parseRRule, buildRRule } from '../../utils/rruleUtils';
-import { RecurrenceEditor } from './utils/RecurrenceEditor';
-import { useCategories } from '../../hooks/useCategories';
-import { useAgendaMutations } from '../../hooks/useAgendaMutations';
-import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import { type Category, CategoryGenre } from '@/types';
+import type { CalendarEvent } from '@/types';
+import DatePicker from '@/components/shared/utils/DatePicker';
+import { getLocalDateString, smontaOrario, pad, formatTimeToServer } from '@/utils/dateUtils'; 
+import CategorySelect from '@/components/shared/utils/CategorySelect';
+import BaseModal from '@/components/shared/dialog/BaseModal';
+import { useConfirm } from '@/context/ConfirmContext';
+import { CancelIcon } from '@/components/shared/utils/Icons';
+import { combineDateAndTime } from '@/utils/dateUtils';
+import { parseRRule, buildRRule } from '@/utils/rruleUtils';
+import { RecurrenceEditor } from '@/components/shared/utils/RecurrenceEditor';
+import { useCategories } from '@/hooks/useCategories';
+import { useAgendaMutations } from '@/hooks/useAgendaMutations';
+import TimeInput from '@/components/shared/utils/TimeInput'; 
+
 
 interface NewEventModalProps {
   isOpen: boolean; 
@@ -170,11 +170,12 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
         isOpen={isOpen}
         onClose={onClose}
         title={eventToEdit ? 'Modifica Evento' : 'Nuovo Evento'}
-        maxWidthClass="max-w-lg" // Usiamo max-w-lg per far respirare i controlli orari/date
+        maxWidthClass="max-w-xl" // Usiamo max-w-xl per far respirare i controlli orari/date
         formId="event-form"
         confirmText={eventToEdit ? 'Aggiorna Evento' : 'Salva Evento'}
         isLoading={isSaving}
         isConfirmDisabled={!newEventForm.titolo.trim()}
+        overflowVisible={true}
       >
         <form id="event-form" onSubmit={handleSalvaNuovoEvento} className="space-y-4">
             <div>
@@ -194,7 +195,7 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-end">
               {/* DATA INIZIO */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Data Inizio</label>
@@ -210,42 +211,15 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
               {/* ORA INIZIO */}
               <div className="relative">
                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ora Inizio</label>
-                 <div className="relative flex items-center">
-                   <div className={`w-full flex items-center justify-center gap-1 px-3 py-1.5 border border-gray-200 rounded-xl text-sm bg-white focus-within:border-blue-500 transition-colors ${newEventForm.tutto_il_giorno ? 'bg-gray-100' : ''}`}>
-                     <input
-                       type="text" placeholder="HH" maxLength={2} inputMode="numeric" disabled={newEventForm.tutto_il_giorno}
-                       value={orarioInizioScomposto.ore}
-                       onChange={(e) => {
-                         const val = e.target.value.replace(/\D/g, '');
-                         if (val && parseInt(val, 10) > 23) return;
-                         setNewEventForm({...newEventForm, ora_inizio: val ? `${val}:${orarioInizioScomposto.minuti || '00'}` : (orarioInizioScomposto.minuti ? `00:${orarioInizioScomposto.minuti}` : '') });
-                       }}
-                       className="w-6 text-center bg-transparent focus:outline-none text-gray-700 font-medium disabled:text-gray-400"
-                     />
-                     <span className="text-gray-400 font-bold select-none">:</span>
-                     <input
-                       type="text" placeholder="MM" maxLength={2} inputMode="numeric" disabled={newEventForm.tutto_il_giorno}
-                       value={orarioInizioScomposto.minuti}
-                       onChange={(e) => {
-                         const val = e.target.value.replace(/\D/g, '');
-                         if (val && parseInt(val, 10) > 59) return;
-                         setNewEventForm({...newEventForm, ora_inizio: val ? `${orarioInizioScomposto.ore || '00'}:${val}` : (orarioInizioScomposto.ore ? `${orarioInizioScomposto.ore}:00` : '') });
-                       }}
-                       className="w-6 text-center bg-transparent focus:outline-none text-gray-700 font-medium disabled:text-gray-400"
-                     />
-                   </div>
-                   {newEventForm.ora_inizio && !newEventForm.tutto_il_giorno && (
-                     <div className="absolute right-2 flex items-center bg-white pl-1 rounded-full">
-                       <button type="button" onClick={() => setNewEventForm({...newEventForm, ora_inizio: ''})} className="text-red-400 hover:text-red-600 transition-colors">
-                         <CancelIcon className="h-4 w-4" />
-                       </button>
-                     </div>
-                   )}
-                 </div>
+                 <TimeInput 
+                    value={newEventForm.ora_inizio}
+                    onChange={(newTime: string) => setNewEventForm({ ...newEventForm, ora_inizio: newTime })}
+                    disabled={newEventForm.tutto_il_giorno}
+                  />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 mt-4 items-end">
               {/* DATA FINE */}
               <div className="relative">
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Data Fine</label>
@@ -271,39 +245,11 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
               {/* ORA FINE */}
               <div className="relative">
                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ora Fine</label>
-                 <div className="relative flex items-center">
-                   <div className={`w-full flex items-center justify-center gap-1 px-3 py-1.5 border border-gray-200 rounded-xl text-sm bg-white focus-within:border-blue-500 transition-colors ${newEventForm.tutto_il_giorno ? 'bg-gray-100' : ''}`}>
-                     <input
-                       type="text" placeholder="HH" maxLength={2} inputMode="numeric" disabled={newEventForm.tutto_il_giorno}
-                       value={orarioFineScomposto.ore}
-                       onChange={(e) => {
-                         const val = e.target.value.replace(/\D/g, '');
-                         if (val && parseInt(val, 10) > 23) return;
-                         setNewEventForm({...newEventForm, ora_fine: val ? `${val}:${orarioFineScomposto.minuti || '00'}` : (orarioFineScomposto.minuti ? `00:${orarioFineScomposto.minuti}` : '') });
-                       }}
-                       className="w-6 text-center bg-transparent focus:outline-none text-gray-700 font-medium disabled:text-gray-400"
-                     />
-                     <span className="text-gray-400 font-bold select-none">:</span>
-                     <input
-                       type="text" placeholder="MM" maxLength={2} inputMode="numeric" disabled={newEventForm.tutto_il_giorno}
-                       value={orarioFineScomposto.minuti}
-                       onChange={(e) => {
-                         const val = e.target.value.replace(/\D/g, '');
-                         if (val && parseInt(val, 10) > 59) return;
-                         setNewEventForm({...newEventForm, ora_fine: val ? `${orarioFineScomposto.ore || '00'}:${val}` : (orarioFineScomposto.ore ? `${orarioFineScomposto.ore}:00` : '') });
-                       }}
-                       className="w-6 text-center bg-transparent focus:outline-none text-gray-700 font-medium disabled:text-gray-400"
-                     />
-                   </div>
-
-                   {newEventForm.ora_fine && !newEventForm.tutto_il_giorno && (
-                     <div className="absolute right-2 flex items-center bg-white pl-1 rounded-full">
-                       <button type="button" onClick={() => setNewEventForm({...newEventForm, ora_fine: ''})} className="text-red-400 hover:text-red-600 transition-colors">
-                          <CancelIcon className="h-5 w-5" />
-                          </button>
-                     </div>
-                   )}
-                 </div>
+                 <TimeInput 
+                    value={newEventForm.ora_fine}
+                    onChange={(newTime: string) => setNewEventForm({ ...newEventForm, ora_fine: newTime })}
+                    disabled={newEventForm.tutto_il_giorno}
+                  />
               </div>
             </div>
 
@@ -319,16 +265,16 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
               onUntilDateChange={setRruleUntil}
             />
 
-            <div className="grid grid-cols-2 gap-4 mt-2">
-              <div>
-                <CategorySelect  
+            <div className="grid grid-cols-2 gap-4 mt-2 items-end">
+              <div className="w-full">
+                  <CategorySelect  
                   value={newEventForm.category} 
                   onChange={(catName) => setNewEventForm({...newEventForm, category: catName})} 
                   genreType={CategoryGenre.EVENTS} // 2 = Eventi
                 />
               </div>
 
-              <div>
+              <div className="w-full">
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Luogo</label>
                 <input type="text" placeholder="Es. Ufficio, Roma..." value={newEventForm.luogo} onChange={(e) => setNewEventForm({...newEventForm, luogo: e.target.value})} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500" />
               </div>

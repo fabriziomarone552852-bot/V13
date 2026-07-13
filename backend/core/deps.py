@@ -6,20 +6,16 @@ from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from backend import models
+from backend.core import models
+from backend.core.settings import get_settings
 from backend.database import SessionLocal
-from backend.settings import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-    ALGORITHM,
-    DEFAULT_MAX_SUBTASK_DEPTH,
-    REFRESH_TOKEN_EXPIRE_DAYS,
-    SECRET_KEY,
-)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+settings = get_settings()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 ph = PasswordHasher()
 
 
@@ -44,24 +40,24 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(
     data: dict,
-    expire_minutes: int = ACCESS_TOKEN_EXPIRE_MINUTES,
+    expire_minutes: int = settings.access_token_expire_minutes,
 ) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
 def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
     to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
 def verify_refresh_token(token: str) -> Optional[str]:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         if payload.get("type") != "refresh":
             return None
         return payload.get("sub")
@@ -80,14 +76,19 @@ def get_current_user(
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         username: Optional[str] = payload.get("sub")
         if username is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user = db.query(models.User).filter(models.User.username == username).first()
+    user = (
+        db.query(models.User)
+        .filter(func.lower(models.User.username) == username.lower())
+        .filter(models.User.deleted_at.is_(None))
+        .first()
+    )
     if user is None:
         raise credentials_exception
     return user
@@ -102,7 +103,7 @@ def require_superuser(
             detail="Permessi insufficienti",
         )
     return current_user
-    
+
 
 def get_admin_max_depth(db: Session) -> int:
     config_db = (
@@ -110,12 +111,16 @@ def get_admin_max_depth(db: Session) -> int:
         .filter(models.Config.key == "max_subtask_depth")
         .first()
     )
-    return int(config_db.value) if config_db else DEFAULT_MAX_SUBTASK_DEPTH
+    return int(config_db.value) if config_db else settings.default_max_subtask_depth
 
 
 def get_effective_max_depth(user: models.User, db: Session) -> int:
     admin_limit = get_admin_max_depth(db)
-    user_limit = user.max_subtask_depth_user if user.max_subtask_depth_user is not None else DEFAULT_MAX_SUBTASK_DEPTH
+    user_limit = (
+        user.max_subtask_depth_user
+        if user.max_subtask_depth_user is not None
+        else settings.default_max_subtask_depth
+    )
     return min(user_limit, admin_limit)
 
 
@@ -149,8 +154,6 @@ def validate_task_category(
     if not category:
         return
 
-    # Regola di dominio: se una categoria event-only viene usata in un task,
-    # viene promossa automaticamente a categoria comune (genre=3).
     if category.genre == 2:
         category.genre = 3
         db.add(category)
@@ -165,8 +168,6 @@ def validate_event_category(
     if not category:
         return
 
-    # Regola di dominio: se una categoria task-only viene usata in un evento,
-    # viene promossa automaticamente a categoria comune (genre=3).
     if category.genre == 1:
         category.genre = 3
         db.add(category)

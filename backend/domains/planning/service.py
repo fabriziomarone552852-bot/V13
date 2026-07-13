@@ -5,6 +5,8 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from . import repository
+
 from backend.domains.planning import repository as repo
 from backend.domains.planning import schemas
 from backend.domains.planning.models import DailyEntry
@@ -12,16 +14,26 @@ from backend.domains.users.models import User
 
 _NOT_FOUND = "Daily entry non trovata."
 _GOAL_DUP = "Esiste già un obiettivo per questa data."
+# 1. Aggiungiamo l'errore per la settimana
+_WEEKLY_GOAL_DUP = "Esiste già un obiettivo settimanale per questa settimana."
 
 
 def list_entries(
     db: Session,
-    current_user: User,
+    user: User,
     data_riferimento: Optional[date] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     tipo: Optional[str] = None,
 ) -> List[DailyEntry]:
-    return repo.list_for_user(db, current_user.id, data_riferimento, tipo)
-
+    return repository.list_for_user(
+        db=db, 
+        user_id=user.id, 
+        data_riferimento=data_riferimento,
+        start_date=start_date,
+        end_date=end_date,
+        tipo=tipo
+    )
 
 def get_entry(db: Session, current_user: User, entry_id: int) -> DailyEntry:
     entry = repo.get_owned(db, entry_id, current_user.id)
@@ -31,10 +43,17 @@ def get_entry(db: Session, current_user: User, entry_id: int) -> DailyEntry:
 
 
 def create_entry(db: Session, current_user: User, payload: schemas.DailyEntryCreate) -> DailyEntry:
-    if payload.tipo == "Obiettivo" and repo.goal_exists(
-        db, current_user.id, payload.data_riferimento
+    # 2. Controllo duplicato per Obiettivo Giornaliero
+    if payload.tipo == "OD" and repo.entry_exists_by_type(
+        db, current_user.id, payload.data_riferimento, tipo="OD"
     ):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_GOAL_DUP)
+
+    # 3. Controllo duplicato per Obiettivo Settimanale
+    if payload.tipo == "OS" and repo.entry_exists_by_type(
+        db, current_user.id, payload.data_riferimento, tipo="OS"
+    ):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_WEEKLY_GOAL_DUP)
 
     new_entry = DailyEntry(
         user_id=current_user.id,
@@ -61,10 +80,17 @@ def update_entry(
         payload.data_riferimento if payload.data_riferimento is not None else entry.data_riferimento
     )
 
-    if new_tipo == "Obiettivo" and repo.goal_exists(
-        db, current_user.id, new_data_riferimento, exclude_id=entry.id
+    # 4. Controllo duplicato aggiornamento Obiettivo Giornaliero
+    if new_tipo == "OD" and repo.entry_exists_by_type(
+        db, current_user.id, new_data_riferimento, tipo="OD", exclude_id=entry.id
     ):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_GOAL_DUP)
+
+    # 5. Controllo duplicato aggiornamento Obiettivo Settimanale
+    if new_tipo == "OS" and repo.entry_exists_by_type(
+        db, current_user.id, new_data_riferimento, tipo="OS", exclude_id=entry.id
+    ):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=_WEEKLY_GOAL_DUP)
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():

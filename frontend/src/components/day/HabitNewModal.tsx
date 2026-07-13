@@ -1,9 +1,9 @@
 // src/components/day/HabitNewModal.tsx
 import React, { useState, useEffect } from 'react';
-import { getLocalDateString } from '../../utils/dateUtils'; 
-import BaseModal from '../shared/dialog/BaseModal';
-import { InfoIcon } from '../shared/utils/Icons';
-import { buildRRule } from '../../utils/rruleUtils';
+import { getLocalDateString } from '@/utils/dateUtils'; 
+import BaseModal from '@/components/shared/dialog/BaseModal';
+import { InfoIcon } from '@/components/shared/utils/Icons';
+import { buildRRule } from '@/utils/rruleUtils';
 
 export interface HabitSavePayload {
   titolo: string;
@@ -69,6 +69,7 @@ const HabitNewModal: React.FC<HabitNewModalProps> = ({ isOpen, onClose, onSave }
       confirmText="Crea"
       isConfirmDisabled={!form.titolo.trim()}
       isLoading={isSaving} 
+      overflowVisible={true}
     >
       {/* Da qui in poi c'è SOLO l'HTML che riguarda strettamente il form! */}
       <form id="habit-form" onSubmit={handleSubmit} className="space-y-5">

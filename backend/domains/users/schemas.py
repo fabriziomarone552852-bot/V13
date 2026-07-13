@@ -4,9 +4,10 @@ Pydantic models for API request/response validation.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Optional
 
-from pydantic import EmailStr, Field, field_validator
+from pydantic import EmailStr, Field, field_validator, model_validator
 
 from backend.core.schemas import ORMBaseModel, StrictBaseModel
 
@@ -20,8 +21,7 @@ class UserCreate(StrictBaseModel):
     @field_validator("username")
     @classmethod
     def normalize_username(cls, value: str) -> str:
-        value = value.strip()
-        return value.lower()
+        return value.strip().lower()
 
     @field_validator("email")
     @classmethod
@@ -55,6 +55,18 @@ class UserSettingsResponse(ORMBaseModel):
     must_change_password: bool = False
 
 
+class UserAdminResponse(ORMBaseModel):
+    """Administrative response model, includes soft-delete metadata."""
+    id: int
+    username: str
+    email: EmailStr
+    max_subtask_depth_user: Optional[int] = 3
+    is_superuser: bool = False
+    must_change_password: bool = False
+    deleted_at: Optional[datetime] = None
+    deleted_by_user_id: Optional[int] = None
+
+
 class UserSettingsUpdate(StrictBaseModel):
     """Request model for updating user settings."""
     email: Optional[EmailStr] = None
@@ -63,6 +75,7 @@ class UserSettingsUpdate(StrictBaseModel):
     confirm_new_password: Optional[str] = Field(None, min_length=6, max_length=255)
     max_subtask_depth_user: Optional[int] = Field(None, ge=1, le=15)
 
+    @model_validator(mode="after")
     def validate_password_change(self) -> "UserSettingsUpdate":
         provided = [self.current_password, self.new_password, self.confirm_new_password]
         if any(value is not None for value in provided):

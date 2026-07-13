@@ -12,22 +12,14 @@ Il backend seleziona automaticamente il file env in base a `APP_ENV`:
 
 Se `APP_ENV` non è valorizzata, il default è `dev`.
 
-Avvio backend (sempre dalla ROOT del repository, non da `backend/`):
+Avvio backend:
 
 ```bash
-# Modo consigliato (wrapper)
-APP_ENV=dev  python run.py
-APP_ENV=test python run.py
-APP_ENV=prod python run.py
-
-# In alternativa con uvicorn diretto
-APP_ENV=dev  uvicorn backend.main:app --reload
-APP_ENV=test uvicorn backend.main:app --reload
-APP_ENV=prod uvicorn backend.main:app
+cd backend
+APP_ENV=dev uvicorn main:app --reload
+APP_ENV=test uvicorn main:app --reload
+APP_ENV=prod uvicorn main:app
 ```
-
-Tutti i moduli usano import a package (`backend.*`): l'app si avvia dalla root
-senza dover aggiungere `backend/` al PYTHONPATH.
 
 All'avvio viene stampato l'ambiente caricato e il file env usato, senza esporre segreti.
 
@@ -36,8 +28,8 @@ All'avvio viene stampato l'ambiente caricato e il file env usato, senza esporre 
 Alembic usa la stessa logica del backend. Esempi:
 
 ```bash
-# dalla ROOT del repository
-APP_ENV=dev  alembic upgrade head
+cd backend
+APP_ENV=dev alembic upgrade head
 APP_ENV=test alembic upgrade head
 APP_ENV=prod alembic upgrade head
 ```
