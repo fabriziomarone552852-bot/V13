@@ -13,3 +13,4 @@ venv/
 
 # Ignora file di configurazione con dati sensibili (es. password, chiavi API)
 .env
+.env.*
