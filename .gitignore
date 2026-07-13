@@ -1,1 +1,15 @@
-frontend/node_modules/
+# Ignora le dipendenze di Node.js
+node_modules/
+npm-debug.log
+
+# Ignora la cache di Python e l'ambiente virtuale
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Ignora i file di sistema (es. Mac)
+.DS_Store
+
+# Ignora file di configurazione con dati sensibili (es. password, chiavi API)
+.env
