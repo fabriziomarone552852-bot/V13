@@ -50,7 +50,7 @@ class Task(Base):
     data_fatto: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     category_id: Mapped[Optional[int]] = mapped_column(
         Integer,
-        ForeignKey("user_categories.id", ondelete="SET NULL"),  # Punta alla tabella ponte con SET NULL
+        ForeignKey("categories.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

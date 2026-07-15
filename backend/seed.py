@@ -16,10 +16,10 @@ SYSTEM_USER = {
 }
 
 DEFAULT_CATEGORIES = [
-    {"name": "Lavoro", "colore": "#3498DB", "genre": 3},
-    {"name": "Famiglia", "colore": "#E74C3C", "genre": 3},
-    {"name": "Salute", "colore": "#2ECC71", "genre": 3},
-    {"name": "Studio", "colore": "#9B59B6", "genre": 3},
+    {"name": "Lavoro"},
+    {"name": "Famiglia"},
+    {"name": "Salute"},
+    {"name": "Studio"},
 ]
 
 DEFAULT_CONFIG_CODES = [
@@ -277,37 +277,12 @@ def _get_code_id(code_ids: dict[tuple[str, str], int], code_type: str, code_valu
 
 def _seed_default_categories(db) -> int:
     inserted = 0
-
     for category_data in DEFAULT_CATEGORIES:
-        existing = (
-            db.query(Category)
-            .filter(
-                Category.user_id.is_(None),
-                Category.name == category_data["name"],
-            )
-            .first()
-        )
-
+        existing = db.query(Category).filter(Category.name == category_data["name"]).first()
         if existing:
-            updated = False
-
-            if existing.colore != category_data["colore"]:
-                existing.colore = category_data["colore"]
-                updated = True
-
-            if existing.genre != category_data["genre"]:
-                existing.genre = category_data["genre"]
-                updated = True
-
-            if updated:
-                db.add(existing)
-                db.flush()
-
             continue
-
-        db.add(Category(user_id=None, **category_data))
+        db.add(Category(name=category_data["name"]))
         inserted += 1
-
     return inserted
 
 

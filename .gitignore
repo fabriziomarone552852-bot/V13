@@ -1,16 +1,69 @@
-# Ignora le dipendenze di Node.js
-node_modules/
-npm-debug.log
+# =========================
+# Python / FastAPI backend
+# =========================
 
-# Ignora la cache di Python e l'ambiente virtuale
-__pycache__/
-*.pyc
-.venv/
-venv/
+backend/__pycache__/
+backend/*.py[cod]
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.tox/
+backend/.cache/
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/.venv/
+backend/venv/
+backend/env/
 
-# Ignora i file di sistema (es. Mac)
-.DS_Store
-
-# Ignora file di configurazione con dati sensibili (es. password, chiavi API)
+# Env files (non versionate, usare .env.example per riferimento)
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
 .env
 .env.*
+
+# =========================
+# React / Vite frontend
+# =========================
+
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/*.local
+frontend/*.local.*
+
+# Lock file (package-lock.json, yarn.lock, pnpm-lock.yaml)
+# NON ignorarli: vanno committati per avere installazioni riproducibili.
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========================
+# IDE / OS
+# =========================
+
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Runtime / temp
+# =========================
+
+tmp/
+temp/
+uploads/
+media/
+staticfiles/

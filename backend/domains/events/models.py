@@ -31,7 +31,7 @@ class Event(Base):
     luogo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     category_id: Mapped[Optional[int]] = mapped_column(
         Integer,
-        ForeignKey("user_categories.id", ondelete="SET NULL"),  # Punta alla tabella ponte con SET NULL
+        ForeignKey("categories.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

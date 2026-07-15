@@ -16,6 +16,7 @@ const ShoppingPage: React.FC = () => {
 
   const {
     lists,
+    groups,
     items,
     suppliers,
     config,
@@ -25,7 +26,7 @@ const ShoppingPage: React.FC = () => {
     listsLoading,
     itemsLoading,
     isInitialLoading,
-  } = useShoppingData();
+  } = useShoppingData() as any;
 
   const unitOptions = config?.unitOptions ?? [];
   const itemStatusOptions = config?.itemStatusOptions ?? [];
@@ -34,10 +35,16 @@ const ShoppingPage: React.FC = () => {
   const listVisibilityOptions = config?.visibilityOptions ?? [];
   const listStatusOptions = config?.listStatusOptions ?? [];
 
+  const groupVisibilityId = useMemo(() => {
+    const opt = listVisibilityOptions.find(
+      (o: any) =>
+        o.codeValue?.toLowerCase() === 'group' ||
+        o.codeName?.toLowerCase() === 'group'
+    );
+    return opt?.id ?? null;
+  }, [listVisibilityOptions]);
+
   const filteredItems = useMemo<ShoppingListItem[]>(() => {
-    // Anti-Corruption Layer (ACL): Normalizziamo i dati dal backend (snake_case)
-    // al formato atteso dal frontend (camelCase) in un unico punto.
-    // Questo garantisce coerenza a tutti i componenti figli.
     const mappedItems = items.map((item: any) => ({
       ...item,
       shoppingListId: item.shopping_list_id,
@@ -76,8 +83,11 @@ const ShoppingPage: React.FC = () => {
 
   const listModeLabel = useMemo(() => {
     if (!activeList) return null;
-    return activeList.groupId ? 'Gruppo' : 'Privata';
-  }, [activeList]);
+    const isGroup =
+      groupVisibilityId != null &&
+      Number(activeList.visibilityId) === Number(groupVisibilityId);
+    return isGroup ? 'Gruppo' : 'Privata';
+  }, [activeList, groupVisibilityId]);
 
   const hasLists = lists.length > 0;
   const hasActiveList = activeListId != null && activeList != null;
@@ -121,7 +131,7 @@ const ShoppingPage: React.FC = () => {
               loadingLists={listsLoading}
               activeListId={activeListId}
               setActiveListId={handleSelectList}
-              groups={[]}
+              groups={groups ?? []}
               listVisibilityOptions={listVisibilityOptions}
               listStatusOptions={listStatusOptions}
             />

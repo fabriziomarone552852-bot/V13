@@ -1,4 +1,3 @@
-// src/components/shared/shopping/ShoppingListsColumn.tsx
 import React, { useEffect, useId, useMemo, useState } from 'react';
 import { useShoppingMutations } from '@/hooks/shopping/useShoppingMutations';
 import { useModal } from '@/hooks/useModals';
@@ -64,6 +63,7 @@ interface ListModalProps {
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
   submitLabel: string;
+  showStatusField?: boolean;
 }
 
 const ListModal: React.FC<ListModalProps> = ({
@@ -76,6 +76,7 @@ const ListModal: React.FC<ListModalProps> = ({
   onClose,
   onSubmit,
   submitLabel,
+  showStatusField = true,
 }) => {
   const titleId = useId();
   const nameId = useId();
@@ -86,9 +87,7 @@ const ListModal: React.FC<ListModalProps> = ({
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     };
 
     window.addEventListener('keydown', handleEscape);
@@ -164,25 +163,27 @@ const ListModal: React.FC<ListModalProps> = ({
             </select>
           </div>
 
-          <div>
-            <label
-              htmlFor={statusId}
-              className="mb-1 block text-xs font-medium text-gray-700"
-            >
-              Stato
-            </label>
-            <select
-              id={statusId}
-              className={shoppingInputClass}
-              value={form.statusId}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, statusId: e.target.value }))
-              }
-            >
-              <option value="">Default backend</option>
-              {renderConfigOptions(listStatusOptions)}
-            </select>
-          </div>
+          {showStatusField ? (
+            <div>
+              <label
+                htmlFor={statusId}
+                className="mb-1 block text-xs font-medium text-gray-700"
+              >
+                Stato
+              </label>
+              <select
+                id={statusId}
+                className={shoppingInputClass}
+                value={form.statusId}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, statusId: e.target.value }))
+                }
+              >
+                <option value="">Default backend</option>
+                {renderConfigOptions(listStatusOptions)}
+              </select>
+            </div>
+          ) : null}
 
           <div>
             <label
@@ -248,29 +249,35 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
 
   useEffect(() => {
     setForm((prev) => {
-      if (prev.visibilityId || listVisibilityOptions.length === 0) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        visibilityId: String(listVisibilityOptions[0].id),
-      };
+      if (prev.visibilityId || listVisibilityOptions.length === 0) return prev;
+      return { ...prev, visibilityId: String(listVisibilityOptions[0].id) };
     });
   }, [listVisibilityOptions]);
 
   useEffect(() => {
     setEditForm((prev) => {
-      if (prev.visibilityId || listVisibilityOptions.length === 0) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        visibilityId: String(listVisibilityOptions[0].id),
-      };
+      if (prev.visibilityId || listVisibilityOptions.length === 0) return prev;
+      return { ...prev, visibilityId: String(listVisibilityOptions[0].id) };
     });
   }, [listVisibilityOptions]);
+
+  const groupVisibilityId = useMemo(() => {
+    const opt = listVisibilityOptions.find(
+      (o) =>
+        o.codeValue?.toLowerCase() === 'group' ||
+        o.codeName?.toLowerCase() === 'group'
+    );
+    return opt ? Number(opt.id) : null;
+  }, [listVisibilityOptions]);
+
+  const activeStatusId = useMemo(() => {
+    const opt = listStatusOptions.find(
+      (o) =>
+        o.codeValue?.toLowerCase() === 'active' ||
+        o.codeName?.toLowerCase() === 'active'
+    );
+    return opt ? Number(opt.id) : undefined;
+  }, [listStatusOptions]);
 
   const visibleLists = useMemo(() => lists, [lists]);
 
@@ -288,9 +295,9 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
     await mutations.createList({
       name: trimmedName,
       description: form.description.trim() || undefined,
-      groupId: form.groupId ? Number(form.groupId) : undefined,
+      groupId: form.groupId ? Number(form.groupId) : null,
       visibilityId: Number(form.visibilityId),
-      statusId: form.statusId ? Number(form.statusId) : undefined,
+      statusId: activeStatusId,
     });
 
     setForm(makeEmptyForm(listVisibilityOptions));
@@ -379,6 +386,9 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
 
             {visibleLists.map((list) => {
               const isActive = activeListId === list.id;
+              const isGroupList =
+                groupVisibilityId != null &&
+                Number(list.visibilityId) === groupVisibilityId;
 
               return (
                 <div
@@ -404,8 +414,10 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
                       ) : null}
 
                       <div className="mt-1 flex items-center gap-2 text-xs">
-                        {list.groupId ? (
-                          <span className="text-blue-500">Gruppo</span>
+                        {isGroupList ? (
+                          <span className="text-blue-500">
+                            {list.groupId ? 'Gruppo' : 'Gruppo (da associare)'}
+                          </span>
                         ) : (
                           <span className="text-gray-400">Privata</span>
                         )}
@@ -418,6 +430,28 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
                     </button>
 
                     <div className="flex shrink-0 items-center gap-1">
+                      {isGroupList ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.alert(
+                              list.groupId
+                                ? `Invita membri alla lista "${list.name}"`
+                                : `Associa o crea un gruppo per la lista "${list.name}"`
+                            );
+                          }}
+                          className="rounded px-2 py-1 text-xs text-gray-400 hover:text-indigo-600"
+                          aria-label={
+                            list.groupId
+                              ? `Invita membri per ${list.name}`
+                              : `Associa gruppo per ${list.name}`
+                          }
+                          title={list.groupId ? 'Invita membri' : 'Associa/Crea gruppo'}
+                        >
+                          👥
+                        </button>
+                      ) : null}
+
                       {list.canEdit ? (
                         <button
                           type="button"
@@ -459,6 +493,7 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
           onClose={createModal.close}
           onSubmit={handleCreate}
           submitLabel="Crea"
+          showStatusField={false}
         />
       ) : null}
 
@@ -473,6 +508,7 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
           onClose={editModal.close}
           onSubmit={handleSaveEdit}
           submitLabel="Salva"
+          showStatusField
         />
       ) : null}
     </div>
