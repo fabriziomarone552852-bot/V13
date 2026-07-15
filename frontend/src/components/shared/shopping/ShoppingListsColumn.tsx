@@ -1,17 +1,8 @@
 import React, { useEffect, useId, useMemo, useState } from 'react';
 import { useShoppingMutations } from '@/hooks/shopping/useShoppingMutations';
 import { useModal } from '@/hooks/useModals';
-import type {
-  ConfigOption,
-  ShoppingGroupSummary,
-  ShoppingListSummary,
-} from '@/types/shopping';
-import {
-  shoppingButtonPrimaryClass,
-  shoppingButtonSecondaryClass,
-  shoppingCardClass,
-  shoppingInputClass,
-} from './shoppingUi';
+import type { ConfigOption, ShoppingGroupSummary, ShoppingListSummary } from '@/types/shopping';
+import { shoppingButtonPrimaryClass, shoppingButtonSecondaryClass, shoppingCardClass, shoppingInputClass } from './shoppingUi';
 
 interface ListFormState {
   groupId: string;
@@ -31,20 +22,15 @@ interface ShoppingListsColumnProps {
   listStatusOptions: ConfigOption[];
 }
 
-const makeEmptyForm = (
-  listVisibilityOptions: ConfigOption[] = []
-): ListFormState => ({
+const makeEmptyForm = (listVisibilityOptions: ConfigOption[] = []): ListFormState => ({
   groupId: '',
-  visibilityId: listVisibilityOptions[0]
-    ? String(listVisibilityOptions[0].id)
-    : '',
+  visibilityId: listVisibilityOptions[0] ? String(listVisibilityOptions[0].id) : '',
   statusId: '',
   name: '',
   description: '',
 });
 
-const getConfigOptionLabel = (option: ConfigOption) =>
-  option.displayName?.trim() || option.codeName;
+const getConfigOptionLabel = (option: ConfigOption) => option.displayName?.trim() || option.codeName;
 
 const renderConfigOptions = (options: ConfigOption[]) =>
   options.map((option) => (
@@ -89,75 +75,28 @@ const ListModal: React.FC<ListModalProps> = ({
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
-
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/30 p-4 backdrop-blur-sm">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className={`${shoppingCardClass} w-full max-w-md p-5`}
-      >
-        <h2 id={titleId} className="mb-4 text-lg font-bold text-gray-900">
-          {title}
-        </h2>
-
+      <div role="dialog" aria-modal="true" aria-labelledby={titleId} className={`${shoppingCardClass} w-full max-w-md p-5`}>
+        <h2 id={titleId} className="mb-4 text-lg font-bold text-gray-900">{title}</h2>
         <form onSubmit={onSubmit} className="space-y-3">
           <div>
-            <label htmlFor={nameId} className="mb-1 block text-xs font-medium text-gray-700">
-              Nome lista
-            </label>
-            <input
-              id={nameId}
-              className={shoppingInputClass}
-              placeholder="Nome lista"
-              value={form.name}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, name: e.target.value }))
-              }
-              required
-              autoFocus
-            />
+            <label htmlFor={nameId} className="mb-1 block text-xs font-medium text-gray-700">Nome lista</label>
+            <input id={nameId} className={shoppingInputClass} value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required autoFocus />
           </div>
 
           <div>
-            <label
-              htmlFor={descriptionId}
-              className="mb-1 block text-xs font-medium text-gray-700"
-            >
-              Descrizione
-            </label>
-            <input
-              id={descriptionId}
-              className={shoppingInputClass}
-              placeholder="Descrizione (opzionale)"
-              value={form.description}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, description: e.target.value }))
-              }
-            />
+            <label htmlFor={descriptionId} className="mb-1 block text-xs font-medium text-gray-700">Descrizione</label>
+            <input id={descriptionId} className={shoppingInputClass} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
           </div>
 
           <div>
-            <label
-              htmlFor={visibilityId}
-              className="mb-1 block text-xs font-medium text-gray-700"
-            >
-              Visibilità
-            </label>
-            <select
-              id={visibilityId}
-              className={shoppingInputClass}
-              value={form.visibilityId}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, visibilityId: e.target.value }))
-              }
-              required
-            >
+            <label htmlFor={visibilityId} className="mb-1 block text-xs font-medium text-gray-700">Visibilità</label>
+            <select id={visibilityId} className={shoppingInputClass} value={form.visibilityId} onChange={(e) => setForm((p) => ({ ...p, visibilityId: e.target.value }))} required>
               <option value="">Seleziona visibilità</option>
               {renderConfigOptions(listVisibilityOptions)}
             </select>
@@ -165,20 +104,8 @@ const ListModal: React.FC<ListModalProps> = ({
 
           {showStatusField ? (
             <div>
-              <label
-                htmlFor={statusId}
-                className="mb-1 block text-xs font-medium text-gray-700"
-              >
-                Stato
-              </label>
-              <select
-                id={statusId}
-                className={shoppingInputClass}
-                value={form.statusId}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, statusId: e.target.value }))
-                }
-              >
+              <label htmlFor={statusId} className="mb-1 block text-xs font-medium text-gray-700">Stato</label>
+              <select id={statusId} className={shoppingInputClass} value={form.statusId} onChange={(e) => setForm((p) => ({ ...p, statusId: e.target.value }))}>
                 <option value="">Default backend</option>
                 {renderConfigOptions(listStatusOptions)}
               </select>
@@ -186,40 +113,18 @@ const ListModal: React.FC<ListModalProps> = ({
           ) : null}
 
           <div>
-            <label
-              htmlFor={groupId}
-              className="mb-1 block text-xs font-medium text-gray-700"
-            >
-              Gruppo
-            </label>
-            <select
-              id={groupId}
-              className={shoppingInputClass}
-              value={form.groupId}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, groupId: e.target.value }))
-              }
-            >
+            <label htmlFor={groupId} className="mb-1 block text-xs font-medium text-gray-700">Gruppo</label>
+            <select id={groupId} className={shoppingInputClass} value={form.groupId} onChange={(e) => setForm((p) => ({ ...p, groupId: e.target.value }))}>
               <option value="">Nessun gruppo</option>
               {groups.map((group) => (
-                <option key={group.id} value={String(group.id)}>
-                  {group.name}
-                </option>
+                <option key={group.id} value={String(group.id)}>{group.name}</option>
               ))}
             </select>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className={shoppingButtonSecondaryClass}
-            >
-              Annulla
-            </button>
-            <button type="submit" className={shoppingButtonPrimaryClass}>
-              {submitLabel}
-            </button>
+            <button type="button" onClick={onClose} className={shoppingButtonSecondaryClass}>Annulla</button>
+            <button type="submit" className={shoppingButtonPrimaryClass}>{submitLabel}</button>
           </div>
         </form>
       </div>
@@ -228,58 +133,32 @@ const ListModal: React.FC<ListModalProps> = ({
 };
 
 const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
-  lists,
-  loadingLists,
-  activeListId,
-  setActiveListId,
-  groups,
-  listVisibilityOptions,
-  listStatusOptions,
+  lists, loadingLists, activeListId, setActiveListId, groups, listVisibilityOptions, listStatusOptions,
 }) => {
   const mutations = useShoppingMutations();
   const createModal = useModal<null>();
   const editModal = useModal<ShoppingListSummary>();
 
-  const [form, setForm] = useState<ListFormState>(() =>
-    makeEmptyForm(listVisibilityOptions)
-  );
-  const [editForm, setEditForm] = useState<ListFormState>(() =>
-    makeEmptyForm(listVisibilityOptions)
-  );
+  const [form, setForm] = useState<ListFormState>(() => makeEmptyForm(listVisibilityOptions));
+  const [editForm, setEditForm] = useState<ListFormState>(() => makeEmptyForm(listVisibilityOptions));
 
   useEffect(() => {
-    setForm((prev) => {
-      if (prev.visibilityId || listVisibilityOptions.length === 0) return prev;
-      return { ...prev, visibilityId: String(listVisibilityOptions[0].id) };
-    });
+    setForm((prev) => (prev.visibilityId || listVisibilityOptions.length === 0 ? prev : { ...prev, visibilityId: String(listVisibilityOptions[0].id) }));
   }, [listVisibilityOptions]);
 
   useEffect(() => {
-    setEditForm((prev) => {
-      if (prev.visibilityId || listVisibilityOptions.length === 0) return prev;
-      return { ...prev, visibilityId: String(listVisibilityOptions[0].id) };
-    });
+    setEditForm((prev) => (prev.visibilityId || listVisibilityOptions.length === 0 ? prev : { ...prev, visibilityId: String(listVisibilityOptions[0].id) }));
   }, [listVisibilityOptions]);
 
   const groupVisibilityId = useMemo(() => {
-    const opt = listVisibilityOptions.find(
-      (o) =>
-        o.codeValue?.toLowerCase() === 'group' ||
-        o.codeName?.toLowerCase() === 'group'
-    );
+    const opt = listVisibilityOptions.find((o) => o.codeValue?.toLowerCase() === 'group' || o.codeName?.toLowerCase() === 'group');
     return opt ? Number(opt.id) : null;
   }, [listVisibilityOptions]);
 
   const activeStatusId = useMemo(() => {
-    const opt = listStatusOptions.find(
-      (o) =>
-        o.codeValue?.toLowerCase() === 'active' ||
-        o.codeName?.toLowerCase() === 'active'
-    );
+    const opt = listStatusOptions.find((o) => o.codeValue?.toLowerCase() === 'active' || o.codeName?.toLowerCase() === 'active');
     return opt ? Number(opt.id) : undefined;
   }, [listStatusOptions]);
-
-  const visibleLists = useMemo(() => lists, [lists]);
 
   const openCreateModal = () => {
     setForm(makeEmptyForm(listVisibilityOptions));
@@ -288,7 +167,6 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const trimmedName = form.name.trim();
     if (!trimmedName || !form.visibilityId) return;
 
@@ -307,7 +185,6 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
   const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editModal.data) return;
-
     const trimmedName = editForm.name.trim();
     if (!trimmedName) return;
 
@@ -317,9 +194,7 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
         name: trimmedName,
         description: editForm.description.trim() || undefined,
         groupId: editForm.groupId ? Number(editForm.groupId) : undefined,
-        visibilityId: editForm.visibilityId
-          ? Number(editForm.visibilityId)
-          : undefined,
+        visibilityId: editForm.visibilityId ? Number(editForm.visibilityId) : undefined,
         statusId: editForm.statusId ? Number(editForm.statusId) : undefined,
       },
     });
@@ -327,153 +202,53 @@ const ShoppingListsColumn: React.FC<ShoppingListsColumnProps> = ({
     editModal.close();
   };
 
-  const handleDelete = async (list: ShoppingListSummary) => {
-    if (!window.confirm(`Eliminare la lista "${list.name}"?`)) return;
-
-    await mutations.deleteList(list.id);
-
-    if (list.id === activeListId) {
-      setActiveListId(null);
-    }
-  };
-
-  const startEdit = (list: ShoppingListSummary) => {
-    setEditForm({
-      groupId: list.groupId == null ? '' : String(list.groupId),
-      visibilityId: String(list.visibilityId),
-      statusId: list.statusId == null ? '' : String(list.statusId),
-      name: list.name,
-      description: list.description ?? '',
-    });
-
-    editModal.open(list);
-  };
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex shrink-0 items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700">
-          Liste spesa
-        </h2>
-
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className={`${shoppingButtonSecondaryClass} text-xs`}
-        >
-          + Nuova
-        </button>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700">Liste spesa</h2>
+        <button type="button" onClick={openCreateModal} className={`${shoppingButtonSecondaryClass} text-xs`}>+ Nuova</button>
       </div>
 
       <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
         {loadingLists ? (
           <p className="py-4 text-center text-xs text-gray-400">Caricamento...</p>
-        ) : visibleLists.length === 0 ? (
-          <p className="py-4 text-center text-xs text-gray-400">
-            Nessuna lista. Creane una!
-          </p>
+        ) : lists.length === 0 ? (
+          <p className="py-4 text-center text-xs text-gray-400">Nessuna lista. Creane una!</p>
         ) : (
           <>
-            <button
-              type="button"
-              className={`${shoppingCardClass} w-full p-3 text-left transition hover:border-blue-300 ${
-                activeListId === null ? 'border-blue-400 ring-1 ring-blue-200' : ''
-              }`}
-              onClick={() => setActiveListId(null)}
-            >
-              <p className="text-sm font-semibold text-gray-700">Tutte le liste</p>
-            </button>
-
-            {visibleLists.map((list) => {
+            {lists.map((list) => {
               const isActive = activeListId === list.id;
-              const isGroupList =
-                groupVisibilityId != null &&
-                Number(list.visibilityId) === groupVisibilityId;
+              const isGroupList = groupVisibilityId != null && Number(list.visibilityId) === groupVisibilityId;
 
               return (
-                <div
-                  key={list.id}
-                  className={`${shoppingCardClass} ${
-                    isActive ? 'border-blue-400 ring-1 ring-blue-200' : ''
-                  }`}
-                >
+                <div key={list.id} className={`${shoppingCardClass} ${isActive ? 'border-blue-400 ring-1 ring-blue-200' : ''}`}>
                   <div className="flex items-start justify-between gap-2 p-3">
-                    <button
-                      type="button"
-                      className="min-w-0 flex-1 text-left"
-                      onClick={() => setActiveListId(list.id)}
-                    >
-                      <p className="truncate text-sm font-semibold text-gray-800">
-                        {list.name}
-                      </p>
-
-                      {list.description ? (
-                        <p className="truncate text-xs text-gray-500">
-                          {list.description}
-                        </p>
-                      ) : null}
-
+                    <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setActiveListId(list.id)}>
+                      <p className="truncate text-sm font-semibold text-gray-800">{list.name}</p>
                       <div className="mt-1 flex items-center gap-2 text-xs">
                         {isGroupList ? (
-                          <span className="text-blue-500">
-                            {list.groupId ? 'Gruppo' : 'Gruppo (da associare)'}
-                          </span>
+                          <span className="text-blue-500">{list.groupId ? 'Gruppo' : 'Gruppo (da associare)'}</span>
                         ) : (
                           <span className="text-gray-400">Privata</span>
                         )}
-
-                        <span className="text-gray-300">•</span>
-                        <span className="text-gray-500">
-                          {list.openItemsCount} aperti / {list.purchasedItemsCount} presi
-                        </span>
                       </div>
                     </button>
 
-                    <div className="flex shrink-0 items-center gap-1">
-                      {isGroupList ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            window.alert(
-                              list.groupId
-                                ? `Invita membri alla lista "${list.name}"`
-                                : `Associa o crea un gruppo per la lista "${list.name}"`
-                            );
-                          }}
-                          className="rounded px-2 py-1 text-xs text-gray-400 hover:text-indigo-600"
-                          aria-label={
+                    {isGroupList ? (
+                      <button
+                        type="button"
+                        className="rounded px-2 py-1 text-xs text-gray-400 hover:text-indigo-600"
+                        onClick={() =>
+                          window.alert(
                             list.groupId
-                              ? `Invita membri per ${list.name}`
-                              : `Associa gruppo per ${list.name}`
-                          }
-                          title={list.groupId ? 'Invita membri' : 'Associa/Crea gruppo'}
-                        >
-                          👥
-                        </button>
-                      ) : null}
-
-                      {list.canEdit ? (
-                        <button
-                          type="button"
-                          onClick={() => startEdit(list)}
-                          className="rounded px-2 py-1 text-xs text-gray-400 hover:text-blue-500"
-                          aria-label={`Modifica lista ${list.name}`}
-                        >
-                          ✎
-                        </button>
-                      ) : null}
-
-                      {list.canDelete ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleDelete(list)}
-                          className="rounded px-2 py-1 text-xs text-gray-400 hover:text-red-500"
-                          aria-label={`Elimina lista ${list.name}`}
-                        >
-                          ✕
-                        </button>
-                      ) : null}
-                    </div>
+                              ? `Invita membri alla lista "${list.name}"`
+                              : `Associa o crea un gruppo per la lista "${list.name}"`
+                          )
+                        }
+                      >
+                        👥
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );

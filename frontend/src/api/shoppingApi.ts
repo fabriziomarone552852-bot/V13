@@ -534,3 +534,30 @@ export async function deleteInventoryBatch(batchId: number): Promise<void> {
     method: 'DELETE',
   });
 }
+
+// Mantieni il tuo file quasi invariato: è già buono.
+// Aggiungi solo queste 3 funzioni in fondo (stub controllati), utili per contratto hook se vuoi attivarle dopo.
+
+export async function toggleShoppingListItemPurchased(
+  id: number,
+  payload: { isPurchased: boolean }
+): Promise<ShoppingListItem> {
+  const data = await apiRequest<ShoppingListItemApi>(`/items/${id}`, {
+    method: 'PATCH',
+    body: { is_purchased: payload.isPurchased },
+  });
+  return normalizeShoppingListItem(data);
+}
+
+export async function addShoppingPrice(_payload: unknown): Promise<void> {
+  // Non disponibile nel backend attuale: usare inventory-batches
+  throw new Error('addShoppingPrice non supportato: usare addInventoryBatch.');
+}
+
+export async function updateShoppingPrice(_priceId: number, _payload: unknown): Promise<void> {
+  throw new Error('updateShoppingPrice non supportato nel backend attuale.');
+}
+
+export async function deleteShoppingPrice(_priceId: number): Promise<void> {
+  throw new Error('deleteShoppingPrice non supportato nel backend attuale.');
+}

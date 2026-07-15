@@ -26,6 +26,14 @@ export interface ShoppingGroupSummary {
   canDelete?: boolean;
 }
 
+export interface ShoppingGroup {
+  id: number;
+  name: string;
+  description?: string | null;
+  ownerId: number;
+  statusId: number;
+}
+
 export interface ShoppingSupplierOption {
   id: number;
   name: string;
@@ -332,4 +340,14 @@ export interface UseShoppingMutationsResult {
   updatePrice: (args: UpdateShoppingPriceArgs) => Promise<void>;
 
   deletePrice: (priceId: number) => Promise<void>;
+}
+
+export interface AddInventoryBatchArgs {
+  itemId: number;
+  listId: number;
+  data: InventoryBatchCreatePayload;
+  
+  export interface DeleteInventoryBatchArgs {
+  batchId: number;
+  listId: number;
 }

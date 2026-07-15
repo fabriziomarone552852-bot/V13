@@ -29,6 +29,7 @@ const ShoppingPage: React.FC = () => {
   } = useShoppingData() as any;
 
   const unitOptions = config?.unitOptions ?? [];
+  const itemStatusOptions = config?.itemStatusOptions ?? [];
   const currencyOptions = config?.currencyOptions ?? [];
   const offerFlagOptions = config?.offerFlagOptions ?? [];
   const listVisibilityOptions = config?.visibilityOptions ?? [];
@@ -46,21 +47,24 @@ const ShoppingPage: React.FC = () => {
   const filteredItems = useMemo<ShoppingListItem[]>(() => {
     const mappedItems = items.map((item: any) => ({
       ...item,
-      shoppingListId: item.shopping_list_id ?? item.shoppingListId,
-      productName: item.product_name ?? item.productName,
-      isPurchased: item.is_purchased ?? item.isPurchased,
-      unitId: item.unit_id ?? item.unitId,
-      unitCodeName: item.unit_code_name ?? item.unitCodeName,
-      statusId: item.status_id ?? item.statusId,
-      productId: item.product_id ?? item.productId,
+      shoppingListId: item.shopping_list_id,
+      productName: item.product_name,
+      isPurchased: item.is_purchased,
+      unitId: item.unit_id,
+      unitCodeName: item.unit_code_name,
+      statusId: item.status_id,
+      productId: item.product_id,
     }));
 
-    if (!searchQuery) return mappedItems;
+    if (!searchQuery) {
+      return mappedItems;
+    }
 
     const q = searchQuery.trim().toLowerCase();
-    return mappedItems.filter((item) =>
-      String(item.productName ?? '').trim().toLowerCase().includes(q)
-    );
+    return mappedItems.filter((item) => {
+      const name = (item.productName ?? '').trim().toLowerCase();
+      return name.includes(q);
+    });
   }, [items, searchQuery]);
 
   const openItems = useMemo(
@@ -114,7 +118,9 @@ const ShoppingPage: React.FC = () => {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onAddItem={handleAddItem}
-        onOpenActions={() => {}}
+        onOpenActions={() => {
+          // TODO: collegare drawer azioni lista quando disponibile
+        }}
       />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -137,19 +143,36 @@ const ShoppingPage: React.FC = () => {
             {isInitialLoading ? (
               <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
                 <div className="max-w-md">
-                  <h2 className="text-lg font-semibold text-slate-900">Caricamento shopping</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Caricamento shopping
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Sto caricando liste e articoli della lista attiva.
+                  </p>
                 </div>
               </div>
             ) : !hasLists ? (
               <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
                 <div className="max-w-md">
-                  <h2 className="text-lg font-semibold text-slate-900">Nessuna lista disponibile</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Nessuna lista disponibile
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Crea una nuova lista per iniziare ad aggiungere articoli e
+                    registrare gli acquisti.
+                  </p>
                 </div>
               </div>
             ) : !hasActiveList ? (
               <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
                 <div className="max-w-md">
-                  <h2 className="text-lg font-semibold text-slate-900">Nessuna lista selezionata</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Nessuna lista selezionata
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Seleziona una lista dalla colonna laterale per visualizzare
+                    gli articoli e registrare gli acquisti.
+                  </p>
                 </div>
               </div>
             ) : viewMode === 'bulk-purchase' ? (
