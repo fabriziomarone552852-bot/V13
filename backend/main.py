@@ -24,6 +24,7 @@ from backend.domains.shopping.router import router as shopping_router
 from backend.domains.sync.router import router as sync_router
 from backend.domains.catalogs.router_public import router as catalogs_router
 from backend.domains.catalogs.router_admin import router as admin_catalogs_router
+from backend.domains.monthly_entries.router import router as monthly_entries_router
 
 
 app = FastAPI(title="Smart Agenda API", version="3.0")
@@ -58,3 +59,4 @@ app.include_router(habit_log_router)
 app.include_router(sync_router)
 app.include_router(catalogs_router)
 app.include_router(admin_catalogs_router)
+app.include_router(monthly_entries_router)

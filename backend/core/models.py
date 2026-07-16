@@ -30,6 +30,7 @@ from backend.domains.shopping.models import (  # noqa
 )
 from backend.domains.tasks.models import Task  # noqa
 from backend.domains.users.models import User  # noqa
+from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling  # noqa
 
 __all__ = [
     # Config
@@ -63,4 +64,6 @@ __all__ = [
     "Habit",
     "HabitPeriod",
     "HabitLog",
+    "MonthlyEntry",
+    "MonthlyFeeling",
 ]
