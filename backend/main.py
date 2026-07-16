@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Selezione ambiente + caricamento .env in base ad APP_ENV (nessuna scrittura su disco).
 # DEVE stare in cima, prima di qualsiasi import che legga le variabili d'ambiente.
 from backend.core import config as _config  # noqa: F401
@@ -60,3 +61,6 @@ app.include_router(sync_router)
 app.include_router(catalogs_router)
 app.include_router(admin_catalogs_router)
 app.include_router(monthly_entries_router)
+=======
+from backend.domains.monthly_entries.router import router as monthly_entries_router
+>>>>>>> af462a6b9bbd1f0671746e7461292080173d29ed

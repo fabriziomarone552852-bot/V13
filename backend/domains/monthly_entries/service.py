@@ -28,6 +28,11 @@ def _validate_feel_value(value: int) -> None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="feel_value deve essere compreso tra 0 e 10.")
 
 
+def _ensure_admin(current_user: User) -> None:
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permessi insufficienti")
+
+
 def _get_feeling_or_404(db: Session, feeling_id: int) -> MonthlyFeeling:
     feeling = repo.get_feeling(db, feeling_id)
     if not feeling:
@@ -42,22 +47,19 @@ def _get_entry_or_404(db: Session, entry_id: int, user_id: int) -> MonthlyEntry:
     return entry
 
 
-# -------------------- Feelings --------------------
-
 def list_feelings(db: Session) -> List[MonthlyFeeling]:
     return repo.list_feelings(db)
 
 
-def create_feeling(db: Session, feeling_in: schemas.MonthlyFeelingCreate) -> MonthlyFeeling:
-    existing = repo.get_feeling_by_name(db, feeling_in.feel_name)
-    if existing:
+def create_feeling(db: Session, current_user: User, feeling_in: schemas.MonthlyFeelingCreate) -> MonthlyFeeling:
+    _ensure_admin(current_user)
+    if repo.get_feeling_by_name(db, feeling_in.feel_name):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="feel_name già esistente.")
-
-    feeling = MonthlyFeeling(feel_name=feeling_in.feel_name)
-    return repo.create_feeling(db, feeling)
+    return repo.create_feeling(db, MonthlyFeeling(feel_name=feeling_in.feel_name))
 
 
-def update_feeling(db: Session, feeling_id: int, feeling_in: schemas.MonthlyFeelingUpdate) -> MonthlyFeeling:
+def update_feeling(db: Session, current_user: User, feeling_id: int, feeling_in: schemas.MonthlyFeelingUpdate) -> MonthlyFeeling:
+    _ensure_admin(current_user)
     feeling = _get_feeling_or_404(db, feeling_id)
 
     if feeling_in.feel_name is not None:
@@ -69,12 +71,11 @@ def update_feeling(db: Session, feeling_id: int, feeling_in: schemas.MonthlyFeel
     return repo.update_feeling(db, feeling)
 
 
-def delete_feeling(db: Session, feeling_id: int) -> None:
+def delete_feeling(db: Session, current_user: User, feeling_id: int) -> None:
+    _ensure_admin(current_user)
     feeling = _get_feeling_or_404(db, feeling_id)
     repo.delete_feeling(db, feeling)
 
-
-# -------------------- Entries --------------------
 
 def list_entries(
     db: Session,
@@ -95,18 +96,9 @@ def create_entry(db: Session, current_user: User, entry_in: schemas.MonthlyEntry
     _validate_feel_value(entry_in.feel_value)
     _get_feeling_or_404(db, entry_in.feel_type)
 
-    existing = repo.get_entry_by_key(
-        db,
-        current_user.id,
-        entry_in.year,
-        entry_in.month,
-        entry_in.feel_type,
-    )
+    existing = repo.get_entry_by_key(db, current_user.id, entry_in.year, entry_in.month, entry_in.feel_type)
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Esiste già un valore per questo feeling in questo mese.",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Esiste già un valore per questo feeling in questo mese.")
 
     entry = MonthlyEntry(
         user_id=current_user.id,
@@ -120,15 +112,11 @@ def create_entry(db: Session, current_user: User, entry_in: schemas.MonthlyEntry
         return repo.create_entry(db, entry)
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Esiste già un valore per questo feeling in questo mese.",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Esiste già un valore per questo feeling in questo mese.")
 
 
 def update_entry(db: Session, current_user: User, entry_id: int, entry_in: schemas.MonthlyEntryUpdate) -> MonthlyEntry:
     _validate_feel_value(entry_in.feel_value)
-
     entry = _get_entry_or_404(db, entry_id, current_user.id)
     entry.feel_value = entry_in.feel_value
     return repo.update_entry(db, entry)

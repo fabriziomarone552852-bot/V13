@@ -15,7 +15,7 @@ __all__ = [
     "MonthlyEntry",
     "MonthlyFeeling",
     "MonthlyEntryCreate",
-    "MonnthlyEntryResponse",
+    "MonthlyEntryResponse",
     "MonthlyEntryUpdate",
     "MonthlyFeelingCreate",
     "MonthlyFeelingResponse",

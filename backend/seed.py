@@ -1,26 +1,21 @@
-import sys
+"""Monthly feeling catalog seed data."""
 
-from sqlalchemy import or_, text
-
-from backend.database import SessionLocal
-from backend.models import Category, Config, ConfigCode, ShoppingSupplier, User
-from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
-from backend.api import deps
-
-
-SYSTEM_USER = {
-    "id": 1,
-    "username": "signori",
-    "email": "signori@sinasce.lol",
-    "password": "signori",
-}
-
-DEFAULT_CATEGORIES = [
-    {"name": "Lavoro"},
-    {"name": "Famiglia"},
-    {"name": "Salute"},
-    {"name": "Studio"},
+DEFAULT_MONTHLY_FEELINGS = [
+    {"feel_name": "Energia"},
+    {"feel_name": "Umore"},
+    {"feel_name": "Stress"},
+    {"feel_name": "Motivazione"},
+    {"feel_name": "Serenità"},
+    {"feel_name": "Ansia"},
+    {"feel_name": "Fatica"},
+    {"feel_name": "Focus"},
+    {"feel_name": "Soddisfazione"},
+    {"feel_name": "Ottimismo"},
+    {"feel_name": "Tensione"},
+    {"feel_name": "Benessere"},
+    {"feel_name": "Equilibrio"},
 ]
+<<<<<<< HEAD
 
 DEFAULT_CONFIG_CODES = [
     {"code_type":"currency","code_value":"EUR","code_name":"Euro","description":"Euro","active":True,"sort_order":1},
@@ -428,3 +423,5 @@ def seed_database() -> None:
 
 if __name__ == "__main__":
     seed_database()
+=======
+>>>>>>> af462a6b9bbd1f0671746e7461292080173d29ed
