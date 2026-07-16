@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """
 Central model registry for SQLAlchemy.
 This module imports all domain models to ensure SQLAlchemy can resolve
@@ -68,6 +67,3 @@ __all__ = [
     "MonthlyEntry",
     "MonthlyFeeling",
 ]
-=======
-from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling  # noqa
->>>>>>> af462a6b9bbd1f0671746e7461292080173d29ed

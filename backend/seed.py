@@ -15,7 +15,6 @@ DEFAULT_MONTHLY_FEELINGS = [
     {"feel_name": "Benessere"},
     {"feel_name": "Equilibrio"},
 ]
-<<<<<<< HEAD
 
 DEFAULT_CONFIG_CODES = [
     {"code_type":"currency","code_value":"EUR","code_name":"Euro","description":"Euro","active":True,"sort_order":1},
@@ -423,5 +422,3 @@ def seed_database() -> None:
 
 if __name__ == "__main__":
     seed_database()
-=======
->>>>>>> af462a6b9bbd1f0671746e7461292080173d29ed
