@@ -1,6 +1,6 @@
 export type MoodEventType = 'EP' | 'EN';
 export type NoteVariant = 'N1' | 'N2' | 'N3' | 'N4';
-export type DailyEntryType = 'OD' | 'PD' | 'OW' | 'PW' | MoodEventType | NoteVariant;
+export type DailyEntryType = 'OD' | 'PD' | 'OW' | 'PW' | 'PX' | MoodEventType | NoteVariant;
 
 export interface DailyEntry {
   id: number;
@@ -20,6 +20,10 @@ export interface MoodEvent {
   type: MoodEventType;
   date: string;
 }
+
+// Definiamo le opzioni per i colori del pixel, niente stringhe libere
+// ANCHE SE SARANNO FORMULATI I COLORIN NEL BACKEND IN USER_CATEGORIES TABLE
+export type PixelColor = 'blu' | 'giallo' | 'rosso' | 'verde' | 'viola' | 'transparent';
 
 // Struttura del payload per la creazione
 export interface CreateMoodPayload {

@@ -94,6 +94,7 @@ interface NotesSidebarProps {
   onAutoSaveNote: (id: number, text: string, variant: NoteVariant, isNew?: boolean) => void;
   onDeleteNote: (id: number, isNew?: boolean) => void;
   clearEditingNoteId: () => void;
+  selectedDateStr?: string;
 }
 
 const NotesSidebar: React.FC<NotesSidebarProps> = ({ 
