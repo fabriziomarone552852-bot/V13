@@ -15,12 +15,8 @@ from backend.domains.users.models import User
 router = APIRouter(prefix="/monthly-entries", tags=["monthly-entries"])
 
 
-# -------------------- Feelings --------------------
-
 @router.get("/feelings", response_model=List[schemas.MonthlyFeelingResponse])
-def list_feelings(
-    db: Session = Depends(deps.get_db),
-):
+def list_feelings(db: Session = Depends(deps.get_db)):
     return service.list_feelings(db)
 
 
@@ -32,8 +28,9 @@ def list_feelings(
 def create_feeling(
     feeling_in: schemas.MonthlyFeelingCreate,
     db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.require_superuser),
 ):
-    return service.create_feeling(db, feeling_in)
+    return service.create_feeling(db, current_user, feeling_in)
 
 
 @router.patch("/feelings/{feeling_id}", response_model=schemas.MonthlyFeelingResponse)
@@ -41,20 +38,20 @@ def update_feeling(
     feeling_id: int,
     feeling_in: schemas.MonthlyFeelingUpdate,
     db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.require_superuser),
 ):
-    return service.update_feeling(db, feeling_id, feeling_in)
+    return service.update_feeling(db, current_user, feeling_id, feeling_in)
 
 
 @router.delete("/feelings/{feeling_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_feeling(
     feeling_id: int,
     db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.require_superuser),
 ):
-    service.delete_feeling(db, feeling_id)
+    service.delete_feeling(db, current_user, feeling_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-# -------------------- Entries --------------------
 
 @router.get("", response_model=List[schemas.MonthlyEntryResponse])
 def list_entries(

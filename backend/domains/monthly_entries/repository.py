@@ -11,8 +11,6 @@ from sqlalchemy.orm import Session, joinedload
 from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling
 
 
-# -------------------- Feelings --------------------
-
 def list_feelings(db: Session) -> List[MonthlyFeeling]:
     return (
         db.query(MonthlyFeeling)
@@ -22,19 +20,11 @@ def list_feelings(db: Session) -> List[MonthlyFeeling]:
 
 
 def get_feeling(db: Session, feeling_id: int) -> Optional[MonthlyFeeling]:
-    return (
-        db.query(MonthlyFeeling)
-        .filter(MonthlyFeeling.id == feeling_id)
-        .first()
-    )
+    return db.query(MonthlyFeeling).filter(MonthlyFeeling.id == feeling_id).first()
 
 
 def get_feeling_by_name(db: Session, feel_name: str) -> Optional[MonthlyFeeling]:
-    return (
-        db.query(MonthlyFeeling)
-        .filter(MonthlyFeeling.feel_name == feel_name)
-        .first()
-    )
+    return db.query(MonthlyFeeling).filter(MonthlyFeeling.feel_name == feel_name).first()
 
 
 def create_feeling(db: Session, feeling: MonthlyFeeling) -> MonthlyFeeling:
@@ -54,8 +44,6 @@ def delete_feeling(db: Session, feeling: MonthlyFeeling) -> None:
     db.delete(feeling)
     db.commit()
 
-
-# -------------------- Entries --------------------
 
 def list_entries(
     db: Session,
@@ -88,10 +76,7 @@ def get_entry(db: Session, entry_id: int, user_id: int) -> Optional[MonthlyEntry
     return (
         db.query(MonthlyEntry)
         .options(joinedload(MonthlyEntry.feeling))
-        .filter(
-            MonthlyEntry.id == entry_id,
-            MonthlyEntry.user_id == user_id,
-        )
+        .filter(MonthlyEntry.id == entry_id, MonthlyEntry.user_id == user_id)
         .first()
     )
 
