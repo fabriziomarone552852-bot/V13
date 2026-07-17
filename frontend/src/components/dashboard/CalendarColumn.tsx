@@ -9,6 +9,7 @@ import WeekGridClassic from './calendar/WeekGridClassic';
 import WeekGridDetailed from './calendar/WeekGridDetailed';
 import MonthGrid from './calendar/MonthGrid';
 import MonthGridDetailed from './calendar/MonthGridDetailed';
+import type { DailyMood } from './calendar/MonthDayCell';
 
 interface CalendarColumnProps {
   events: CalendarEvent[];
@@ -23,12 +24,13 @@ interface CalendarColumnProps {
   variant?: 'classic' | 'detailed';
   onSelectTask?: (task: DbTask) => void;
   onToggleTask?: (task: DbTask, newStatus: boolean) => void;
+  onMoodChange?: (dateStr: string, newMood: DailyMood | null) => void;
 }
 
 const CalendarColumn: React.FC<CalendarColumnProps> = ({ 
   events, tasks, onSelectEvent, onAddEventClick, onDayClick, onMonthChange,
   hideHeader, forceView, targetDate, variant = 'classic', onSelectTask,
-  onToggleTask
+  onToggleTask, onMoodChange
 }) => {
   const baseState = useCalendarState();
   const { setCurrentWeekDate, setCurrentMonthDate } = baseState;
@@ -67,6 +69,7 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
             tasks={tasks}
             onDayClick={onDayClick} 
             onAddEventClick={onAddEventClick} 
+            onMoodChange={onMoodChange}
           />
         ) : (
           <MonthGrid 

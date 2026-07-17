@@ -11,6 +11,7 @@ import CalendarColumn from '@/components/dashboard/CalendarColumn';
 import TaskColumn from '@/components/shared/tasks/TaskColumn'; 
 import MoodEventsBoard from '@/components/weekmonth/MoodEventsBoard';
 import { TrackerPanel, type TrackerItem } from '@/components/weekmonth/TrackerPanel';
+import type { DailyMood } from '@/components/dashboard/calendar/MonthDayCell';
 
 // --- IMPORT ARCHITETTURA & UTILS ---
 import { useDay } from '@/context/DayContext';
@@ -119,6 +120,10 @@ const MonthPage: React.FC = () => {
   const handleDeleteMoodEvent = useCallback((id: number) => { console.log(`Elimina:`, id); }, []);
 
   const monthTasksUI: UITask[] = useMemo(() => buildTaskTree(monthData?.tasks || []), [monthData?.tasks]);
+
+  const handleCalendarMoodChange = useCallback((dateStr: string, newMood: DailyMood | null) => {
+    console.log(`Salva nel DB l'umore "${newMood}" per il giorno: ${dateStr}`);
+  }, []);
 
   if (isLoading) {
     return <div className="flex h-full items-center justify-center font-bold text-gray-500 animate-pulse">Caricamento mese...</div>;
@@ -250,17 +255,18 @@ const MonthPage: React.FC = () => {
 
         {/* CALENDARIO MENSILE DETTAGLIATO (3 su 4) */}
         <div className="xl:col-span-3 h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 p-4 min-h-0 w-full min-w-0 overflow-hidden relative">
-          <CalendarColumn 
-             events={monthData?.events || []} 
-             tasks={monthData?.tasks || []}
-             hideHeader={true}        
-             forceView="Mese"   
-             targetDate={monthTargetDate} 
-             variant="detailed"    
-             onDayClick={handleGoToDay}
-             onSelectEvent={handleSelectEvent}
-           />
-        </div>
+      <CalendarColumn 
+         events={monthData?.events || []} 
+         tasks={monthData?.tasks || []}
+         hideHeader={true}        
+         forceView="Mese"   
+         targetDate={monthTargetDate} 
+         variant="detailed"    
+         onDayClick={handleGoToDay}
+         onSelectEvent={handleSelectEvent}
+         onMoodChange={handleCalendarMoodChange}
+        />
+         </div>    
       </div>
 
       <NotesSidebar 
