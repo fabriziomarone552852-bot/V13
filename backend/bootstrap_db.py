@@ -1,6 +1,5 @@
-from backend.core.database import Base, engine, SessionLocal
+from backend.core.database import Base, engine, SessionLocal  # IMPORT OBBLIGATORI: registrano tutte le tabelle nel metadata
 
-# IMPORT OBBLIGATORI: registrano tutte le tabelle nel metadata
 import backend.domains.users.models
 import backend.domains.categories.models
 import backend.domains.tasks.models
@@ -12,7 +11,7 @@ import backend.domains.countdowns.models
 import backend.domains.notifications.models
 import backend.domains.audit.models
 import backend.domains.catalogs.models
-
+import backend.domains.monthly_entries.models  # <<< AGGIUNTO
 
 def bootstrap_db() -> None:
     Base.metadata.create_all(bind=engine)

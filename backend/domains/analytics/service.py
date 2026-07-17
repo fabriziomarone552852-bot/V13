@@ -1,131 +1,154 @@
-# backend/services/analytics_prices.py
-from datetime import datetime, timedelta, timezone
+"""Analytics domain service."""
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass
 from decimal import Decimal
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from fastapi import HTTPException
+from sqlalchemy.orm import Session, selectinload
 
-from backend import models
+from backend.core import models
+from backend.domains.shopping import (
+    InventoryBatch,
+    ShoppingListItem,
+    ShoppingSupplier,
+)
 
 
+@dataclass
 class SupplierPriceMetrics:
-    def __init__(
-        self,
-        supplier: models.ShoppingSupplier,
-        last_price: Optional[models.ShoppingPrice],
-        avg_normal_price: Optional[Decimal],
-        best_price: Optional[models.ShoppingPrice],
-    ):
-        self.supplier = supplier
-        self.last_price = last_price
-        self.avg_normal_price = avg_normal_price
-        self.best_price = best_price
+    supplier: ShoppingSupplier
+    last_batch: InventoryBatch
+    best_batch: InventoryBatch
+    avg_normal_price: Optional[Decimal]
 
 
-def get_item_price_metrics(
-    db: Session,
-    item_id: int,
-    user_id: int,
-    days_window: int = 180,
-) -> Optional[List[SupplierPriceMetrics]]:
+def _get_item_owned(db: Session, shopping_list_item_id: int, user_id: int) -> ShoppingListItem:
     item = (
-        db.query(models.ShoppingListItem)
-        .join(models.ShoppingList)
-        .filter(
-            models.ShoppingListItem.id == item_id,
-            models.ShoppingList.owner_id == user_id,
+        db.query(ShoppingListItem)
+        .options(
+            selectinload(ShoppingListItem.product),
+            selectinload(ShoppingListItem.shopping_list),
         )
+        .filter(ShoppingListItem.id == shopping_list_item_id)
         .first()
     )
+
     if not item:
-        return None
+        raise HTTPException(status_code=404, detail="Item non trovato")
 
-    cutoff = datetime.now(timezone.utc).date() - timedelta(days=days_window)
+    if item.shopping_list.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="Non autorizzato")
 
-    prices = (
-        db.query(models.ShoppingPrice)
-        .filter(
-            models.ShoppingPrice.shopping_list_item_id == item_id,
-            models.ShoppingPrice.purchase_date >= cutoff,
+    return item
+
+
+def _get_product_batches(
+    db: Session,
+    product_id: int,
+) -> List[InventoryBatch]:
+    return (
+        db.query(InventoryBatch)
+        .options(
+            selectinload(InventoryBatch.supplier),
+            selectinload(InventoryBatch.product),
         )
+        .filter(InventoryBatch.product_id == product_id)
+        .filter(InventoryBatch.deleted_at.is_(None))
+        .order_by(InventoryBatch.purchase_date.desc(), InventoryBatch.id.desc())
         .all()
     )
 
-    by_supplier: Dict[Optional[int], List[models.ShoppingPrice]] = {}
-    for p in prices:
-        by_supplier.setdefault(p.supplier_id, []).append(p)
+
+def _group_metrics_by_supplier(
+    batches: List[InventoryBatch],
+) -> List[SupplierPriceMetrics]:
+    grouped: dict[int, List[InventoryBatch]] = defaultdict(list)
+
+    for batch in batches:
+        if batch.supplier_id is None or batch.supplier is None:
+            continue
+        grouped[int(batch.supplier_id)].append(batch)
 
     metrics: List[SupplierPriceMetrics] = []
 
-    for supplier_id, supplier_prices in by_supplier.items():
-        if supplier_id is None:
-            continue
-
-        supplier = supplier_prices[0].supplier
-        if supplier is None:
-            continue
-
-        last_price = max(supplier_prices, key=lambda p: p.purchase_date, default=None)
-        best_price = min(supplier_prices, key=lambda p: p.price, default=None)
-
-        avg_normal_price = (
-            db.query(func.avg(models.ShoppingPrice.price))
-            .filter(
-                models.ShoppingPrice.shopping_list_item_id == item_id,
-                models.ShoppingPrice.supplier_id == supplier_id,
-                models.ShoppingPrice.offer_flag_id.is_(None),
-                models.ShoppingPrice.purchase_date >= cutoff,
-            )
-            .scalar()
+    for supplier_batches in grouped.values():
+        supplier_batches.sort(
+            key=lambda b: (b.purchase_date, b.id),
+            reverse=True,
         )
+
+        last_batch = supplier_batches[0]
+        best_batch = min(
+            supplier_batches,
+            key=lambda b: (b.purchase_price, b.purchase_date, b.id),
+        )
+
+        normal_batches = [b for b in supplier_batches if not b.is_on_sale]
+        avg_normal_price: Optional[Decimal] = None
+        if normal_batches:
+            total = sum((b.purchase_price for b in normal_batches), Decimal("0"))
+            avg_normal_price = total / Decimal(len(normal_batches))
 
         metrics.append(
             SupplierPriceMetrics(
-                supplier=supplier,
-                last_price=last_price,
-                avg_normal_price=round(avg_normal_price, 2) if avg_normal_price else None,
-                best_price=best_price,
+                supplier=last_batch.supplier,
+                last_batch=last_batch,
+                best_batch=best_batch,
+                avg_normal_price=avg_normal_price,
             )
         )
 
+    metrics.sort(key=lambda m: m.supplier.name.lower())
     return metrics
 
 
-def get_price_history_series(
+def get_supplier_price_summaries(
     db: Session,
-    item_id: int,
-    user_id: int,
-    supplier_id: Optional[int] = None,
-) -> Optional[List[dict]]:
-    """Restituisce la serie storica ordinata per data, ideale per grafici."""
-    item = (
-        db.query(models.ShoppingListItem)
-        .join(models.ShoppingList)
-        .filter(
-            models.ShoppingListItem.id == item_id,
-            models.ShoppingList.owner_id == user_id,
-        )
-        .first()
-    )
-    if not item:
-        return None
+    current_user: models.User,
+    shopping_list_item_id: int,
+) -> list[dict]:
+    item = _get_item_owned(db, shopping_list_item_id, current_user.id)
+    batches = _get_product_batches(db, item.product_id)
 
-    query = db.query(models.ShoppingPrice).filter(models.ShoppingPrice.shopping_list_item_id == item_id)
-    if supplier_id is not None:
-        query = query.filter(models.ShoppingPrice.supplier_id == supplier_id)
+    metrics = _group_metrics_by_supplier(batches)
 
-    prices = query.order_by(models.ShoppingPrice.purchase_date.asc()).all()
+    return [
+        {
+            "supplier_id": metric.supplier.id,
+            "supplier_name": metric.supplier.name,
+            "last_price": metric.last_batch.purchase_price,
+            "last_purchase_date": metric.last_batch.purchase_date,
+            "best_price": metric.best_batch.purchase_price,
+            "best_purchase_date": metric.best_batch.purchase_date,
+            "avg_normal_price": metric.avg_normal_price,
+            "is_last_price_on_sale": metric.last_batch.is_on_sale,
+        }
+        for metric in metrics
+    ]
 
-    series = []
-    for p in prices:
-        series.append(
+
+def get_price_history(
+    db: Session,
+    current_user: models.User,
+    shopping_list_item_id: int,
+) -> list[dict]:
+    item = _get_item_owned(db, shopping_list_item_id, current_user.id)
+    batches = _get_product_batches(db, item.product_id)
+
+    history = []
+    for batch in sorted(batches, key=lambda b: (b.purchase_date, b.id)):
+        history.append(
             {
-                "data_acquisto": p.purchase_date,
-                "prezzo": p.price,
-                "in_offerta": p.offer_flag_id is not None,
-                "supplier_id": p.supplier_id,
-                "supplier_nome": p.supplier.name if p.supplier else "",
+                "batch_id": batch.id,
+                "date": batch.purchase_date,
+                "price": batch.purchase_price,
+                "supplier_id": batch.supplier.id if batch.supplier else None,
+                "supplier_name": batch.supplier.name if batch.supplier else None,
+                "is_on_sale": batch.is_on_sale,
             }
         )
-    return series
+
+    return history
