@@ -1,13 +1,14 @@
 // frontend/src/components/dashboard/CalendarColumn.tsx
 import React, { useEffect } from 'react';
-import { useCalendarState } from '@/hooks/useCalendarState';
-import CalendarHeader from '@/components/dashboard/calendar/CalendarHeader';
-import MonthGrid from '@/components/dashboard/calendar/MonthGrid';
+import { useCalendarState } from '../../hooks/useCalendarState';
+import CalendarHeader from './calendar/CalendarHeader';
 import { PlusIcon } from '@/components/shared/utils/Icons';
 import type { DbTask, CalendarEvent } from '@/types';
 
 import WeekGridClassic from './calendar/WeekGridClassic';
 import WeekGridDetailed from './calendar/WeekGridDetailed';
+import MonthGrid from './calendar/MonthGrid';
+import MonthGridDetailed from './calendar/MonthGridDetailed';
 
 interface CalendarColumnProps {
   events: CalendarEvent[];
@@ -59,13 +60,23 @@ const CalendarColumn: React.FC<CalendarColumnProps> = ({
       {!hideHeader && <CalendarHeader state={state} />}
 
       {state.view === 'Mese' ? (
-        <MonthGrid 
-          state={state} 
-          events={events} 
-          tasks={tasks}
-          onDayClick={onDayClick} 
-          onAddEventClick={onAddEventClick} 
-        />
+        variant === 'detailed' ? (
+          <MonthGridDetailed 
+            state={state} 
+            events={events} 
+            tasks={tasks}
+            onDayClick={onDayClick} 
+            onAddEventClick={onAddEventClick} 
+          />
+        ) : (
+          <MonthGrid 
+            state={state} 
+            events={events} 
+            tasks={tasks}
+            onDayClick={onDayClick} 
+            onAddEventClick={onAddEventClick} 
+          />
+        )
       ) : variant === 'detailed' ? (
         <WeekGridDetailed 
           state={state} 

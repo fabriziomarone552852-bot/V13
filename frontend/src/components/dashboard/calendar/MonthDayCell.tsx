@@ -48,7 +48,7 @@ export const MonthDayCell: React.FC<MonthDayCellProps> = ({
       onMouseLeave={() => setIsHovered(false)} 
       onClick={handleSingleClick}
       onDoubleClick={handleDoubleClick}
-      className={`relative p-1.5 border border-gray-100 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer min-h-0 flex flex-col justify-between group ${isToday ? 'bg-amber-50/20' : 'transition-colors'} ${isHovered ? 'z-[60]' : 'z-10'}`}
+      className={`relative p-1.5 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer min-h-0 flex flex-col justify-between group ${isToday ? 'bg-amber-50/20' : 'transition-colors'} ${isHovered ? 'z-[60]' : 'z-10'}`}
     >
       <span className={`text-xs w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-amber-500 text-white shadow-md ring-4 ring-amber-100 font-extrabold' : 'text-gray-700 font-bold group-hover:text-blue-600'}`}>
         {dayNum}
