@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import HomePage from '@/views/HomePage';
 import DayPage from '@/views/DayPage';
 import WeekPage from '@/views/WeekPage';
+import MonthPage from '@/views/MonthPage';
 import TasksPage from '@/views/TasksPage';
 import EventsPage from '@/views/EventsPage';
 import CategoriesPage from '@/views/CategoriesPage';
@@ -29,14 +30,7 @@ const AppRouter: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/giorno" element={<DayPage />} />
             <Route path="/settimana" element={<WeekPage />} />
-            <Route
-              path="/mese"
-              element={
-                <div className="p-6 text-xl font-bold">
-                  Pagina Mese in costruzione...
-                </div>
-              }
-            />
+            <Route path="/mese" element={<MonthPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
