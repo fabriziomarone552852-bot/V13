@@ -1,3 +1,6 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
   File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Scripts\uvicorn.exe\__main__.py", line 5, in <module>
     sys.exit(main())
              ~~~~^^
