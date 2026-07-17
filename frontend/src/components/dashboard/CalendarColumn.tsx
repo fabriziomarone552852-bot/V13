@@ -6,8 +6,8 @@ import MonthGrid from '@/components/dashboard/calendar/MonthGrid';
 import { PlusIcon } from '@/components/shared/utils/Icons';
 import type { DbTask, CalendarEvent } from '@/types';
 
-import WeekGridClassic from '@/components/dashboard/calendar/WeekGridClassic';
-import WeekGridDetailed from '@/components/weekmonth/WeekGridDetailed';
+import WeekGridClassic from './calendar/WeekGridClassic';
+import WeekGridDetailed from './calendar/WeekGridDetailed';
 
 interface CalendarColumnProps {
   events: CalendarEvent[];
