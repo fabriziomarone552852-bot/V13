@@ -1,21 +1,20 @@
 """Monthly feeling catalog seed data."""
 
 DEFAULT_MONTHLY_FEELINGS = [
-    {"feel_name": "Energia"},
-    {"feel_name": "Umore"},
-    {"feel_name": "Stress"},
-    {"feel_name": "Motivazione"},
-    {"feel_name": "Serenità"},
-    {"feel_name": "Ansia"},
-    {"feel_name": "Fatica"},
-    {"feel_name": "Focus"},
-    {"feel_name": "Soddisfazione"},
-    {"feel_name": "Ottimismo"},
-    {"feel_name": "Tensione"},
-    {"feel_name": "Benessere"},
-    {"feel_name": "Equilibrio"},
+    {"feel_name": "Gioia"},
+    {"feel_name": "Tristezza"},
+    {"feel_name": "Rabbia"},
+    {"feel_name": "Disgusto"},
+    {"feel_name": "Paura"},
+    {"feel_name": "Famiglia"},
+    {"feel_name": "Coppia"},
+    {"feel_name": "Salute"},
+    {"feel_name": "Mente"},
+    {"feel_name": "Amici"},
+    {"feel_name": "Finanze"},
+    {"feel_name": "Divertimento"},
+    {"feel_name": "Lavoro"},
 ]
-
 DEFAULT_CONFIG_CODES = [
     {"code_type":"currency","code_value":"EUR","code_name":"Euro","description":"Euro","active":True,"sort_order":1},
     {"code_type":"group_status","code_value":"active","code_name":"Active","description":"Gruppo attivo","active":True},
@@ -118,22 +117,6 @@ DEFAULT_CONFIG_CODES = [
 ]
 
 DEFAULT_SUPPLIERS = ["Coop", "Carni e Affini", "MD", "Lidl", "Eurospin", "Famila"]
-
-DEFAULT_MONTHLY_FEELINGS = [
-    {"feel_name": "Energia"},
-    {"feel_name": "Umore"},
-    {"feel_name": "Stress"},
-    {"feel_name": "Motivazione"},
-    {"feel_name": "Serenità"},
-    {"feel_name": "Ansia"},
-    {"feel_name": "Fatica"},
-    {"feel_name": "Focus"},
-    {"feel_name": "Soddisfazione"},
-    {"feel_name": "Ottimismo"},
-    {"feel_name": "Tensione"},
-    {"feel_name": "Benessere"},
-    {"feel_name": "Equilibrio"},
-]
 
 def _ensure_system_user(db) -> User:
     normalized_username = SYSTEM_USER["username"].strip().lower()
