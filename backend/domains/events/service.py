@@ -5,7 +5,8 @@ from typing import Optional, Sequence, Union
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from backend.core import deps
+from backend.domains.categories import repository as categories_repo
+from backend.domains.categories.models import CategoryGenre
 from backend.domains.events import repository as repo
 from backend.domains.events import schemas
 from backend.domains.events.models import Event
@@ -13,26 +14,54 @@ from backend.domains.users.models import User
 from backend.pagination_schemas import PaginatedEvents
 from backend.utils import expand_events_for_range
 
+
 _NOT_FOUND = "Impegno non trovato o non accessibile"
 
 
 def populate_category_name(
     obj: Union[Event, Sequence[Event], None],
 ) -> Union[Event, Sequence[Event], None]:
+    """Copia il nome categoria user-scoped sull'attributo trasmesso al client."""
     if obj is None:
         return None
+
     if isinstance(obj, Event):
         if obj.category:
-            obj.category_name = obj.category.name
+            obj.category_name = obj.category.category_name
         return obj
+
     for event in obj:
         if event.category:
-            event.category_name = event.category.name
+            event.category_name = event.category.category_name
+
     return obj
 
 
+def _validate_user_category(
+    db: Session,
+    current_user: User,
+    user_category_id: int | None,
+) -> None:
+    """Verifica che la categoria appartenga all'utente e sia compatibile con gli eventi."""
+    if user_category_id is None:
+        return
+
+    user_category = categories_repo.get_user_category(db, user_category_id, current_user.id)
+    if not user_category:
+        raise HTTPException(
+            status_code=400,
+            detail="Categoria evento non valida o non accessibile.",
+        )
+
+    if user_category.genre not in (CategoryGenre.EVENTS, CategoryGenre.COMMON):
+        raise HTTPException(
+            status_code=400,
+            detail="La categoria selezionata non è utilizzabile per gli eventi.",
+        )
+
+
 def create_event(db: Session, current_user: User, event_in: schemas.EventCreate) -> Event:
-    deps.validate_event_category(event_in.category_id, current_user, db)
+    _validate_user_category(db, current_user, event_in.user_category_id)
 
     db_event = Event(
         titolo=event_in.titolo,
@@ -41,7 +70,7 @@ def create_event(db: Session, current_user: User, event_in: schemas.EventCreate)
         data_fine=event_in.data_fine,
         tutto_il_giorno=event_in.tutto_il_giorno,
         luogo=event_in.luogo,
-        category_id=event_in.category_id,
+        user_category_id=event_in.user_category_id,
         user_id=current_user.id,
         rrule=event_in.rrule,
     )
@@ -59,7 +88,7 @@ def list_events(
     titolo: Optional[str] = None,
     descrizione: Optional[str] = None,
     luogo: Optional[str] = None,
-    category_id: Optional[int] = None,
+    user_category_id: Optional[int] = None,
     tutto_il_giorno: Optional[bool] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
@@ -72,7 +101,7 @@ def list_events(
         titolo=titolo,
         descrizione=descrizione,
         luogo=luogo,
-        category_id=category_id,
+        user_category_id=user_category_id,
         tutto_il_giorno=tutto_il_giorno,
         limit=limit,
         offset=offset,
@@ -80,24 +109,26 @@ def list_events(
 
     populate_category_name(events_db)
 
-    # Se il frontend ha chiesto un range, espandiamo le ricorrenze; altrimenti
-    # ritorniamo le regole base (vista Lista/Ricerca).
     if start_date and end_date:
         items = expand_events_for_range(events_db, start_date, end_date)
     else:
         items = [schemas.EventResponse.model_validate(ev) for ev in events_db]
 
-    # Nota: 'total' è il numero di regole base nel DB, non delle occorrenze espanse.
     return PaginatedEvents(items=items, total=total, limit=limit, offset=offset)
 
 
-def update_event(db: Session, current_user: User, event_id: int, event_in: schemas.EventUpdate) -> Event:
+def update_event(
+    db: Session,
+    current_user: User,
+    event_id: int,
+    event_in: schemas.EventUpdate,
+) -> Event:
     db_event = repo.get_owned(db, event_id, current_user.id)
     if not db_event:
         raise HTTPException(status_code=404, detail=_NOT_FOUND)
 
-    if event_in.category_id is not None:
-        deps.validate_event_category(event_in.category_id, current_user, db)
+    if event_in.user_category_id is not None:
+        _validate_user_category(db, current_user, event_in.user_category_id)
 
     update_data = event_in.model_dump(exclude_unset=True)
     for key, value in update_data.items():

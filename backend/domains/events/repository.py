@@ -30,7 +30,7 @@ def list_filtered(
     titolo: Optional[str] = None,
     descrizione: Optional[str] = None,
     luogo: Optional[str] = None,
-    category_id: Optional[int] = None,
+    user_category_id: Optional[int] = None,
     tutto_il_giorno: Optional[bool] = None,
     limit: int = 100,
     offset: int = 0,
@@ -47,8 +47,8 @@ def list_filtered(
         query = query.filter(Event.descrizione.ilike(f"%{descrizione}%"))
     if luogo:
         query = query.filter(Event.luogo.ilike(f"%{luogo}%"))
-    if category_id is not None:
-        query = query.filter(Event.category_id == category_id)
+    if user_category_id is not None:
+        query = query.filter(Event.user_category_id == user_category_id)
     if tutto_il_giorno is not None:
         query = query.filter(Event.tutto_il_giorno == tutto_il_giorno)
 

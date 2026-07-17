@@ -1,5 +1,6 @@
 """
 Central model registry for SQLAlchemy.
+
 This module imports all domain models to ensure SQLAlchemy can resolve
 string references in relationships. It MUST be imported before any
 database operations.
@@ -12,7 +13,7 @@ from __future__ import annotations
 # Import all domain models to register them with SQLAlchemy
 # This enables string references in relationships
 from backend.domains.audit.models import SharedActivityLog  # noqa
-from backend.domains.categories.models import Category  # noqa
+from backend.domains.categories.models import UserCategory  # noqa
 from backend.domains.catalogs.models import Config, ConfigCode  # noqa
 from backend.domains.countdowns.models import Countdown  # noqa
 from backend.domains.events.models import Event  # noqa
@@ -20,13 +21,13 @@ from backend.domains.habits.models import Habit, HabitLog, HabitPeriod  # noqa
 from backend.domains.notifications.models import Notification  # noqa
 from backend.domains.planning.models import DailyEntry  # noqa
 from backend.domains.shopping.models import (  # noqa
+    InventoryBatch,
     ShoppingGroup,
     ShoppingGroupMember,
     ShoppingList,
     ShoppingListItem,
-    ShoppingProduct,      # AGGIUNTO: mancava
+    ShoppingProduct,
     ShoppingSupplier,
-    InventoryBatch,       # MODIFICATO: rimpiazza ShoppingPrice
 )
 from backend.domains.tasks.models import Task  # noqa
 from backend.domains.users.models import User  # noqa
@@ -39,7 +40,7 @@ __all__ = [
     # Users
     "User",
     # Categories
-    "Category",
+    "UserCategory",
     # Tasks
     "Task",
     # Events
@@ -49,9 +50,9 @@ __all__ = [
     "ShoppingGroupMember",
     "ShoppingList",
     "ShoppingListItem",
-    "ShoppingProduct",    # AGGIUNTO
+    "ShoppingProduct",
     "ShoppingSupplier",
-    "InventoryBatch",     # MODIFICATO
+    "InventoryBatch",
     # Audit
     "SharedActivityLog",
     # Notifications
@@ -64,6 +65,7 @@ __all__ = [
     "Habit",
     "HabitPeriod",
     "HabitLog",
+    # Monthly entries
     "MonthlyEntry",
     "MonthlyFeeling",
 ]

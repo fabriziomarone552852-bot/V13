@@ -22,7 +22,7 @@ class EventCreate(StrictBaseModel):
     data_fine: Optional[datetime] = None
     tutto_il_giorno: bool = False
     luogo: Optional[str] = Field(None, max_length=255)
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     rrule: Optional[str] = Field(None, max_length=255)
 
     @field_validator("titolo")
@@ -49,7 +49,7 @@ class EventUpdate(StrictBaseModel):
     data_fine: Optional[datetime] = None
     tutto_il_giorno: Optional[bool] = None
     luogo: Optional[str] = Field(None, max_length=255)
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     rrule: Optional[str] = Field(None, max_length=255)
     esclusioni: Optional[str] = None
 
@@ -81,7 +81,7 @@ class EventResponse(ORMBaseModel):
     tutto_il_giorno: bool
     luogo: Optional[str] = None
     user_id: int
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     category: Optional[CategoryResponse] = None
     category_name: Optional[str] = None
     rrule: Optional[str] = Field(None, max_length=255)

@@ -24,12 +24,21 @@ def create_event(
 
 @router.get("", response_model=PaginatedEvents)
 def get_events(
-    start_date: Optional[date] = Query(None, description="Inizio range per espandere ricorrenze"),
-    end_date: Optional[date] = Query(None, description="Fine range per espandere ricorrenze"),
+    start_date: Optional[date] = Query(
+        None,
+        description="Inizio range per espandere ricorrenze",
+    ),
+    end_date: Optional[date] = Query(
+        None,
+        description="Fine range per espandere ricorrenze",
+    ),
     titolo: Optional[str] = None,
     descrizione: Optional[str] = None,
     luogo: Optional[str] = None,
-    category_id: Optional[int] = None,
+    user_category_id: Optional[int] = Query(
+        None,
+        description="ID della categoria utente da usare come filtro",
+    ),
     tutto_il_giorno: Optional[bool] = None,
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
@@ -42,7 +51,7 @@ def get_events(
         titolo=titolo,
         descrizione=descrizione,
         luogo=luogo,
-        category_id=category_id,
+        user_category_id=user_category_id,
         tutto_il_giorno=tutto_il_giorno,
         start_date=start_date,
         end_date=end_date,
