@@ -6,20 +6,7 @@ import { pad } from '@/utils/dateUtils';
 import { isEventInDay } from '@/utils/eventUtils';
 import { MonthDayCell } from './MonthDayCell';
 
-// 1. LA NOSTRA CLASSIFICAZIONE: Zero 'any'. Dichiariamo esattamente cosa entra nella cella.
-export interface CalendarGridItem {
-  id: string | number;
-  title: string;
-  type: 'task' | 'event';
-  category: string;
-  time?: string;
-  endTime?: string;
-  dateStr?: string;
-  endDateStr?: string;
-  isMultiDay: boolean;
-  categoryColor: string;
-  done: boolean;
-}
+import type { CalendarGridItem } from './MonthGrid';
 
 interface MonthGridDetailedProps {
   state: CalendarState;
@@ -38,58 +25,78 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
 }) => {
   const { monthYear, monthIndex, mainFirstDayIndex, mainDaysInMonth, todayStr } = state;
 
-  // 2. SCUDO DI PERFORMANCE FRONTEND: Filtriamo eventi e task del mese una sola volta.
-  const gridDays = useMemo(() => {
-    if (monthYear === undefined || monthIndex === undefined) return [];
+  // 2. SCUDO DI PERFORMANCE FRONTEND (Zero 'any' e Lookup O(1))
+  const itemsByDate = useMemo(() => {
+    if (monthYear === undefined || monthIndex === undefined) return {};
 
-    const daysArray = [];
+    const dictionary: Record<string, CalendarGridItem[]> = {};
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    const safeEvents = Array.isArray(events) ? events : [];
 
+    // Inizializza il dizionario per tutti i giorni del mese
     for (let i = 1; i <= mainDaysInMonth; i++) {
       const dateKey = `${monthYear}-${pad(monthIndex + 1)}-${pad(i)}`;
-
-      // Mappatura sicura dei Task (senza 'any')
-      const dayTasks: CalendarGridItem[] = tasks
-        .filter((t) => t.data_scadenza && t.data_scadenza.substring(0, 10) === dateKey)
-        .map((t) => ({
-          id: `task-${t.id}`,
-          title: t.titolo,
-          type: 'task',
-          category: t.category?.name || 'Generico',
-          isMultiDay: false,
-          categoryColor: t.category?.colore || '#9CA3AF',
-          done: !!t.fatto
-        }));
-
-      // Mappatura sicura degli Eventi (senza 'any')
-      const dayEvents: CalendarGridItem[] = events
-        .filter((e) => isEventInDay(e, dateKey))
-        .map((e) => ({
-          id: `event-${e.id}`,
-          title: e.title,
-          type: 'event',
-          category: e.category,
-          time: e.time,
-          endTime: e.endTime,
-          dateStr: e.dateStr,
-          endDateStr: e.endDateStr,
-          isMultiDay: !!e.tutto_il_giorno || (!!e.endDateStr && e.endDateStr !== e.dateStr),
-          categoryColor: e.categoryColor,
-          done: false
-        }));
-
-      daysArray.push({
-        dayNum: i,
-        dateKey,
-        items: [...dayTasks, ...dayEvents]
-      });
+      dictionary[dateKey] = [];
     }
-    return daysArray;
-  }, [monthYear, monthIndex, mainDaysInMonth, tasks, events]);
+
+    // Mappatura Tasks
+    safeTasks.forEach((t: DbTask) => {
+      if (t.data_scadenza) {
+        const tDate = t.data_scadenza.substring(0, 10);
+        if (dictionary[tDate]) {
+          dictionary[tDate].push({
+            title: t.titolo, 
+            type: 'task', 
+            category: t.category?.name || 'Generico',
+            isMultiDay: false, 
+            categoryColor: t.category?.colore || '#9CA3AF', // Fallback sicuro
+            done: !!t.fatto // Assicura che sia un booleano
+          });
+        }
+      }
+    });
+
+    // Mappatura Eventi
+    safeEvents.forEach((e: CalendarEvent) => {
+      for (let i = 1; i <= mainDaysInMonth; i++) {
+        const dateKey = `${monthYear}-${pad(monthIndex + 1)}-${pad(i)}`;
+        if (isEventInDay(e, dateKey)) {
+          dictionary[dateKey].push({
+            title: e.title, 
+            type: 'event', 
+            category: e.category, 
+            time: e.time, 
+            endTime: e.endTime,
+            dateStr: e.dateStr, 
+            endDateStr: e.endDateStr,
+            isMultiDay: !!e.tutto_il_giorno || (!!e.endDateStr && e.endDateStr !== e.dateStr),
+            // CORREZIONE ERRORE TYPESCRIPT: Fallback per categoryColor
+            categoryColor: e.categoryColor || '#3B82F6', 
+            done: false
+          });
+        }
+      }
+    });
+
+    // Ordinamento (come nel file originale)
+    Object.keys(dictionary).forEach(key => {
+      dictionary[key].sort((a, b) => {
+        if (a.isMultiDay !== b.isMultiDay) return a.isMultiDay ? -1 : 1;
+        if (a.type === 'event' && b.type === 'event' && a.time && b.time) {
+          return a.time.localeCompare(b.time);
+        }
+        if (a.done !== b.done) return a.done ? 1 : -1;
+        return a.title.localeCompare(b.title);
+      });
+    });
+
+    return dictionary;
+  }, [tasks, events, monthYear, monthIndex, mainDaysInMonth]);
 
   if (monthYear === undefined || monthIndex === undefined) return null;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-visible relative z-0">
+    <div className="flex-1 flex flex-col min-h-0 overflow-visible relative transition-none z-0 hover:z-[60]">
       
       {/* HEADER GIORNI */}
       <div className="grid grid-cols-7 gap-1 text-center mb-1 flex-shrink-0">
@@ -104,18 +111,22 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
           <div key={`empty-start-${i}`} className="p-2 border-transparent min-h-0"></div>
         ))}
         
-        {/* RENDER COMPONENTE GIORNO (Senza ricalcoli inline) */}
-        {gridDays.map((dayData) => (
-          <MonthDayCell
-            key={dayData.dateKey}
-            dateKey={dayData.dateKey}
-            dayNum={dayData.dayNum}
-            isToday={dayData.dateKey === todayStr}
-            items={dayData.items}
-            onDayClick={onDayClick}
-            onAddEventClick={onAddEventClick}
-          />
-        ))}
+        {Array.from({ length: mainDaysInMonth }).map((_, i) => {
+          const dayNum = i + 1;
+          const dateKey = `${monthYear}-${pad(monthIndex + 1)}-${pad(dayNum)}`;
+          
+          return (
+            <MonthDayCell 
+              key={dateKey}
+              dateKey={dateKey}
+              dayNum={dayNum}
+              isToday={dateKey === todayStr}
+              items={itemsByDate[dateKey] || []} // Estrazione istantanea O(1)
+              onDayClick={onDayClick}
+              onAddEventClick={onAddEventClick}
+            />
+          );
+        })}
 
         {Array.from({ length: 42 - (mainFirstDayIndex + mainDaysInMonth) }).map((_, i) => (
           <div key={`empty-end-${i}`} className="p-2 border-transparent min-h-0"></div>
