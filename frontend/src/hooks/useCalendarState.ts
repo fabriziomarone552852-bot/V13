@@ -15,8 +15,6 @@ export function useCalendarState() {
 
   const [isSelectingDate, setIsSelectingDate] = useState(false);
   
-  // RIMOSSI: pickerYear e pickerMonthDate (ora li gestisce DatePicker)
-
   const monthYear = currentMonthDate.getFullYear();
   const monthIndex = currentMonthDate.getMonth();
   const mainDaysInMonth = getDaysInMonth(monthYear, monthIndex);

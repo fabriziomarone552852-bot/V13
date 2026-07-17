@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CalendarState } from '@/hooks/useCalendarState';
-import type { CalendarEvent, Task } from '@/types';
+import type { CalendarEvent, DbTask } from '@/types';
 import WeeklyFocusPopup from '@/components/dashboard/WeeklyFocusPopup';
 import { pad } from '@/utils/dateUtils';
 import { getEventSegmentsForDay, type DayEventItem } from '@/utils/eventUtils';
@@ -12,11 +12,11 @@ import { AllDayEventsGroup } from '@/components/shared/utils/AllDayEventsGroup';
 interface WeekGridProps {
   state: CalendarState;
   events: CalendarEvent[];
-  tasks?: Task[];
+  tasks?: DbTask[];
   onDayClick?: (dateStr: string) => void;
   onSelectEvent: (event: CalendarEvent) => void;
-  onSelectTask?: (task: Task) => void;
-  onToggleTask?: (task: Task, newStatus: boolean) => void;
+  onSelectTask?: (task: DbTask) => void;
+  onToggleTask?: (task: DbTask, newStatus: boolean) => void;
   variant?: 'classic' | 'detailed';
 }
 
@@ -36,7 +36,7 @@ const formatHoverTime = (start?: string, end?: string): string => {
 };
 
 // Helper Type-Safe per estrarre il colore senza usare "any"
-const getTaskColorHex = (task: Task): string => {
+const getTaskColorHex = (task: DbTask): string => {
   const t = task as unknown as Record<string, unknown>;
   const cat = t.category as Record<string, unknown> | undefined;
   

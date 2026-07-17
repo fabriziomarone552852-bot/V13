@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import type { Task } from '@/types';
+import type { DbTask } from '@/types';
 
 interface TaskTreeSelectorProps {
-  tasks: Task[];
+  tasks: DbTask[]; 
   selectedParentId: string;
   onSelect: (parentId: string) => void;
   maxDepth?: number;
@@ -13,7 +13,7 @@ const TaskTreeSelector: React.FC<TaskTreeSelectorProps> = ({
   tasks, selectedParentId, onSelect, maxDepth = 3, onMaxDepthReached 
 }) => {
   const tasksByParent = useMemo(() => {
-    const map = new Map<number | null, Task[]>();
+    const map = new Map<number | null, DbTask[]>();
     tasks.forEach(t => {
       if (t.fatto) return; // Escludiamo quelle completate
       const pId = t.parent_id ?? null;

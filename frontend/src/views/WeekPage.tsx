@@ -42,7 +42,7 @@ const WeekPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-[1600px] mx-auto min-h-full xl:h-full xl:overflow-hidden relative pt-2">
+    <div className="flex flex-col gap-4 max-w-[1600px] mx-auto min-h-full xl:h-full xl:overflow-hidden relative">
       
       {/* 1. SEZIONE SUPERIORE (HEADER E PRIORITÀ) */}
       <div className="flex flex-col xl:flex-row gap-6 shrink-0 items-stretch">
