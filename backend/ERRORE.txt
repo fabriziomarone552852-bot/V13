@@ -1,51 +1,762 @@
-Traceback (most recent call last):
-  File "<frozen runpy>", line 203, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Scripts\uvicorn.exe\__main__.py", line 5, in <module>
-    sys.exit(main())
-             ~~~~^^
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\click\core.py", line 1524, in __call__
-    return self.main(*args, **kwargs)
-           ~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\click\core.py", line 1445, in main
-    rv = self.invoke(ctx)
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\click\core.py", line 1308, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\click\core.py", line 877, in invoke
-    return callback(*args, **kwargs)
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\uvicorn\main.py", line 441, in main
-    run(
-    ~~~^
-        app,
-        ^^^^
-    ...<48 lines>...
-        reset_contextvars=reset_contextvars,
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\uvicorn\main.py", line 609, in run
-    config.load_app()
-    ~~~~~~~~~~~~~~~^^
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\uvicorn\config.py", line 415, in load_app
-    return import_from_string(self.app)
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\site-packages\uvicorn\importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-  File "C:\Users\Fabrizio\AppData\Local\Programs\Python\Python314\Lib\importlib\__init__.py", line 88, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1406, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
-  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
-  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
-  File "C:\Users\Fabrizio\Desktop\app\smart\V13\backend\main.py", line 9, in <module>
-    from backend.core.models import *  # noqa: F401, F403
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Fabrizio\Desktop\app\smart\V13\backend\core\models.py", line 16, in <module>
-    from backend.domains.categories.models import UserCategory  # noqa
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Fabrizio\Desktop\app\smart\V13\backend\domains\categories\__init__.py", line 4, in <module>
-    from backend.domains.categories.models import Category, CategoryGenre
-ImportError: cannot import name 'Category' from 'backend.domains.categories.models' (C:\Users\Fabrizio\Desktop\app\smart\V13\backend\domains\categories\models.py)
+A WEEKPAGE: react-dom_client.js?v=946803a1:14338 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+settimana:1 Access to XMLHttpRequest at 'http://localhost:8000/sync/week?start_date=2026-07-13&end_date=2026-07-19' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/sync/week?start_date=2026-07-13&end_date=2026-07-19 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaWeek.ts:29
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<WeekPage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:32
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
+settimana:1 Access to XMLHttpRequest at 'http://localhost:8000/sync/week?start_date=2026-07-13&end_date=2026-07-19' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/sync/week?start_date=2026-07-13&end_date=2026-07-19 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaWeek.ts:29
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:660
+Promise.then
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:658
+Promise.catch
+run @ modern-DpHDIv-m.js?v=946803a1:644
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<WeekPage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:32
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
+
+HOMEPAGE: react-dom_client.js?v=946803a1:14338 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+(index):1 Access to XMLHttpRequest at 'http://localhost:8000/events?start_date=2026-05-31&end_date=2026-08-30' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/events?start_date=2026-05-31&end_date=2026-08-30 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaHome.ts:25
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<HomePage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:30
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
+(index):1 Access to XMLHttpRequest at 'http://localhost:8000/events?start_date=2026-07-17&end_date=2026-07-17' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/events?start_date=2026-07-17&end_date=2026-07-17 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaHome.ts:41
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<HomePage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:30
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
+(index):1 Access to XMLHttpRequest at 'http://localhost:8000/events?start_date=2026-05-31&end_date=2026-08-30' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/events?start_date=2026-05-31&end_date=2026-08-30 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaHome.ts:25
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:660
+Promise.then
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:658
+Promise.catch
+run @ modern-DpHDIv-m.js?v=946803a1:644
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<HomePage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:30
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
+(index):1 Access to XMLHttpRequest at 'http://localhost:8000/events?start_date=2026-07-17&end_date=2026-07-17' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+apiService.ts:49  GET http://localhost:8000/events?start_date=2026-07-17&end_date=2026-07-17 net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=946803a1:2287
+xhr @ axios.js?v=946803a1:2193
+dispatchRequest @ axios.js?v=946803a1:2858
+Promise.then
+_request @ axios.js?v=946803a1:3071
+request @ axios.js?v=946803a1:2985
+Axios$1.<computed> @ axios.js?v=946803a1:3108
+wrap @ axios.js?v=946803a1:12
+(anonymous) @ apiService.ts:49
+(anonymous) @ useAgendaHome.ts:41
+fetchFn @ modern-DpHDIv-m.js?v=946803a1:980
+run @ modern-DpHDIv-m.js?v=946803a1:640
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:660
+Promise.then
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:658
+Promise.catch
+run @ modern-DpHDIv-m.js?v=946803a1:644
+start @ modern-DpHDIv-m.js?v=946803a1:676
+fetch @ modern-DpHDIv-m.js?v=946803a1:1030
+#executeFetch @ modern-DpHDIv-m.js?v=946803a1:1288
+onSubscribe @ modern-DpHDIv-m.js?v=946803a1:1200
+subscribe @ modern-DpHDIv-m.js?v=946803a1:12
+(anonymous) @ modern-DpHDIv-m.js?v=946803a1:2697
+subscribeToStore @ react-dom_client.js?v=946803a1:4566
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12904
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+commitHookEffectListMount @ react-dom_client.js?v=946803a1:6617
+commitHookPassiveMountEffects @ react-dom_client.js?v=946803a1:6652
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7618
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7617
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7672
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=946803a1:7606
+commitPassiveMountOnFiber @ react-dom_client.js?v=946803a1:7627
+flushPassiveEffects @ react-dom_client.js?v=946803a1:8808
+(anonymous) @ react-dom_client.js?v=946803a1:8562
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<HomePage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ AppRouter.tsx:30
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<AppRouter>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+App @ App.tsx:17
+react_stack_bottom_frame @ react-dom_client.js?v=946803a1:12868
+renderWithHooksAgain @ react-dom_client.js?v=946803a1:4268
+renderWithHooks @ react-dom_client.js?v=946803a1:4219
+updateFunctionComponent @ react-dom_client.js?v=946803a1:5569
+beginWork @ react-dom_client.js?v=946803a1:6140
+runWithFiberInDEV @ react-dom_client.js?v=946803a1:851
+performUnitOfWork @ react-dom_client.js?v=946803a1:8429
+workLoopSync @ react-dom_client.js?v=946803a1:8325
+renderRootSync @ react-dom_client.js?v=946803a1:8309
+performWorkOnRoot @ react-dom_client.js?v=946803a1:7957
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=946803a1:9059
+performWorkUntilDeadline @ react-dom_client.js?v=946803a1:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=946803a1:193
+(anonymous) @ main.tsx:25
