@@ -60,6 +60,7 @@ class Event(Base):
 
     category: Mapped[Optional["UserCategory"]] = relationship(
         "UserCategory",
+        back_populates="events",
         lazy="selectin",
     )
     user: Mapped["User"] = relationship(

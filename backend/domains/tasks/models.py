@@ -14,6 +14,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 
 if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
     from backend.domains.categories.models import UserCategory
     from backend.domains.users.models import User
 
@@ -111,7 +113,7 @@ class Task(Base):
             f"titolo={self.titolo!r} fatto={self.fatto}>"
         )
 
-    def calculate_depth(self, db_session) -> int:
+    def calculate_depth(self, db_session: "Session") -> int:
         if self.parent_id is None:
             return 1
 

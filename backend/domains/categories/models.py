@@ -6,7 +6,7 @@ con nome personalizzato e metadati locali.
 from __future__ import annotations
 
 from enum import IntEnum
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
@@ -14,12 +14,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from backend.core.database import Base
 
 if TYPE_CHECKING:
-    from backend.domains.users.models import User
+    from backend.domains.events.models import Event
     from backend.domains.tasks.models import Task
+    from backend.domains.users.models import User
 
 
 class CategoryGenre(IntEnum):
     """Category type enumeration."""
+
     TASKS = 1
     EVENTS = 2
     COMMON = 3
@@ -65,6 +67,12 @@ class UserCategory(Base):
 
     tasks: Mapped[List["Task"]] = relationship(
         "Task",
+        back_populates="category",
+        passive_deletes=True,
+    )
+
+    events: Mapped[List["Event"]] = relationship(
+        "Event",
         back_populates="category",
         passive_deletes=True,
     )

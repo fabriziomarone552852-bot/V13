@@ -13,9 +13,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 
 if TYPE_CHECKING:
-    from backend.domains.tasks.models import Task
-    from backend.domains.events.models import Event
+    from backend.domains.audit.models import SharedActivityLog
     from backend.domains.categories.models import UserCategory
+    from backend.domains.countdowns.models import Countdown
+    from backend.domains.events.models import Event
+    from backend.domains.habits.models import Habit
+    from backend.domains.notifications.models import Notification
+    from backend.domains.planning.models import DailyEntry
     from backend.domains.shopping.models import (
         InventoryBatch,
         ShoppingGroup,
@@ -25,11 +29,7 @@ if TYPE_CHECKING:
         ShoppingProduct,
         ShoppingSupplier,
     )
-    from backend.domains.audit.models import SharedActivityLog
-    from backend.domains.notifications.models import Notification
-    from backend.domains.planning.models import DailyEntry
-    from backend.domains.countdowns.models import Countdown
-    from backend.domains.habits.models import Habit
+    from backend.domains.tasks.models import Task
 
 
 class User(Base):
@@ -203,7 +203,7 @@ class User(Base):
 
     def __repr__(self) -> str:
         return (
-            f"<User username={self.username!r} email={self.email!r} "
+            f"<User id={self.id} username={self.username!r} email={self.email!r} "
             f"deleted_at={self.deleted_at!r} "
             f"max_subtask_depth_user={self.max_subtask_depth_user}>"
         )
