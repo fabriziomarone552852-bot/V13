@@ -2,30 +2,14 @@
 DEPRECATED: Central models module - use domain-specific models instead.
 
 This file exists for backward compatibility only.
-All models have been moved to their respective domain modules:
-- backend.domains.config.models sostituito da backend.domains.catalogs.models
-- backend.domains.users.models
-- backend.domains.categories.models
-- backend.domains.tasks.models
-- backend.domains.events.models
-- backend.domains.shopping.models
-- backend.domains.audit.models
-- backend.domains.notifications.models
-- backend.domains.planning.models
-- backend.domains.countdowns.models
-- backend.domains.habits.models
-
 For new code, import directly from the domain modules.
-For backward compatibility, all models are re-exported below.
 """
 from __future__ import annotations
 
-# Re-export Base from core
 from backend.core.database import Base  # noqa: F401
 
-# Re-export all domain models for backward compatibility
 from backend.domains.audit.models import SharedActivityLog  # noqa: F401
-from backend.domains.categories.models import Category  # noqa: F401
+from backend.domains.categories.models import CategoryGenre, UserCategory  # noqa: F401
 from backend.domains.catalogs.models import Config, ConfigCode  # noqa: F401
 from backend.domains.countdowns.models import Countdown  # noqa: F401
 from backend.domains.events.models import Event  # noqa: F401
@@ -33,11 +17,11 @@ from backend.domains.habits.models import Habit, HabitLog, HabitPeriod  # noqa: 
 from backend.domains.notifications.models import Notification  # noqa: F401
 from backend.domains.planning.models import DailyEntry  # noqa: F401
 from backend.domains.shopping.models import (  # noqa: F401
+    InventoryBatch,
     ShoppingGroup,
     ShoppingGroupMember,
     ShoppingList,
     ShoppingListItem,
-    InventoryBatch,
     ShoppingProduct,
     ShoppingSupplier,
 )
@@ -49,7 +33,8 @@ __all__ = [
     "Config",
     "ConfigCode",
     "User",
-    "Category",
+    "UserCategory",
+    "CategoryGenre",
     "Task",
     "PrioritaEnum",
     "Event",
@@ -57,8 +42,9 @@ __all__ = [
     "ShoppingGroupMember",
     "ShoppingList",
     "ShoppingListItem",
+    "ShoppingProduct",
     "ShoppingSupplier",
-    "ShoppingPrice",
+    "InventoryBatch",
     "SharedActivityLog",
     "Notification",
     "DailyEntry",
