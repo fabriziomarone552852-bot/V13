@@ -15,6 +15,7 @@ from backend.core.database import Base
 if TYPE_CHECKING:
     from backend.domains.tasks.models import Task
     from backend.domains.events.models import Event
+    from backend.domains.categories.models import UserCategory
     from backend.domains.shopping.models import (
         InventoryBatch,
         ShoppingGroup,
@@ -40,6 +41,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+
     max_subtask_depth_user: Mapped[Optional[int]] = mapped_column(
         Integer,
         nullable=True,
@@ -89,6 +91,11 @@ class User(Base):
     )
     events: Mapped[List["Event"]] = relationship(
         "Event",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    user_categories: Mapped[List["UserCategory"]] = relationship(
+        "UserCategory",
         back_populates="user",
         cascade="all, delete-orphan",
     )
