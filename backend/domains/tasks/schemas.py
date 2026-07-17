@@ -4,7 +4,7 @@ Pydantic models for task API validation and serialization.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import Field, field_validator, model_validator
@@ -22,7 +22,7 @@ class TaskCreate(StrictBaseModel):
     data_start: Optional[datetime] = None
     data_scadenza: Optional[datetime] = None
     priorita: PrioritaEnum = PrioritaEnum.MEDIA
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     luogo: Optional[str] = Field(None, max_length=255)
     parent_id: Optional[int] = None
 
@@ -49,7 +49,7 @@ class TaskUpdate(StrictBaseModel):
     data_start: Optional[datetime] = None
     data_scadenza: Optional[datetime] = None
     priorita: Optional[PrioritaEnum] = None
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     luogo: Optional[str] = Field(None, max_length=255)
     fatto: Optional[bool] = None
     data_fatto: Optional[datetime] = None
@@ -67,16 +67,15 @@ class TaskUpdate(StrictBaseModel):
 
     @model_validator(mode="after")
     def validate_dates_and_completion(self) -> "TaskUpdate":
-        if getattr(self, 'data_start', None) and getattr(self, 'data_scadenza', None):
-            start_date = self.data_start.date() if hasattr(self.data_start, 'date') else self.data_start
-            end_date = self.data_scadenza.date() if hasattr(self.data_scadenza, 'date') else self.data_scadenza
-        
-            if end_date < start_date:
-                raise ValueError("La data di scadenza non può essere precedente alla data di inizio")
-        if getattr(self, 'fatto', False) and not getattr(self, 'data_fatto', None):
-            from datetime import datetime
-            self.data_fatto = datetime.now()
-            
+        if self.data_start and self.data_scadenza and self.data_scadenza < self.data_start:
+            raise ValueError("La data di scadenza non può essere precedente alla data di inizio")
+
+        if self.fatto is True and self.data_fatto is None:
+            self.data_fatto = datetime.now(timezone.utc)
+
+        if self.fatto is False:
+            self.data_fatto = None
+
         return self
 
 
@@ -89,7 +88,7 @@ class TaskResponse(ORMBaseModel):
     data_start: datetime
     data_scadenza: Optional[datetime] = None
     priorita: PrioritaEnum
-    category_id: Optional[int] = None
+    user_category_id: Optional[int] = None
     category: Optional[CategoryResponse] = None
     category_name: Optional[str] = None
     luogo: Optional[str] = None

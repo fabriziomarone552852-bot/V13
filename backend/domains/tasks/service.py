@@ -6,11 +6,14 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from backend.core import deps
+from backend.domains.categories import repository as categories_repo
+from backend.domains.categories.models import CategoryGenre
 from backend.domains.tasks import repository as repo
 from backend.domains.tasks import schemas
 from backend.domains.tasks.models import Task
 from backend.domains.users.models import User
 from backend.pagination_schemas import PaginatedTasks
+
 
 _COMPLETED_LOOKBACK_DAYS = 90
 
@@ -18,21 +21,47 @@ _COMPLETED_LOOKBACK_DAYS = 90
 def populate_category_name(
     obj: Union[Task, Sequence[Task], None],
 ) -> Union[Task, Sequence[Task], None]:
-    """Copia il nome categoria sull'attributo trasmesso al client."""
+    """Copia il nome categoria user-scoped sull'attributo trasmesso al client."""
     if obj is None:
         return None
+
     if isinstance(obj, Task):
         if obj.category:
-            obj.category_name = obj.category.name
+            obj.category_name = obj.category.category_name
         return obj
+
     for task in obj:
         if task.category:
-            task.category_name = task.category.name
+            task.category_name = task.category.category_name
+
     return obj
 
 
+def _validate_user_category(
+    db: Session,
+    current_user: User,
+    user_category_id: int | None,
+) -> None:
+    """Verifica che la categoria appartenga all'utente e sia compatibile con i task."""
+    if user_category_id is None:
+        return
+
+    user_category = categories_repo.get_user_category(db, user_category_id, current_user.id)
+    if not user_category:
+        raise HTTPException(
+            status_code=400,
+            detail="Categoria task non valida o non accessibile.",
+        )
+
+    if user_category.genre not in (CategoryGenre.TASKS, CategoryGenre.COMMON):
+        raise HTTPException(
+            status_code=400,
+            detail="La categoria selezionata non è utilizzabile per i task.",
+        )
+
+
 def create_task(db: Session, current_user: User, task_in: schemas.TaskCreate) -> Task:
-    deps.validate_task_category(task_in.category_id, current_user, db)
+    _validate_user_category(db, current_user, task_in.user_category_id)
 
     parent_task = (
         deps.get_task_owned(task_in.parent_id, current_user, db)
@@ -46,7 +75,7 @@ def create_task(db: Session, current_user: User, task_in: schemas.TaskCreate) ->
         data_start=task_in.data_start or datetime.now(timezone.utc),
         data_scadenza=task_in.data_scadenza,
         priorita=task_in.priorita,
-        category_id=task_in.category_id,
+        user_category_id=task_in.user_category_id,
         luogo=task_in.luogo,
         user_id=current_user.id,
         parent_id=parent_task.id if parent_task else None,
@@ -84,7 +113,12 @@ def get_task_family(db: Session, current_user: User, task_id: int) -> Task:
     return task
 
 
-def update_task(db: Session, current_user: User, task_id: int, task_in: schemas.TaskUpdate) -> Task:
+def update_task(
+    db: Session,
+    current_user: User,
+    task_id: int,
+    task_in: schemas.TaskUpdate,
+) -> Task:
     db_task = deps.get_task_owned(task_id, current_user, db)
 
     if task_in.parent_id is not None and deps.would_create_cycle(
@@ -95,8 +129,8 @@ def update_task(db: Session, current_user: User, task_id: int, task_in: schemas.
             detail="Aggiornamento non valido: creerebbe un ciclo nella gerarchia dei task.",
         )
 
-    if task_in.category_id is not None:
-        deps.validate_task_category(task_in.category_id, current_user, db)
+    if task_in.user_category_id is not None:
+        _validate_user_category(db, current_user, task_in.user_category_id)
 
     update_data = task_in.model_dump(exclude_unset=True)
     old_fatto = db_task.fatto
