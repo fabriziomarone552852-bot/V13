@@ -2,7 +2,7 @@
 # Python / FastAPI backend
 # =========================
 
-backend/__pycache__/
+**/__pycache__/
 backend/*.py[cod]
 backend/.pytest_cache/
 backend/.mypy_cache/
