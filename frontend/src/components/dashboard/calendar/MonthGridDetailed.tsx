@@ -4,6 +4,7 @@ import type { CalendarState } from '@/hooks/useCalendarState';
 import type { CalendarEvent, DbTask } from '@/types';
 import { pad } from '@/utils/dateUtils';
 import { isEventInDay } from '@/utils/eventUtils';
+import { type DailyMood } from './MonthDayCell';
 import { MonthDayCell } from './MonthDayCell';
 
 import type { CalendarGridItem } from './MonthGrid';
@@ -14,6 +15,7 @@ interface MonthGridDetailedProps {
   tasks?: DbTask[];
   onDayClick?: (dateStr: string) => void;
   onAddEventClick?: (dateStr: string) => void;
+  onMoodChange?: (dateStr: string, newMood: DailyMood | null) => void;
 }
 
 const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
@@ -21,7 +23,8 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
   events,
   tasks = [],
   onDayClick,
-  onAddEventClick
+  onAddEventClick,
+  onMoodChange
 }) => {
   const { monthYear, monthIndex, mainFirstDayIndex, mainDaysInMonth, todayStr } = state;
 
@@ -45,6 +48,7 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
         const tDate = t.data_scadenza.substring(0, 10);
         if (dictionary[tDate]) {
           dictionary[tDate].push({
+            id: `task-${t.id}`,
             title: t.titolo, 
             type: 'task', 
             category: t.category?.name || 'Generico',
@@ -62,6 +66,7 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
         const dateKey = `${monthYear}-${pad(monthIndex + 1)}-${pad(i)}`;
         if (isEventInDay(e, dateKey)) {
           dictionary[dateKey].push({
+            id: `event-${e.id}`,
             title: e.title, 
             type: 'event', 
             category: e.category, 
@@ -121,9 +126,11 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
               dateKey={dateKey}
               dayNum={dayNum}
               isToday={dateKey === todayStr}
-              items={itemsByDate[dateKey] || []} // Estrazione istantanea O(1)
+              items={itemsByDate[dateKey] || []}
               onDayClick={onDayClick}
               onAddEventClick={onAddEventClick}
+              showMoodSelector={true} // <-- ACCENDE LA FACCINA SOLO QUI
+              onMoodChange={onMoodChange} // <-- PASSA IL DATO IN SU
             />
           );
         })}
