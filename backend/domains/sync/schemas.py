@@ -1,13 +1,13 @@
 """
 Sync domain schemas.
-Aggregate response model for the daily sync endpoint.
+Aggregate response models for sync endpoints.
 """
 from __future__ import annotations
 
 from datetime import date
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.domains.categories.schemas import CategoryResponse
 from backend.domains.countdowns.schemas import CountdownResponse
@@ -25,29 +25,31 @@ class SyncDayResponse(BaseModel):
     """
 
     data_riferimento: date
-    obiettivi: List[DailyEntryResponse] = []
-    priorita: List[DailyEntryResponse] = []
-    note: List[DailyEntryResponse] = []
-    tasks: List[TaskResponse] = []
-    events: List[EventResponse] = []
-    habits: List[HabitResponse] = []
-    categories: List[CategoryResponse] = []
-    shopping_lists: List[ShoppingListResponse] = []
-    countdowns: List[CountdownResponse] = []
+    obiettivi: List[DailyEntryResponse] = Field(default_factory=list)
+    priorita: List[DailyEntryResponse] = Field(default_factory=list)
+    note: List[DailyEntryResponse] = Field(default_factory=list)
+    tasks: List[TaskResponse] = Field(default_factory=list)
+    events: List[EventResponse] = Field(default_factory=list)
+    habits: List[HabitResponse] = Field(default_factory=list)
+    categories: List[CategoryResponse] = Field(default_factory=list)
+    shopping_lists: List[ShoppingListResponse] = Field(default_factory=list)
+    countdowns: List[CountdownResponse] = Field(default_factory=list)
 
-
-__all__ = [
-    "SyncDayResponse",
-    "DailyEntryResponse",
-]
 
 class SyncWeekResponse(BaseModel):
     start_date: date
     end_date: date
     obiettivo_settimanale: Optional[DailyEntryResponse] = None
-    priorita_settimanali: List[DailyEntryResponse] = []
-    eventi_positivi: List[DailyEntryResponse] = []
-    eventi_negativi: List[DailyEntryResponse] = []
-    note: List[DailyEntryResponse] = []
-    events: List[EventResponse] = []
-    tasks: List[TaskResponse] = []
+    priorita_settimanali: List[DailyEntryResponse] = Field(default_factory=list)
+    eventi_positivi: List[DailyEntryResponse] = Field(default_factory=list)
+    eventi_negativi: List[DailyEntryResponse] = Field(default_factory=list)
+    note: List[DailyEntryResponse] = Field(default_factory=list)
+    events: List[EventResponse] = Field(default_factory=list)
+    tasks: List[TaskResponse] = Field(default_factory=list)
+
+
+__all__ = [
+    "SyncDayResponse",
+    "SyncWeekResponse",
+    "DailyEntryResponse",
+]
