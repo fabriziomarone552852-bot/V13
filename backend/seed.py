@@ -1,3 +1,34 @@
+import sys
+
+from sqlalchemy import or_, text
+
+from backend.database import SessionLocal
+from backend.models import Category, Config, ConfigCode, ShoppingSupplier, User, UserCategories
+from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
+from backend.api import deps
+
+
+SYSTEM_USER = {
+    "id": 1,
+    "username": "signori",
+    "email": "signori@sinasce.lol",
+    "password": "signori",
+}
+
+DEFAULT_CATEGORIES = [
+    {"name": "Lavoro"},
+    {"name": "Famiglia"},
+    {"name": "Salute"},
+    {"name": "Studio"},
+]
+
+DEFAULT_USER_CATEGORIES = [
+    {"category_id": 1,"colore": "#68EEB4","genre": 3},
+    {"category_id": 2,"colore": "#68EEB4","genre": 3},
+    {"category_id": 3,"colore": "#68EEB4","genre": 3},
+    {"category_id": 4,"colore": "#68EEB4","genre": 3},
+]
+
 """Monthly feeling catalog seed data."""
 
 DEFAULT_MONTHLY_FEELINGS = [
