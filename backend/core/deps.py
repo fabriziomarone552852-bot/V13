@@ -10,8 +10,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.core import models
+from backend.core.database import SessionLocal
 from backend.core.settings import get_settings
-from backend.database import SessionLocal
 
 settings = get_settings()
 
@@ -91,6 +91,7 @@ def get_current_user(
     )
     if user is None:
         raise credentials_exception
+
     return user
 
 
@@ -124,55 +125,6 @@ def get_effective_max_depth(user: models.User, db: Session) -> int:
     return min(user_limit, admin_limit)
 
 
-def _get_accessible_category(
-    category_id: Optional[int],
-    current_user: models.User,
-    db: Session,
-) -> Optional[models.Category]:
-    if not category_id:
-        return None
-
-    category = (
-        db.query(models.Category)
-        .filter(
-            models.Category.id == category_id,
-            models.Category.user_id.is_(None) | (models.Category.user_id == current_user.id),
-        )
-        .first()
-    )
-    if not category:
-        raise HTTPException(status_code=400, detail="Categoria non valida")
-    return category
-
-
-def validate_task_category(
-    category_id: Optional[int],
-    current_user: models.User,
-    db: Session,
-):
-    category = _get_accessible_category(category_id, current_user, db)
-    if not category:
-        return
-
-    if category.genre == 2:
-        category.genre = 3
-        db.add(category)
-
-
-def validate_event_category(
-    category_id: Optional[int],
-    current_user: models.User,
-    db: Session,
-):
-    category = _get_accessible_category(category_id, current_user, db)
-    if not category:
-        return
-
-    if category.genre == 1:
-        category.genre = 3
-        db.add(category)
-
-
 def get_task_owned(
     task_id: int,
     current_user: models.User,
@@ -196,6 +148,7 @@ def would_create_cycle(
 ) -> bool:
     if new_parent_id is None:
         return False
+
     if task_id == new_parent_id:
         return True
 
