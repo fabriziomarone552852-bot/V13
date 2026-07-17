@@ -1,7 +1,10 @@
 """
-Categories domain - Category management for tasks and events.
+Categories domain - user-scoped category management for tasks and events.
+Public API re-exports for schemas and enums.
 """
-from backend.domains.categories.models import Category, CategoryGenre
+from __future__ import annotations
+
+from backend.domains.categories.models import CategoryGenre, UserCategory
 from backend.domains.categories.schemas import (
     CategoryCreate,
     CategoryResponse,
@@ -9,7 +12,7 @@ from backend.domains.categories.schemas import (
 )
 
 __all__ = [
-    "Category",
+    "UserCategory",
     "CategoryGenre",
     "CategoryCreate",
     "CategoryResponse",
