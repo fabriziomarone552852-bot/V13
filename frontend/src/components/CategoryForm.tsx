@@ -4,7 +4,7 @@ import type { Category } from '@/views/CategoriesPage';
 
 export interface CategoryFormValues {
   name: string;
-  colore: string;
+  color: string;
   genre: number; // 1=Tasks, 2=Events, 3=Comuni
 }
 
@@ -16,7 +16,7 @@ interface CategoryFormProps {
 
 const defaultValues: CategoryFormValues = {
   name: '',
-  colore: '#cccccc',
+  color: '#cccccc',
   genre: 1,
 };
 
@@ -53,7 +53,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       await onSubmit({
         ...values,
         name: values.name.trim(),
-        colore: values.colore || '#cccccc',
+        color: values.color || '#cccccc',
       });
     } finally {
       setSubmitting(false);
@@ -95,8 +95,8 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
         </label>
         <input
           type="color"
-          value={values.colore}
-          onChange={handleChange('colore')}
+          value={values.color}
+          onChange={handleChange('color')}
         />
       </div>
 

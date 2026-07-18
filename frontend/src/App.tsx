@@ -10,7 +10,6 @@ function App() {
     <AuthProvider>
       <ConfirmProvider>
         <DayProvider>
-          {/* 🪄 Inseriamo il nuovo provider qui */}
           <EventModalProvider>
             <TaskModalProvider>
               

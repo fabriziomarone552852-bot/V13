@@ -1,10 +1,10 @@
 import React from 'react';
-import type { MoodEvent, MoodEventType } from '@/types';
+import type { MoodEventType, DailyEntry } from '@/types';
 import { MoodEventColumn } from './MoodEventParts/MoodEventColumn';
 
 interface MoodEventsBoardProps {
-  positiveEvents: MoodEvent[];
-  negativeEvents: MoodEvent[];
+  positiveEvents: DailyEntry[];
+  negativeEvents: DailyEntry[];
   onAddMoodEvent: (type: MoodEventType, title: string) => void;
   onUpdateMoodEvent: (id: number, newTitle: string) => void;
   onDeleteMoodEvent: (id: number) => void;

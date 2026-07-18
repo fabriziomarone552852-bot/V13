@@ -7,7 +7,7 @@ import type { Category, CategoryGenre } from '@/types';
 interface CategoriesContextType {
   dbCategories: Category[];
   refreshCategories: () => Promise<void>;
-  addCategory: (name: string, colore: string, genre: CategoryGenre) => Promise<Category>;
+  addCategory: (name: string, color: string, genre: CategoryGenre) => Promise<Category>;
   updateCategory: (id: number, updates: Partial<Category>) => Promise<Category>;
 }
 
@@ -26,9 +26,9 @@ export const CategoriesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (err) { console.error("Errore fetch categorie:", err); }
   };
 
-  const addCategory = async (name: string, colore: string, genre: CategoryGenre): Promise<Category> => {
+  const addCategory = async (name: string, color: string, genre: CategoryGenre): Promise<Category> => {
     // Nota: Usiamo api.post perché l'hai definito in useApi.ts!
-    const nuovaCategoria = await api.post<Partial<Category>>('/categories', { name, colore, genre });
+    const nuovaCategoria = await api.post<Partial<Category>>('/categories', { name, color, genre });
     
     setDbCategories((prev) => {
       // Evitiamo duplicati per sicurezza

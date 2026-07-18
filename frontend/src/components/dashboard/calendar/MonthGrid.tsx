@@ -59,7 +59,7 @@ const MonthGrid: React.FC<MonthGridProps> = ({ state, events, tasks, onDayClick,
             type: 'task', 
             category: t.category?.name || 'Generico',
             isMultiDay: false, 
-            categoryColor: t.category?.colore || '#9CA3AF', 
+            categoryColor: t.category?.color || '#9CA3AF', 
             done: !!t.fatto
           });
         }

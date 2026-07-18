@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl } from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
 import CategoryForm, { type CategoryFormValues } from '@/components/CategoryForm';
-import type { Category } from '@/CategoriesPage';
+import type { Category } from '@/types';
 
 const CategoryEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,7 +46,7 @@ const CategoryEditPage: React.FC = () => {
         const data = (await res.json()) as Category;
         setInitialValues({
           name: data.name,
-          colore: data.colore || '#cccccc',
+          color: data.color || '#cccccc',
           genre: data.genre,
         });
       } catch (err) {
@@ -62,7 +62,7 @@ const CategoryEditPage: React.FC = () => {
   const handleUpdate = async (values: CategoryFormValues) => {
     const payload: Partial<CategoryFormValues> = {
       name: values.name,
-      colore: values.colore || undefined,
+      color: values.color || undefined,
       genre: values.genre,
     };
 
