@@ -1,0 +1,983 @@
+backend\add_new_tables.py:1:from sqlalchemy import (
+backend\add_new_tables.py:16:from sqlalchemy.engine import Engine
+backend\add_new_tables.py:17:from backend.database import engine
+backend\api\admin.py:2:from backend.domains.admin.router import router  # noqa: F401
+backend\api\analytics.py:2:from backend.domains.analytics.router import router  # noqa: F401
+backend\api\auth.py:2:from backend.domains.auth.router import router  # noqa: F401
+backend\api\categories.py:5:retro-compatibilità (`from backend.api.categories import router`).
+backend\api\categories.py:7:from backend.domains.categories.router import router  # noqa: F401
+backend\api\countdowns.py:2:from backend.domains.countdowns.router import router  # noqa: F401
+backend\api\daily_entries.py:2:from backend.domains.planning.router import router  # noqa: F401
+backend\api\deps.py:5:`from . import deps` continuano a funzionare. Nuovo codice: usare
+backend\api\deps.py:6:`from backend.core import deps`.
+backend\api\deps.py:8:from backend.core.deps import *  # noqa: F401,F403
+backend\api\deps.py:11:from backend.core.deps import (  # noqa: F401
+backend\api\events.py:6:Nuovo codice: importa da `backend.domains.events.service`.
+backend\api\events.py:8:from backend.domains.events.router import router  # noqa: F401
+backend\api\events.py:9:from backend.domains.events.service import populate_category_name as populate_event_category_name  # noqa: F401
+backend\api\habits.py:2:from backend.domains.habits.habits_router import router  # noqa: F401
+backend\api\habit_log.py:2:from backend.domains.habits.habit_log_router import router  # noqa: F401
+backend\api\shopping.py:2:from backend.domains.shopping.router import router  # noqa: F401
+backend\api\sync.py:5:dal dominio sync. Nuovo codice: importa da `backend.domains.sync`.
+backend\api\sync.py:7:from backend.domains.sync.router import router  # noqa: F401
+backend\api\tasks.py:6:Nuovo codice: importa da `backend.domains.tasks.service`.
+backend\api\tasks.py:8:from backend.domains.tasks.router import router  # noqa: F401
+backend\api\tasks.py:9:from backend.domains.tasks.service import populate_category_name as populate_task_category_name  # noqa: F401
+backend\api\users.py:2:from backend.domains.users.router import router  # noqa: F401
+backend\bootstrap_db.py:1:from backend.core.database import Base, engine, SessionLocal  # IMPORT OBBLIGATORI: registrano tutte le tabelle nel metadata
+backend\bootstrap_db.py:3:import backend.domains.users.models
+backend\bootstrap_db.py:4:import backend.domains.categories.models
+backend\bootstrap_db.py:5:import backend.domains.tasks.models
+backend\bootstrap_db.py:6:import backend.domains.events.models
+backend\bootstrap_db.py:7:import backend.domains.planning.models
+backend\bootstrap_db.py:8:import backend.domains.shopping.models
+backend\bootstrap_db.py:9:import backend.domains.habits.models
+backend\bootstrap_db.py:10:import backend.domains.countdowns.models
+backend\bootstrap_db.py:11:import backend.domains.notifications.models
+backend\bootstrap_db.py:12:import backend.domains.audit.models
+backend\bootstrap_db.py:13:import backend.domains.catalogs.models
+backend\bootstrap_db.py:14:import backend.domains.monthly_entries.models  # <<< AGGIUNTO
+backend\bootstrap_db.py:25:    # from backend.seed import seed_database
+backend\core\config.py:20:Importare questo modulo PRIMA di leggere qualsiasi variabile d'ambiente
+backend\core\config.py:21:(es. DATABASE_URL). `backend.core.database` lo importa per primo.
+backend\core\config.py:23:from __future__ import annotations
+backend\core\config.py:25:import os
+backend\core\config.py:26:from pathlib import Path
+backend\core\config.py:28:from dotenv import load_dotenv
+backend\core\config.py:74:# Eseguito una sola volta all'import del modulo.
+backend\core\database.py:5:from __future__ import annotations
+backend\core\database.py:7:# IMPORTANTE: la config tipizzata carica il file .env corretto (in base ad APP_ENV)
+backend\core\database.py:9:from backend.core.settings import get_settings
+backend\core\database.py:11:from sqlalchemy import create_engine
+backend\core\database.py:12:from sqlalchemy.orm import sessionmaker, DeclarativeBase
+backend\core\deps.py:1:from datetime import datetime, timedelta, timezone
+backend\core\deps.py:2:from typing import Optional
+backend\core\deps.py:4:from argon2 import PasswordHasher
+backend\core\deps.py:5:from argon2.exceptions import InvalidHashError, VerifyMismatchError
+backend\core\deps.py:6:from fastapi import Depends, HTTPException, status
+backend\core\deps.py:7:from fastapi.security import OAuth2PasswordBearer
+backend\core\deps.py:8:from jose import JWTError, jwt
+backend\core\deps.py:9:from sqlalchemy import func, select
+backend\core\deps.py:10:from sqlalchemy.orm import Session
+backend\core\deps.py:12:from backend.core import models
+backend\core\deps.py:13:from backend.core.database import SessionLocal
+backend\core\deps.py:14:from backend.core.settings import get_settings
+backend\core\models.py:4:This module imports all domain models to ensure SQLAlchemy can resolve
+backend\core\models.py:5:string references in relationships. It MUST be imported before any
+backend\core\models.py:9:    from backend.core.models import *  # noqa
+backend\core\models.py:11:from __future__ import annotations
+backend\core\models.py:13:# Import all domain models to register them with SQLAlchemy
+backend\core\models.py:15:from backend.domains.audit.models import SharedActivityLog  # noqa
+backend\core\models.py:16:from backend.domains.categories.models import UserCategory  # noqa
+backend\core\models.py:17:from backend.domains.catalogs.models import Config, ConfigCode  # noqa
+backend\core\models.py:18:from backend.domains.countdowns.models import Countdown  # noqa
+backend\core\models.py:19:from backend.domains.events.models import Event  # noqa
+backend\core\models.py:20:from backend.domains.habits.models import Habit, HabitLog, HabitPeriod  # noqa
+backend\core\models.py:21:from backend.domains.notifications.models import Notification  # noqa
+backend\core\models.py:22:from backend.domains.planning.models import DailyEntry  # noqa
+backend\core\models.py:23:from backend.domains.shopping.models import (  # noqa
+backend\core\models.py:32:from backend.domains.tasks.models import Task  # noqa
+backend\core\models.py:33:from backend.domains.users.models import User  # noqa
+backend\core\models.py:34:from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling  # noqa
+backend\core\models.py:39:    "ConfigCode",
+backend\core\schemas.py:5:from __future__ import annotations
+backend\core\schemas.py:7:from pydantic import BaseModel, ConfigDict
+backend\core\schemas.py:11:    """Base model for ORM objects with from_attributes enabled."""
+backend\core\schemas.py:12:    model_config = ConfigDict(from_attributes=True)
+backend\core\schemas.py:22:    model_config = ConfigDict(from_attributes=True, extra="forbid")
+backend\core\settings.py:10:    from backend.core.settings import get_settings
+backend\core\settings.py:14:from __future__ import annotations
+backend\core\settings.py:16:from functools import lru_cache
+backend\core\settings.py:19:from backend.core import config as _config  # noqa: F401
+backend\core\settings.py:21:from pydantic_settings import BaseSettings, SettingsConfigDict
+backend\core\__init__.py:4:from backend.core.database import Base, SessionLocal, engine
+backend\core\__init__.py:5:from backend.core.schemas import ORMBaseModel, StrictBaseModel, ORMStrictBaseModel
+backend\database.py:3:Uses shared Base class from backend.core.database.
+backend\database.py:5:from backend.core.database import Base, SessionLocal, engine
+backend\DBGEN.py:2:    # Svuota i metadati prima di iniziare a importare per evitare conflitti speculativi
+backend\DBGEN.py:5:    imported_modules = _import_domain_models()
+backend\DBGEN.py:8:def _import_domain_models() -> list[str]:
+backend\DBGEN.py:9:    imported_modules: list[str] = []
+backend\DBGEN.py:11:    domains_pkg = importlib.import_module("backend.domains")
+backend\DBGEN.py:21:            models_module = importlib.import_module(models_module_name)
+backend\DBGEN.py:42:                    importlib.import_module(full_submodule_name)
+backend\DBGEN.py:43:                    if full_submodule_name not in imported_modules:
+backend\DBGEN.py:44:                        imported_modules.append(full_submodule_name)
+backend\DBGEN.py:51:            if models_module_name not in imported_modules:
+backend\DBGEN.py:52:                imported_modules.append(models_module_name)
+backend\DBGEN.py:54:    return imported_modulesbackend\domains\admin\router.py:2:from fastapi import APIRouter, Depends
+backend\domains\admin\router.py:4:from backend.core import deps
+backend\domains\analytics\router.py:2:from __future__ import annotations
+backend\domains\analytics\router.py:4:from fastapi import APIRouter, Depends
+backend\domains\analytics\router.py:5:from sqlalchemy.orm import Session
+backend\domains\analytics\router.py:7:from backend.core import deps
+backend\domains\analytics\router.py:8:from backend.domains.analytics import service
+backend\domains\analytics\router.py:9:from backend.domains.users.models import User
+backend\domains\analytics\service.py:2:from __future__ import annotations
+backend\domains\analytics\service.py:4:from collections import defaultdict
+backend\domains\analytics\service.py:5:from dataclasses import dataclass
+backend\domains\analytics\service.py:6:from decimal import Decimal
+backend\domains\analytics\service.py:7:from typing import List, Optional
+backend\domains\analytics\service.py:9:from fastapi import HTTPException
+backend\domains\analytics\service.py:10:from sqlalchemy.orm import Session, selectinload
+backend\domains\analytics\service.py:12:from backend.core import models
+backend\domains\analytics\service.py:13:from backend.domains.shopping import (
+backend\domains\audit\models.py:5:from __future__ import annotations
+backend\domains\audit\models.py:7:from datetime import datetime, timezone
+backend\domains\audit\models.py:8:from typing import TYPE_CHECKING, Optional
+backend\domains\audit\models.py:10:from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
+backend\domains\audit\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\audit\models.py:13:from backend.core.database import Base
+backend\domains\audit\models.py:16:    from backend.domains.catalogs.models import ConfigCode
+backend\domains\audit\models.py:17:    from backend.domains.users.models import User
+backend\domains\audit\models.py:60:    module_code: Mapped["ConfigCode"] = relationship("ConfigCode", foreign_keys=[module_code_id])
+backend\domains\audit\models.py:61:    entity_type: Mapped["ConfigCode"] = relationship("ConfigCode", foreign_keys=[entity_type_id])
+backend\domains\audit\models.py:62:    action_type: Mapped["ConfigCode"] = relationship("ConfigCode", foreign_keys=[action_type_id])
+backend\domains\audit\schemas.py:5:from __future__ import annotations
+backend\domains\audit\schemas.py:7:from datetime import datetime
+backend\domains\audit\schemas.py:8:from typing import Optional
+backend\domains\audit\schemas.py:10:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\audit\__init__.py:4:from backend.domains.audit.models import SharedActivityLog
+backend\domains\audit\__init__.py:5:from backend.domains.audit.schemas import SharedActivityLogResponse
+backend\domains\auth\router.py:2:from fastapi import APIRouter, Depends
+backend\domains\auth\router.py:3:from fastapi.security import OAuth2PasswordRequestForm
+backend\domains\auth\router.py:4:from sqlalchemy.orm import Session
+backend\domains\auth\router.py:6:from backend.core import deps
+backend\domains\auth\router.py:7:from backend.domains.auth import service
+backend\domains\auth\router.py:8:from backend.domains.auth.schemas import RefreshTokenRequest, Token, TokenPairResponse
+backend\domains\auth\router.py:9:from backend.domains.users import schemas as users_schemas
+backend\domains\auth\schemas.py:5:from __future__ import annotations
+backend\domains\auth\schemas.py:7:from backend.core.schemas import StrictBaseModel
+backend\domains\auth\service.py:2:from fastapi import HTTPException, status
+backend\domains\auth\service.py:3:from sqlalchemy.orm import Session
+backend\domains\auth\service.py:5:from backend.core.deps import (
+backend\domains\auth\service.py:12:from backend.domains.auth.schemas import Token, TokenPairResponse
+backend\domains\auth\service.py:13:from backend.domains.users import repository as users_repo
+backend\domains\auth\service.py:14:from backend.domains.users import schemas as users_schemas
+backend\domains\auth\service.py:15:from backend.domains.users.models import User
+backend\domains\auth\__init__.py:4:from backend.domains.auth.schemas import RefreshTokenRequest, Token, TokenPairResponse
+backend\domains\catalogs\repository.py:5:from __future__ import annotations
+backend\domains\catalogs\repository.py:7:from typing import List, Optional
+backend\domains\catalogs\repository.py:9:from sqlalchemy import or_
+backend\domains\catalogs\repository.py:10:from sqlalchemy.orm import Session
+backend\domains\catalogs\repository.py:12:from backend.domains.config import Config, ConfigCode
+backend\domains\catalogs\repository.py:43:) -> List[ConfigCode]:
+backend\domains\catalogs\repository.py:44:    query = db.query(ConfigCode)
+backend\domains\catalogs\repository.py:47:        query = query.filter(ConfigCode.code_type == code_type)
+backend\domains\catalogs\repository.py:50:        query = query.filter(ConfigCode.active == active)
+backend\domains\catalogs\repository.py:56:                ConfigCode.code_value.ilike(like_term),
+backend\domains\catalogs\repository.py:57:                ConfigCode.code_name.ilike(like_term),
+backend\domains\catalogs\repository.py:58:                ConfigCode.description.ilike(like_term),
+backend\domains\catalogs\repository.py:63:        ConfigCode.code_type.asc(),
+backend\domains\catalogs\repository.py:64:        ConfigCode.sort_order.asc().nullsfirst(),
+backend\domains\catalogs\repository.py:65:        ConfigCode.code_name.asc(),
+backend\domains\catalogs\repository.py:69:def get_code(db: Session, code_id: int) -> Optional[ConfigCode]:
+backend\domains\catalogs\repository.py:70:    return db.query(ConfigCode).filter(ConfigCode.id == code_id).first()
+backend\domains\catalogs\repository.py:77:) -> Optional[ConfigCode]:
+backend\domains\catalogs\repository.py:79:        db.query(ConfigCode)
+backend\domains\catalogs\repository.py:81:            ConfigCode.code_type == code_type,
+backend\domains\catalogs\repository.py:82:            ConfigCode.code_value == code_value,
+backend\domains\catalogs\repository.py:88:def create_code(db: Session, db_code: ConfigCode) -> ConfigCode:
+backend\domains\catalogs\repository.py:95:def update_code(db: Session, db_code: ConfigCode) -> ConfigCode:
+backend\domains\catalogs\router_admin.py:5:from __future__ import annotations
+backend\domains\catalogs\router_admin.py:7:from fastapi import APIRouter, Depends, status
+backend\domains\catalogs\router_admin.py:8:from sqlalchemy.orm import Session
+backend\domains\catalogs\router_admin.py:10:from backend.core import deps
+backend\domains\catalogs\router_admin.py:11:from backend.domains.catalogs import schemas, service
+backend\domains\catalogs\router_admin.py:12:from backend.domains.users.models import User
+backend\domains\catalogs\router_admin.py:31:@router.post("/codes", response_model=schemas.ConfigCodeResponse, status_code=status.HTTP_201_CREATED)
+backend\domains\catalogs\router_admin.py:33:    code_in: schemas.ConfigCodeCreate,
+backend\domains\catalogs\router_admin.py:40:@router.patch("/codes/{code_id}", response_model=schemas.ConfigCodeResponse)
+backend\domains\catalogs\router_admin.py:43:    code_in: schemas.ConfigCodeUpdate,
+backend\domains\catalogs\router_admin.py:50:@router.delete("/codes/{code_id}", response_model=schemas.ConfigCodeResponse)
+backend\domains\catalogs\router_public.py:5:from __future__ import annotations
+backend\domains\catalogs\router_public.py:7:from typing import List, Optional
+backend\domains\catalogs\router_public.py:9:from fastapi import APIRouter, Depends, Query
+backend\domains\catalogs\router_public.py:10:from sqlalchemy.orm import Session
+backend\domains\catalogs\router_public.py:12:from backend.core import deps
+backend\domains\catalogs\router_public.py:13:from backend.domains.catalogs import schemas, service
+backend\domains\catalogs\router_public.py:14:from backend.domains.users.models import User
+backend\domains\catalogs\router_public.py:36:@router.get("/codes", response_model=List[schemas.ConfigCodeResponse])
+backend\domains\catalogs\router_public.py:47:@router.get("/codes/options/{code_type}", response_model=List[schemas.ConfigCodeOptionResponse])
+backend\domains\catalogs\router_public.py:56:@router.get("/codes/{code_id}", response_model=schemas.ConfigCodeResponse)
+backend\domains\catalogs\schemas.py:5:from __future__ import annotations
+backend\domains\catalogs\schemas.py:7:from datetime import datetime
+backend\domains\catalogs\schemas.py:8:from typing import Optional
+backend\domains\catalogs\schemas.py:10:from pydantic import Field
+backend\domains\catalogs\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\catalogs\schemas.py:28:class ConfigCodeResponse(ORMBaseModel):
+backend\domains\catalogs\schemas.py:41:class ConfigCodeOptionResponse(ORMBaseModel):
+backend\domains\catalogs\schemas.py:50:class ConfigCodeCreate(StrictBaseModel):
+backend\domains\catalogs\schemas.py:60:class ConfigCodeUpdate(StrictBaseModel):
+backend\domains\catalogs\service.py:5:from __future__ import annotations
+backend\domains\catalogs\service.py:7:from fastapi import HTTPException, status
+backend\domains\catalogs\service.py:8:from sqlalchemy.orm import Session
+backend\domains\catalogs\service.py:10:from backend.domains.catalogs import repository as repo
+backend\domains\catalogs\service.py:11:from backend.domains.catalogs import schemas
+backend\domains\catalogs\service.py:12:from backend.domains.catalogs.models import Config, ConfigCode
+backend\domains\catalogs\service.py:13:from backend.domains.users.models import User
+backend\domains\catalogs\service.py:73:) -> list[ConfigCode]:
+backend\domains\catalogs\service.py:83:) -> list[ConfigCode]:
+backend\domains\catalogs\service.py:92:) -> ConfigCode:
+backend\domains\catalogs\service.py:102:    code_in: schemas.ConfigCodeCreate,
+backend\domains\catalogs\service.py:103:) -> ConfigCode:
+backend\domains\catalogs\service.py:111:    db_code = ConfigCode(
+backend\domains\catalogs\service.py:126:    code_in: schemas.ConfigCodeUpdate,
+backend\domains\catalogs\service.py:127:) -> ConfigCode:
+backend\domains\catalogs\service.py:153:) -> ConfigCode:
+backend\domains\catalogs\__init__.py:5:from backend.domains.config import Config, ConfigCode
+backend\domains\catalogs\__init__.py:6:from backend.domains.catalogs.schemas import (
+backend\domains\catalogs\__init__.py:7:    ConfigCodeCreate,
+backend\domains\catalogs\__init__.py:8:    ConfigCodeOptionResponse,
+backend\domains\catalogs\__init__.py:9:    ConfigCodeResponse,
+backend\domains\catalogs\__init__.py:10:    ConfigCodeUpdate,
+backend\domains\catalogs\__init__.py:17:    "ConfigCode",
+backend\domains\catalogs\__init__.py:20:    "ConfigCodeResponse",
+backend\domains\catalogs\__init__.py:21:    "ConfigCodeOptionResponse",
+backend\domains\catalogs\__init__.py:22:    "ConfigCodeCreate",
+backend\domains\catalogs\__init__.py:23:    "ConfigCodeUpdate",
+backend\domains\categories\models.py:6:from __future__ import annotations
+backend\domains\categories\models.py:8:from enum import IntEnum
+backend\domains\categories\models.py:9:from typing import TYPE_CHECKING, List, Optional
+backend\domains\categories\models.py:11:from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+backend\domains\categories\models.py:12:from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+backend\domains\categories\models.py:14:from backend.core.database import Base
+backend\domains\categories\models.py:17:    from backend.domains.events.models import Event
+backend\domains\categories\models.py:18:    from backend.domains.tasks.models import Task
+backend\domains\categories\models.py:19:    from backend.domains.users.models import User
+backend\domains\categories\repository.py:5:from typing import List, Optional
+backend\domains\categories\repository.py:7:from sqlalchemy.orm import Session
+backend\domains\categories\repository.py:9:from backend.domains.categories.models import CategoryGenre, UserCategory
+backend\domains\categories\router.py:7:from typing import List, Optional
+backend\domains\categories\router.py:9:from fastapi import APIRouter, Depends
+backend\domains\categories\router.py:10:from sqlalchemy.orm import Session
+backend\domains\categories\router.py:12:from backend.core import deps
+backend\domains\categories\router.py:13:from backend.domains.categories import schemas, service
+backend\domains\categories\router.py:14:from backend.domains.users.models import User
+backend\domains\categories\schemas.py:5:from __future__ import annotations
+backend\domains\categories\schemas.py:7:from enum import IntEnum
+backend\domains\categories\schemas.py:8:from typing import Optional
+backend\domains\categories\schemas.py:10:from pydantic import Field, field_validator
+backend\domains\categories\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\categories\service.py:5:from typing import List, Optional
+backend\domains\categories\service.py:7:from fastapi import HTTPException
+backend\domains\categories\service.py:8:from sqlalchemy.orm import Session
+backend\domains\categories\service.py:10:from backend.domains.categories import repository as repo
+backend\domains\categories\service.py:11:from backend.domains.categories import schemas
+backend\domains\categories\service.py:12:from backend.domains.categories.models import UserCategory
+backend\domains\categories\service.py:13:from backend.domains.users.models import User
+backend\domains\categories\__init__.py:5:from __future__ import annotations
+backend\domains\categories\__init__.py:7:from backend.domains.categories.models import CategoryGenre, UserCategory
+backend\domains\categories\__init__.py:8:from backend.domains.categories.schemas import (
+backend\domains\config\models.py:5:from __future__ import annotations
+backend\domains\config\models.py:7:from datetime import datetime, timezone
+backend\domains\config\models.py:8:from typing import Optional
+backend\domains\config\models.py:10:from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text, UniqueConstraint
+backend\domains\config\models.py:11:from sqlalchemy.orm import Mapped, mapped_column
+backend\domains\config\models.py:13:from backend.core.database import Base
+backend\domains\config\models.py:41:class ConfigCode(Base):
+backend\domains\config\models.py:70:        return f"<ConfigCode id={self.id} type={self.code_type!r} value={self.code_value!r}>"
+backend\domains\config\schemas.py:5:from __future__ import annotations
+backend\domains\config\schemas.py:7:from datetime import datetime
+backend\domains\config\schemas.py:8:from typing import Optional
+backend\domains\config\schemas.py:10:from pydantic import Field
+backend\domains\config\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\config\schemas.py:28:class ConfigCodeResponse(ORMBaseModel):
+backend\domains\config\schemas.py:41:class ConfigCodeCreate(StrictBaseModel):
+backend\domains\config\schemas.py:51:class ConfigCodeUpdate(StrictBaseModel):
+backend\domains\config\__init__.py:4:from backend.domains.config.models import Config, ConfigCode
+backend\domains\config\__init__.py:5:from backend.domains.config.schemas import (
+backend\domains\config\__init__.py:6:    ConfigCodeCreate,
+backend\domains\config\__init__.py:7:    ConfigCodeResponse,
+backend\domains\config\__init__.py:8:    ConfigCodeUpdate,
+backend\domains\config\__init__.py:15:    "ConfigCode",
+backend\domains\config\__init__.py:18:    "ConfigCodeResponse",
+backend\domains\config\__init__.py:19:    "ConfigCodeCreate",
+backend\domains\config\__init__.py:20:    "ConfigCodeUpdate",
+backend\domains\countdowns\models.py:5:from __future__ import annotations
+backend\domains\countdowns\models.py:7:from datetime import datetime, timezone
+backend\domains\countdowns\models.py:8:from typing import TYPE_CHECKING, Optional
+backend\domains\countdowns\models.py:10:from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String, text
+backend\domains\countdowns\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\countdowns\models.py:13:from backend.core.database import Base
+backend\domains\countdowns\models.py:16:    from backend.domains.users.models import User
+backend\domains\countdowns\repository.py:2:from datetime import datetime
+backend\domains\countdowns\repository.py:3:from typing import List, Optional
+backend\domains\countdowns\repository.py:5:from sqlalchemy.orm import Session
+backend\domains\countdowns\repository.py:7:from backend.domains.countdowns.models import Countdown
+backend\domains\countdowns\repository.py:14:    target_date_from: Optional[datetime] = None,
+backend\domains\countdowns\repository.py:20:    if target_date_from is not None:
+backend\domains\countdowns\repository.py:21:        query = query.filter(Countdown.target_date >= target_date_from)
+backend\domains\countdowns\router.py:2:from datetime import datetime
+backend\domains\countdowns\router.py:3:from typing import List, Literal, Optional
+backend\domains\countdowns\router.py:5:from fastapi import APIRouter, Depends, Query, status
+backend\domains\countdowns\router.py:6:from sqlalchemy.orm import Session
+backend\domains\countdowns\router.py:8:from backend.core import deps
+backend\domains\countdowns\router.py:9:from backend.domains.countdowns import schemas, service
+backend\domains\countdowns\router.py:10:from backend.domains.users.models import User
+backend\domains\countdowns\router.py:20:    target_date_from: Optional[datetime] = Query(default=None),
+backend\domains\countdowns\router.py:26:        db, current_user, status_filter, target_date_from, target_date_to
+backend\domains\countdowns\schemas.py:5:from __future__ import annotations
+backend\domains\countdowns\schemas.py:7:from datetime import datetime
+backend\domains\countdowns\schemas.py:8:from typing import Optional
+backend\domains\countdowns\schemas.py:10:from pydantic import Field, field_validator
+backend\domains\countdowns\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\countdowns\service.py:2:from datetime import datetime, timezone
+backend\domains\countdowns\service.py:3:from typing import List, Optional
+backend\domains\countdowns\service.py:5:from fastapi import HTTPException, status
+backend\domains\countdowns\service.py:6:from sqlalchemy.orm import Session
+backend\domains\countdowns\service.py:8:from backend.domains.countdowns import repository as repo
+backend\domains\countdowns\service.py:9:from backend.domains.countdowns import schemas
+backend\domains\countdowns\service.py:10:from backend.domains.countdowns.models import Countdown
+backend\domains\countdowns\service.py:11:from backend.domains.users.models import User
+backend\domains\countdowns\service.py:28:    target_date_from: Optional[datetime] = None,
+backend\domains\countdowns\service.py:32:        db, current_user.id, status_filter, target_date_from, target_date_to
+backend\domains\countdowns\__init__.py:4:from backend.domains.countdowns.models import Countdown
+backend\domains\countdowns\__init__.py:5:from backend.domains.countdowns.schemas import (
+backend\domains\events\models.py:5:from __future__ import annotations
+backend\domains\events\models.py:7:from datetime import datetime
+backend\domains\events\models.py:8:from typing import TYPE_CHECKING, Optional
+backend\domains\events\models.py:10:from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+backend\domains\events\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\events\models.py:13:from backend.core.database import Base
+backend\domains\events\models.py:16:    from backend.domains.categories.models import UserCategory
+backend\domains\events\models.py:17:    from backend.domains.users.models import User
+backend\domains\events\repository.py:2:from typing import List, Optional, Tuple
+backend\domains\events\repository.py:4:from sqlalchemy.orm import Session, selectinload
+backend\domains\events\repository.py:6:from backend.domains.events.models import Event
+backend\domains\events\router.py:2:from datetime import date
+backend\domains\events\router.py:3:from typing import Optional
+backend\domains\events\router.py:5:from fastapi import APIRouter, Depends, Query
+backend\domains\events\router.py:6:from sqlalchemy.orm import Session
+backend\domains\events\router.py:8:from backend.core import deps
+backend\domains\events\router.py:9:from backend.domains.events import schemas, service
+backend\domains\events\router.py:10:from backend.domains.users.models import User
+backend\domains\events\router.py:11:from backend.pagination_schemas import PaginatedEvents
+backend\domains\events\schemas.py:5:from __future__ import annotations
+backend\domains\events\schemas.py:7:from datetime import datetime
+backend\domains\events\schemas.py:8:from typing import Optional
+backend\domains\events\schemas.py:10:from pydantic import Field, field_validator, model_validator
+backend\domains\events\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\events\schemas.py:13:from backend.domains.categories.schemas import CategoryResponse
+backend\domains\events\service.py:2:from datetime import date
+backend\domains\events\service.py:3:from typing import Optional, Sequence, Union
+backend\domains\events\service.py:5:from fastapi import HTTPException
+backend\domains\events\service.py:6:from sqlalchemy.orm import Session
+backend\domains\events\service.py:8:from backend.domains.categories import repository as categories_repo
+backend\domains\events\service.py:9:from backend.domains.categories.models import CategoryGenre
+backend\domains\events\service.py:10:from backend.domains.events import repository as repo
+backend\domains\events\service.py:11:from backend.domains.events import schemas
+backend\domains\events\service.py:12:from backend.domains.events.models import Event
+backend\domains\events\service.py:13:from backend.domains.users.models import User
+backend\domains\events\service.py:14:from backend.pagination_schemas import PaginatedEvents
+backend\domains\events\service.py:15:from backend.utils import expand_events_for_range
+backend\domains\events\__init__.py:4:from backend.domains.events.models import Event
+backend\domains\events\__init__.py:5:from backend.domains.events.schemas import EventCreate, EventResponse, EventUpdate
+backend\domains\habits\habits_repository.py:2:from datetime import date, timedelta
+backend\domains\habits\habits_repository.py:3:from typing import List, Optional
+backend\domains\habits\habits_repository.py:5:from sqlalchemy.orm import Session, selectinload, with_loader_criteria
+backend\domains\habits\habits_repository.py:7:from backend.domains.habits.models import Habit, HabitLog, HabitPeriod
+backend\domains\habits\habits_router.py:2:from datetime import date
+backend\domains\habits\habits_router.py:3:from typing import List, Optional
+backend\domains\habits\habits_router.py:5:from fastapi import APIRouter, Depends, Query, status
+backend\domains\habits\habits_router.py:6:from sqlalchemy.orm import Session
+backend\domains\habits\habits_router.py:8:from backend.core import deps
+backend\domains\habits\habits_router.py:9:from backend.domains.habits import habits_service as service
+backend\domains\habits\habits_router.py:10:from backend.domains.habits import schemas
+backend\domains\habits\habits_router.py:11:from backend.domains.users.models import User
+backend\domains\habits\habits_service.py:2:from datetime import date
+backend\domains\habits\habits_service.py:3:from typing import List, Optional
+backend\domains\habits\habits_service.py:5:from fastapi import HTTPException, status
+backend\domains\habits\habits_service.py:6:from sqlalchemy.orm import Session
+backend\domains\habits\habits_service.py:8:from backend.core.settings import get_settings
+backend\domains\habits\habits_service.py:9:from backend.domains.habits import habits_repository as repo
+backend\domains\habits\habits_service.py:10:from backend.domains.habits import schemas
+backend\domains\habits\habits_service.py:11:from backend.domains.habits.models import Habit, HabitPeriod
+backend\domains\habits\habits_service.py:12:from backend.domains.users.models import User
+backend\domains\habits\habit_log_repository.py:2:from datetime import date
+backend\domains\habits\habit_log_repository.py:3:from typing import List, Optional
+backend\domains\habits\habit_log_repository.py:5:from sqlalchemy.orm import Session
+backend\domains\habits\habit_log_repository.py:7:from backend.domains.habits.models import Habit, HabitLog, HabitPeriod
+backend\domains\habits\habit_log_router.py:2:from datetime import date
+backend\domains\habits\habit_log_router.py:3:from typing import List, Optional
+backend\domains\habits\habit_log_router.py:5:from fastapi import APIRouter, Depends, Query, status
+backend\domains\habits\habit_log_router.py:6:from sqlalchemy.orm import Session
+backend\domains\habits\habit_log_router.py:8:from backend.core import deps
+backend\domains\habits\habit_log_router.py:9:from backend.domains.habits import habit_log_service as service
+backend\domains\habits\habit_log_router.py:10:from backend.domains.habits import schemas
+backend\domains\habits\habit_log_router.py:11:from backend.domains.users.models import User
+backend\domains\habits\habit_log_service.py:2:from datetime import date
+backend\domains\habits\habit_log_service.py:3:from typing import List, Optional
+backend\domains\habits\habit_log_service.py:5:from fastapi import HTTPException, status
+backend\domains\habits\habit_log_service.py:6:from sqlalchemy.orm import Session
+backend\domains\habits\habit_log_service.py:8:from backend.domains.habits import habit_log_repository as repo
+backend\domains\habits\habit_log_service.py:9:from backend.domains.habits import schemas
+backend\domains\habits\habit_log_service.py:10:from backend.domains.habits.models import HabitLog
+backend\domains\habits\habit_log_service.py:11:from backend.domains.users.models import User
+backend\domains\habits\models.py:5:from __future__ import annotations
+backend\domains\habits\models.py:7:from datetime import date
+backend\domains\habits\models.py:8:from typing import TYPE_CHECKING, List, Optional
+backend\domains\habits\models.py:10:from sqlalchemy import Date, ForeignKey, Index, Integer, String, UniqueConstraint, text
+backend\domains\habits\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\habits\models.py:13:from backend.core.database import Base
+backend\domains\habits\models.py:16:    from backend.domains.users.models import User
+backend\domains\habits\schemas.py:5:from __future__ import annotations
+backend\domains\habits\schemas.py:7:from datetime import date
+backend\domains\habits\schemas.py:8:from typing import List, Optional
+backend\domains\habits\schemas.py:10:from pydantic import Field, field_validator, model_validator
+backend\domains\habits\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\habits\__init__.py:4:from backend.domains.habits.models import Habit, HabitLog, HabitPeriod
+backend\domains\habits\__init__.py:5:from backend.domains.habits.schemas import (
+backend\domains\monthly_entries\models.py:5:from __future__ import annotations
+backend\domains\monthly_entries\models.py:7:from typing import TYPE_CHECKING, List, Optional
+backend\domains\monthly_entries\models.py:9:from sqlalchemy import ForeignKey, Index, Integer, String, UniqueConstraint
+backend\domains\monthly_entries\models.py:10:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\monthly_entries\models.py:12:from backend.core.database import Base
+backend\domains\monthly_entries\models.py:15:    from backend.domains.users.models import User
+backend\domains\monthly_entries\repository.py:5:from __future__ import annotations
+backend\domains\monthly_entries\repository.py:7:from typing import List, Optional
+backend\domains\monthly_entries\repository.py:9:from sqlalchemy.orm import Session, joinedload
+backend\domains\monthly_entries\repository.py:11:from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling
+backend\domains\monthly_entries\router.py:4:from __future__ import annotations
+backend\domains\monthly_entries\router.py:6:from typing import List, Optional
+backend\domains\monthly_entries\router.py:8:from fastapi import APIRouter, Depends, Query, Response, status
+backend\domains\monthly_entries\router.py:9:from sqlalchemy.orm import Session
+backend\domains\monthly_entries\router.py:11:from backend.core import deps
+backend\domains\monthly_entries\router.py:12:from backend.domains.monthly_entries import schemas, service
+backend\domains\monthly_entries\router.py:13:from backend.domains.users.models import User
+backend\domains\monthly_entries\schemas.py:5:from __future__ import annotations
+backend\domains\monthly_entries\schemas.py:7:from typing import Optional
+backend\domains\monthly_entries\schemas.py:9:from pydantic import Field, field_validator
+backend\domains\monthly_entries\schemas.py:11:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\monthly_entries\service.py:5:from __future__ import annotations
+backend\domains\monthly_entries\service.py:7:from typing import List, Optional
+backend\domains\monthly_entries\service.py:9:from fastapi import HTTPException, status
+backend\domains\monthly_entries\service.py:10:from sqlalchemy.exc import IntegrityError
+backend\domains\monthly_entries\service.py:11:from sqlalchemy.orm import Session
+backend\domains\monthly_entries\service.py:13:from backend.domains.monthly_entries import repository as repo
+backend\domains\monthly_entries\service.py:14:from backend.domains.monthly_entries import schemas
+backend\domains\monthly_entries\service.py:15:from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling
+backend\domains\monthly_entries\service.py:16:from backend.domains.users.models import User
+backend\domains\monthly_entries\__init__.py:4:from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling
+backend\domains\monthly_entries\__init__.py:5:from backend.domains.monthly_entries.schemas import (
+backend\domains\notifications\models.py:5:from __future__ import annotations
+backend\domains\notifications\models.py:7:from datetime import datetime, timezone
+backend\domains\notifications\models.py:8:from typing import TYPE_CHECKING, Optional
+backend\domains\notifications\models.py:10:from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+backend\domains\notifications\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\notifications\models.py:13:from backend.core.database import Base
+backend\domains\notifications\models.py:16:    from backend.domains.catalogs.models import ConfigCode
+backend\domains\notifications\models.py:17:    from backend.domains.users.models import User
+backend\domains\notifications\models.py:54:    notification_type: Mapped["ConfigCode"] = relationship("ConfigCode", foreign_keys=[notification_type_id])
+backend\domains\notifications\schemas.py:5:from __future__ import annotations
+backend\domains\notifications\schemas.py:7:from datetime import datetime
+backend\domains\notifications\schemas.py:8:from typing import Optional
+backend\domains\notifications\schemas.py:10:from pydantic import Field, field_validator
+backend\domains\notifications\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\notifications\__init__.py:4:from backend.domains.notifications.models import Notification
+backend\domains\notifications\__init__.py:5:from backend.domains.notifications.schemas import NotificationCreate, NotificationResponse
+backend\domains\planning\models.py:5:from __future__ import annotations
+backend\domains\planning\models.py:7:from datetime import date
+backend\domains\planning\models.py:8:from typing import TYPE_CHECKING, Optional
+backend\domains\planning\models.py:10:from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Text, UniqueConstraint
+backend\domains\planning\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\planning\models.py:13:from backend.core.database import Base
+backend\domains\planning\models.py:16:    from backend.domains.users.models import User
+backend\domains\planning\models.py:17:    from backend.domains.categories.models import UserCategory
+backend\domains\planning\repository.py:2:from datetime import date
+backend\domains\planning\repository.py:3:from typing import List, Optional
+backend\domains\planning\repository.py:5:from sqlalchemy.orm import Session
+backend\domains\planning\repository.py:7:from backend.domains.planning.models import DailyEntry
+backend\domains\planning\router.py:2:from datetime import date
+backend\domains\planning\router.py:3:from typing import List, Literal, Optional
+backend\domains\planning\router.py:5:from fastapi import APIRouter, Depends, Query, status
+backend\domains\planning\router.py:6:from sqlalchemy.orm import Session
+backend\domains\planning\router.py:8:from backend.core import deps
+backend\domains\planning\router.py:9:from backend.domains.planning import schemas, service
+backend\domains\planning\router.py:10:from backend.domains.users.models import User
+backend\domains\planning\schemas.py:5:from __future__ import annotations
+backend\domains\planning\schemas.py:7:from datetime import date
+backend\domains\planning\schemas.py:8:# RIMOSSO: "Any" non è più importato né utilizzato.
+backend\domains\planning\schemas.py:9:from typing import Optional
+backend\domains\planning\schemas.py:11:from pydantic import Field, field_validator
+backend\domains\planning\schemas.py:13:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\planning\service.py:2:from datetime import date
+backend\domains\planning\service.py:3:from typing import List, Optional
+backend\domains\planning\service.py:5:from fastapi import HTTPException, status
+backend\domains\planning\service.py:6:from sqlalchemy.orm import Session
+backend\domains\planning\service.py:8:from . import repository
+backend\domains\planning\service.py:10:from backend.domains.planning import repository as repo
+backend\domains\planning\service.py:11:from backend.domains.planning import schemas
+backend\domains\planning\service.py:12:from backend.domains.planning.models import DailyEntry
+backend\domains\planning\service.py:13:from backend.domains.users.models import User
+backend\domains\planning\__init__.py:4:from backend.domains.planning.models import DailyEntry
+backend\domains\planning\__init__.py:5:from backend.domains.planning.schemas import (
+backend\domains\shopping\models\catalog.py:4:from __future__ import annotations
+backend\domains\shopping\models\catalog.py:6:from datetime import datetime, timezone
+backend\domains\shopping\models\catalog.py:7:from typing import TYPE_CHECKING, List, Optional
+backend\domains\shopping\models\catalog.py:9:from sqlalchemy import DateTime, ForeignKey, Integer, String
+backend\domains\shopping\models\catalog.py:10:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\shopping\models\catalog.py:12:from backend.core.database import Base
+backend\domains\shopping\models\catalog.py:15:    from backend.domains.catalogs.models import ConfigCode
+backend\domains\shopping\models\catalog.py:16:    from backend.domains.users.models import User
+backend\domains\shopping\models\catalog.py:17:    from .inventory import InventoryBatch
+backend\domains\shopping\models\catalog.py:18:    from .lists import ShoppingListItem
+backend\domains\shopping\models\catalog.py:129:    status: Mapped["ConfigCode"] = relationship(
+backend\domains\shopping\models\catalog.py:130:        "ConfigCode",
+backend\domains\shopping\models\groups.py:4:from __future__ import annotations
+backend\domains\shopping\models\groups.py:6:from datetime import datetime, timezone
+backend\domains\shopping\models\groups.py:7:from typing import TYPE_CHECKING, List, Optional
+backend\domains\shopping\models\groups.py:9:from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+backend\domains\shopping\models\groups.py:10:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\shopping\models\groups.py:12:from backend.core.database import Base
+backend\domains\shopping\models\groups.py:15:    from backend.domains.catalogs.models import ConfigCode
+backend\domains\shopping\models\groups.py:16:    from backend.domains.users.models import User
+backend\domains\shopping\models\groups.py:17:    from .lists import ShoppingList
+backend\domains\shopping\models\groups.py:61:    status: Mapped["ConfigCode"] = relationship(
+backend\domains\shopping\models\groups.py:62:        "ConfigCode",
+backend\domains\shopping\models\groups.py:140:    role: Mapped["ConfigCode"] = relationship(
+backend\domains\shopping\models\groups.py:141:        "ConfigCode",
+backend\domains\shopping\models\inventory.py:5:from __future__ import annotations
+backend\domains\shopping\models\inventory.py:7:from datetime import date
+backend\domains\shopping\models\inventory.py:8:from decimal import Decimal
+backend\domains\shopping\models\inventory.py:9:from typing import TYPE_CHECKING, Optional
+backend\domains\shopping\models\inventory.py:11:from sqlalchemy import BigInteger, Boolean, Date, ForeignKey, Numeric
+backend\domains\shopping\models\inventory.py:12:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\shopping\models\inventory.py:14:from backend.core.database import Base
+backend\domains\shopping\models\inventory.py:17:    from backend.domains.users.models import User
+backend\domains\shopping\models\inventory.py:18:    from .lists import ShoppingListItem
+backend\domains\shopping\models\inventory.py:19:    from .catalog import ShoppingProduct, ShoppingSupplier
+backend\domains\shopping\models\lists.py:5:from __future__ import annotations
+backend\domains\shopping\models\lists.py:7:from datetime import datetime, timezone
+backend\domains\shopping\models\lists.py:8:from decimal import Decimal
+backend\domains\shopping\models\lists.py:9:from typing import TYPE_CHECKING, List, Optional
+backend\domains\shopping\models\lists.py:11:from sqlalchemy import (
+backend\domains\shopping\models\lists.py:22:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\shopping\models\lists.py:24:from backend.core.database import Base
+backend\domains\shopping\models\lists.py:27:    from backend.domains.catalogs.models import ConfigCode
+backend\domains\shopping\models\lists.py:28:    from backend.domains.users.models import User
+backend\domains\shopping\models\lists.py:29:    from .catalog import ShoppingProduct
+backend\domains\shopping\models\lists.py:30:    from .groups import ShoppingGroup
+backend\domains\shopping\models\lists.py:31:    from .inventory import InventoryBatch
+backend\domains\shopping\models\lists.py:95:    visibility: Mapped["ConfigCode"] = relationship(
+backend\domains\shopping\models\lists.py:96:        "ConfigCode",
+backend\domains\shopping\models\lists.py:99:    status: Mapped["ConfigCode"] = relationship(
+backend\domains\shopping\models\lists.py:100:        "ConfigCode",
+backend\domains\shopping\models\lists.py:203:    unit: Mapped[Optional["ConfigCode"]] = relationship(
+backend\domains\shopping\models\lists.py:204:        "ConfigCode",
+backend\domains\shopping\models\__init__.py:1:from .catalog import ShoppingProduct, ShoppingSupplier
+backend\domains\shopping\models\__init__.py:2:from .groups import ShoppingGroup, ShoppingGroupMember
+backend\domains\shopping\models\__init__.py:3:from .inventory import InventoryBatch
+backend\domains\shopping\models\__init__.py:4:from .lists import ShoppingList, ShoppingListItem
+backend\domains\shopping\repository\common.py:5:from datetime import datetime, timezone
+backend\domains\shopping\repository\common.py:7:from sqlalchemy.orm import selectinload, with_loader_criteria
+backend\domains\shopping\repository\common.py:9:from backend.domains.shopping.models import (
+backend\domains\shopping\repository\groups.py:6:from typing import List, Optional
+backend\domains\shopping\repository\groups.py:8:from sqlalchemy.orm import Session
+backend\domains\shopping\repository\groups.py:10:from backend.domains.catalogs.models import ConfigCode
+backend\domains\shopping\repository\groups.py:11:from backend.domains.shopping.models import ShoppingGroup, ShoppingGroupMember
+backend\domains\shopping\repository\groups.py:12:from backend.domains.users.models import User
+backend\domains\shopping\repository\groups.py:13:from .common import soft_delete_criteria, _now
+backend\domains\shopping\repository\groups.py:184:        db.query(ConfigCode.id)
+backend\domains\shopping\repository\groups.py:186:            ConfigCode.code_type == "shopping_group_role",
+backend\domains\shopping\repository\groups.py:187:            ConfigCode.code_value == role_code,
+backend\domains\shopping\repository\groups.py:195:        db.query(ConfigCode.id)
+backend\domains\shopping\repository\groups.py:197:            ConfigCode.code_type == "group_status",
+backend\domains\shopping\repository\groups.py:198:            ConfigCode.code_value == "active",
+backend\domains\shopping\repository\lists.py:6:from typing import List, Optional
+backend\domains\shopping\repository\lists.py:8:from sqlalchemy.orm import Session
+backend\domains\shopping\repository\lists.py:10:from backend.domains.shopping.models import ShoppingList, ShoppingListItem
+backend\domains\shopping\repository\lists.py:11:from .common import soft_delete_criteria, list_loaders, item_loaders
+backend\domains\shopping\repository.py:3:from __future__ import annotations
+backend\domains\shopping\repository.py:5:import re
+backend\domains\shopping\repository.py:6:import unicodedata
+backend\domains\shopping\repository.py:7:from datetime import date, datetime, timezone
+backend\domains\shopping\repository.py:8:from typing import List, Optional
+backend\domains\shopping\repository.py:10:from sqlalchemy import or_
+backend\domains\shopping\repository.py:11:from sqlalchemy.orm import Session, selectinload, with_loader_criteria
+backend\domains\shopping\repository.py:13:from backend.domains.catalogs.models import ConfigCode
+backend\domains\shopping\repository.py:14:from backend.domains.shopping.models.catalog import ShoppingProduct, ShoppingSupplier
+backend\domains\shopping\repository.py:15:from backend.domains.shopping.models.groups import ShoppingGroup, ShoppingGroupMember
+backend\domains\shopping\repository.py:16:from backend.domains.shopping.models.inventory import InventoryBatch
+backend\domains\shopping\repository.py:17:from backend.domains.shopping.models.lists import ShoppingList, ShoppingListItem
+backend\domains\shopping\repository.py:18:from backend.domains.users.models import User
+backend\domains\shopping\repository.py:259:        db.query(ConfigCode.id)
+backend\domains\shopping\repository.py:261:            ConfigCode.code_type == "shopping_group_role",
+backend\domains\shopping\repository.py:262:            ConfigCode.code_value == role_code,
+backend\domains\shopping\repository.py:270:        db.query(ConfigCode.id)
+backend\domains\shopping\repository.py:272:            ConfigCode.code_type == "group_status",
+backend\domains\shopping\repository.py:273:            ConfigCode.code_value == "active",
+backend\domains\shopping\repository.py:281:        db.query(ConfigCode.id)
+backend\domains\shopping\repository.py:283:            ConfigCode.code_type == "list_status",
+backend\domains\shopping\repository.py:284:            ConfigCode.code_value == "active",
+backend\domains\shopping\repository.py:292:        db.query(ConfigCode.id)
+backend\domains\shopping\repository.py:294:            ConfigCode.code_type == "supplier_status",
+backend\domains\shopping\repository.py:295:            ConfigCode.code_value == "active",
+backend\domains\shopping\repository.py:665:        db.query(ConfigCode)
+backend\domains\shopping\repository.py:666:        .filter(ConfigCode.code_type == code_type)
+backend\domains\shopping\repository.py:667:        .order_by(ConfigCode.sort_order.asc(), ConfigCode.code_name.asc())
+backend\domains\shopping\router.py:3:from typing import List, Optional
+backend\domains\shopping\router.py:5:from fastapi import APIRouter, Depends, Query, Response, status
+backend\domains\shopping\router.py:6:from sqlalchemy.orm import Session
+backend\domains\shopping\router.py:8:from backend.core import deps
+backend\domains\shopping\router.py:9:from backend.domains.shopping import service
+backend\domains\shopping\router.py:10:from backend.domains.shopping.schemas.groups import (
+backend\domains\shopping\router.py:19:from backend.domains.shopping.schemas.inventory import InventoryBatchCreate, InventoryBatchResponse, InventoryBatchUpdate
+backend\domains\shopping\router.py:20:from backend.domains.shopping.schemas.lists import ShoppingListItemCreate, ShoppingListItemResponse, ShoppingListItemUpdate, ShoppingListCreate, ShoppingListResponse, ShoppingListUpdate
+backend\domains\shopping\router.py:21:from backend.domains.shopping.schemas.catalog import (
+backend\domains\shopping\router.py:27:from backend.domains.shopping.schemas.config import ShoppingConfigBundle
+backend\domains\shopping\router.py:28:from backend.domains.users.models import User
+backend\domains\shopping\schemas\catalog.py:4:from datetime import datetime
+backend\domains\shopping\schemas\catalog.py:5:from typing import Optional
+backend\domains\shopping\schemas\catalog.py:6:from pydantic import Field, field_validator
+backend\domains\shopping\schemas\catalog.py:7:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\shopping\schemas\config.py:5:from __future__ import annotations
+backend\domains\shopping\schemas\config.py:7:from typing import List
+backend\domains\shopping\schemas\config.py:9:from backend.core.schemas import StrictBaseModel
+backend\domains\shopping\schemas\groups.py:4:from datetime import datetime
+backend\domains\shopping\schemas\groups.py:5:from typing import Optional
+backend\domains\shopping\schemas\groups.py:6:from pydantic import EmailStr, Field, field_validator, model_validator
+backend\domains\shopping\schemas\groups.py:7:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\shopping\schemas\groups.py:58:        from backend.api.deps import get_db
+backend\domains\shopping\schemas\groups.py:59:        from backend.domains.users.repos import user_repo
+backend\domains\shopping\schemas\groups.py:68:        from backend.api.deps import get_db
+backend\domains\shopping\schemas\groups.py:69:        from backend.domains.config.repos import config_code_repo
+backend\domains\shopping\schemas\inventory.py:6:from __future__ import annotations
+backend\domains\shopping\schemas\inventory.py:8:from datetime import date
+backend\domains\shopping\schemas\inventory.py:9:from decimal import Decimal, ROUND_DOWN
+backend\domains\shopping\schemas\inventory.py:10:from typing import Optional
+backend\domains\shopping\schemas\inventory.py:12:from pydantic import Field, field_validator
+backend\domains\shopping\schemas\inventory.py:14:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\shopping\schemas\lists.py:5:from __future__ import annotations
+backend\domains\shopping\schemas\lists.py:7:from datetime import datetime
+backend\domains\shopping\schemas\lists.py:8:from decimal import Decimal, ROUND_DOWN
+backend\domains\shopping\schemas\lists.py:9:from typing import List, Optional
+backend\domains\shopping\schemas\lists.py:11:from pydantic import Field, computed_field, field_validator
+backend\domains\shopping\schemas\lists.py:13:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\shopping\schemas\lists.py:14:from .inventory import InventoryBatchResponse
+backend\domains\shopping\schemas\__init__.py:1:from .catalog import (
+backend\domains\shopping\schemas\__init__.py:9:from .config import ConfigOption, ShoppingConfigBundle
+backend\domains\shopping\schemas\__init__.py:10:from .groups import (
+backend\domains\shopping\schemas\__init__.py:20:from .inventory import (
+backend\domains\shopping\schemas\__init__.py:27:from .lists import (
+backend\domains\shopping\service.py:3:from __future__ import annotations
+backend\domains\shopping\service.py:5:from datetime import date, datetime, timezone
+backend\domains\shopping\service.py:6:from typing import List, Optional
+backend\domains\shopping\service.py:8:from fastapi import HTTPException
+backend\domains\shopping\service.py:9:from sqlalchemy.orm import Session
+backend\domains\shopping\service.py:11:from backend.domains.shopping import repository as repo
+backend\domains\shopping\service.py:12:from backend.domains.shopping.models.catalog import ShoppingProduct, ShoppingSupplier
+backend\domains\shopping\service.py:13:from backend.domains.shopping.models.groups import ShoppingGroup, ShoppingGroupMember
+backend\domains\shopping\service.py:14:from backend.domains.shopping.models.inventory import InventoryBatch
+backend\domains\shopping\service.py:15:from backend.domains.shopping.models.lists import ShoppingList, ShoppingListItem
+backend\domains\shopping\service.py:16:from backend.domains.shopping.schemas.catalog import ShoppingSupplierCreate, ShoppingSupplierUpdate
+backend\domains\shopping\service.py:17:from backend.domains.shopping.schemas.config import ShoppingConfigBundle
+backend\domains\shopping\service.py:18:from backend.domains.shopping.schemas.groups import (
+backend\domains\shopping\service.py:25:from backend.domains.shopping.schemas.inventory import InventoryBatchCreate, InventoryBatchUpdate
+backend\domains\shopping\service.py:26:from backend.domains.shopping.schemas.lists import (
+backend\domains\shopping\service.py:32:from backend.domains.users.models import User
+backend\domains\shopping\service.py:67:        raise HTTPException(status_code=500, detail="ConfigCode group_status.active mancante")
+backend\domains\shopping\service.py:223:        raise HTTPException(status_code=500, detail="ConfigCode list_status.active mancante")
+backend\domains\shopping\service.py:389:        raise HTTPException(status_code=500, detail="ConfigCode supplier_status.active mancante")
+backend\domains\shopping\services\common.py:5:from datetime import date, datetime, timezone
+backend\domains\shopping\services\groups.py:6:from typing import List
+backend\domains\shopping\services\groups.py:8:from fastapi import HTTPException
+backend\domains\shopping\services\groups.py:9:from sqlalchemy.orm import Session
+backend\domains\shopping\services\groups.py:11:from backend.domains.shopping import repository as repo
+backend\domains\shopping\services\groups.py:12:from backend.domains.shopping import schemas
+backend\domains\shopping\services\groups.py:13:from backend.domains.shopping.models import ShoppingGroup, ShoppingGroupMember
+backend\domains\shopping\services\groups.py:14:from backend.domains.users.models import User
+backend\domains\shopping\services\groups.py:15:from .common import _now
+backend\domains\shopping\services\groups.py:36:        raise HTTPException(status_code=500, detail="ConfigCode group_status.active mancante")
+backend\domains\shopping\services\lists.py:6:from typing import List, Optional
+backend\domains\shopping\services\lists.py:8:from fastapi import HTTPException
+backend\domains\shopping\services\lists.py:9:from sqlalchemy.orm import Session
+backend\domains\shopping\services\lists.py:11:from backend.domains.shopping import repository as repo
+backend\domains\shopping\services\lists.py:12:from backend.domains.shopping import schemas
+backend\domains\shopping\services\lists.py:13:from backend.domains.shopping.models import ShoppingList, ShoppingListItem, ShoppingProduct
+backend\domains\shopping\services\lists.py:14:from backend.domains.users.models import User
+backend\domains\shopping\services\lists.py:15:from .common import _now
+backend\domains\shopping\services\__init__.py:5:from .groups import (
+backend\domains\shopping\services\__init__.py:16:from .lists import (
+backend\domains\shopping\__init__.py:4:from .models.groups import (
+backend\domains\shopping\__init__.py:8:from .models.inventory import InventoryBatch
+backend\domains\shopping\__init__.py:9:from .models.lists import (
+backend\domains\shopping\__init__.py:13:from .models.catalog import ShoppingProduct, ShoppingSupplier
+backend\domains\shopping\__init__.py:14:from .schemas.config import ConfigOption, ShoppingConfigBundle
+backend\domains\shopping\__init__.py:15:from .schemas.groups import (
+backend\domains\shopping\__init__.py:24:from .schemas.inventory import (
+backend\domains\shopping\__init__.py:29:from .schemas.lists import (
+backend\domains\shopping\__init__.py:37:from .schemas.catalog import (
+backend\domains\sync\router.py:5:from datetime import date
+backend\domains\sync\router.py:7:from fastapi import APIRouter, Depends, Query
+backend\domains\sync\router.py:8:from sqlalchemy.orm import Session
+backend\domains\sync\router.py:10:from backend.core import deps
+backend\domains\sync\router.py:11:from backend.domains.users.models import User
+backend\domains\sync\router.py:12:from backend.domains.sync import service
+backend\domains\sync\router.py:13:from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse
+backend\domains\sync\schemas.py:5:from __future__ import annotations
+backend\domains\sync\schemas.py:7:from datetime import date
+backend\domains\sync\schemas.py:8:from typing import List, Optional
+backend\domains\sync\schemas.py:10:from pydantic import BaseModel, Field
+backend\domains\sync\schemas.py:12:from backend.domains.categories.schemas import CategoryResponse
+backend\domains\sync\schemas.py:13:from backend.domains.countdowns.schemas import CountdownResponse
+backend\domains\sync\schemas.py:14:from backend.domains.events.schemas import EventResponse
+backend\domains\sync\schemas.py:15:from backend.domains.habits.schemas import HabitResponse
+backend\domains\sync\schemas.py:16:from backend.domains.planning.schemas import DailyEntryResponse
+backend\domains\sync\schemas.py:17:from backend.domains.shopping.schemas import ShoppingListResponse
+backend\domains\sync\schemas.py:18:from backend.domains.tasks.schemas import TaskResponse
+backend\domains\sync\service.py:5:Importa gli helper di tasks ed events direttamente dai rispettivi domini,
+backend\domains\sync\service.py:8:from __future__ import annotations
+backend\domains\sync\service.py:10:from datetime import date, datetime, timedelta, timezone
+backend\domains\sync\service.py:12:from sqlalchemy import and_, or_
+backend\domains\sync\service.py:13:from sqlalchemy.orm import Session, selectinload, with_loader_criteria
+backend\domains\sync\service.py:15:from backend.core import models
+backend\domains\sync\service.py:16:from backend.core.settings import get_settings
+backend\domains\sync\service.py:17:from backend.domains.categories.schemas import CategoryResponse
+backend\domains\sync\service.py:18:from backend.domains.countdowns.schemas import CountdownResponse
+backend\domains\sync\service.py:19:from backend.domains.events.schemas import EventResponse
+backend\domains\sync\service.py:20:from backend.domains.events.service import (
+backend\domains\sync\service.py:23:from backend.domains.habits.schemas import HabitResponse
+backend\domains\sync\service.py:24:from backend.domains.shopping.schemas import ShoppingListResponse
+backend\domains\sync\service.py:25:from backend.domains.sync.schemas import (
+backend\domains\sync\service.py:30:from backend.domains.tasks.schemas import TaskResponse
+backend\domains\sync\service.py:31:from backend.domains.tasks.service import (
+backend\domains\sync\service.py:34:from backend.domains.users.models import User
+backend\domains\sync\service.py:35:from backend.utils import expand_events_for_range
+backend\domains\sync\__init__.py:4:Aggregates data from all domains (tasks, events, habits, categories,
+backend\domains\sync\__init__.py:7:from backend.domains.sync.router import router
+backend\domains\tasks\models.py:5:from __future__ import annotations
+backend\domains\tasks\models.py:7:import enum
+backend\domains\tasks\models.py:8:from datetime import datetime, timezone
+backend\domains\tasks\models.py:9:from typing import TYPE_CHECKING, List, Optional
+backend\domains\tasks\models.py:11:from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
+backend\domains\tasks\models.py:12:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\tasks\models.py:14:from backend.core.database import Base
+backend\domains\tasks\models.py:17:    from sqlalchemy.orm import Session
+backend\domains\tasks\models.py:19:    from backend.domains.categories.models import UserCategory
+backend\domains\tasks\models.py:20:    from backend.domains.users.models import User
+backend\domains\tasks\models.py:120:        from sqlalchemy import select
+backend\domains\tasks\models.py:135:        count_query = select(func.count()).select_from(ancestor_cte)
+backend\domains\tasks\repository.py:2:from datetime import datetime, timedelta, timezone
+backend\domains\tasks\repository.py:3:from typing import List, Optional
+backend\domains\tasks\repository.py:5:from sqlalchemy import and_, or_
+backend\domains\tasks\repository.py:6:from sqlalchemy.orm import Session, selectinload
+backend\domains\tasks\repository.py:8:from backend.domains.tasks.models import Task
+backend\domains\tasks\router.py:2:from fastapi import APIRouter, Depends
+backend\domains\tasks\router.py:3:from sqlalchemy.orm import Session
+backend\domains\tasks\router.py:5:from backend.core import deps
+backend\domains\tasks\router.py:6:from backend.domains.tasks import schemas, service
+backend\domains\tasks\router.py:7:from backend.domains.users.models import User
+backend\domains\tasks\router.py:8:from backend.pagination_schemas import PaginatedTasks
+backend\domains\tasks\schemas.py:5:from __future__ import annotations
+backend\domains\tasks\schemas.py:7:from datetime import datetime, timezone
+backend\domains\tasks\schemas.py:8:from typing import List, Optional
+backend\domains\tasks\schemas.py:10:from pydantic import Field, field_validator, model_validator
+backend\domains\tasks\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\tasks\schemas.py:13:from backend.domains.categories.schemas import CategoryResponse
+backend\domains\tasks\schemas.py:14:from backend.domains.tasks.models import PrioritaEnum
+backend\domains\tasks\service.py:2:from datetime import datetime, timezone
+backend\domains\tasks\service.py:3:from typing import Sequence, Union
+backend\domains\tasks\service.py:5:from fastapi import HTTPException
+backend\domains\tasks\service.py:6:from sqlalchemy.orm import Session
+backend\domains\tasks\service.py:8:from backend.core import deps
+backend\domains\tasks\service.py:9:from backend.domains.categories import repository as categories_repo
+backend\domains\tasks\service.py:10:from backend.domains.categories.models import CategoryGenre
+backend\domains\tasks\service.py:11:from backend.domains.tasks import repository as repo
+backend\domains\tasks\service.py:12:from backend.domains.tasks import schemas
+backend\domains\tasks\service.py:13:from backend.domains.tasks.models import Task
+backend\domains\tasks\service.py:14:from backend.domains.users.models import User
+backend\domains\tasks\service.py:15:from backend.pagination_schemas import PaginatedTasks
+backend\domains\tasks\__init__.py:4:from backend.domains.tasks.models import PrioritaEnum, Task
+backend\domains\tasks\__init__.py:5:from backend.domains.tasks.schemas import TaskCreate, TaskResponse, TaskUpdate
+backend\domains\users\models.py:5:from __future__ import annotations
+backend\domains\users\models.py:7:from datetime import datetime
+backend\domains\users\models.py:8:from typing import TYPE_CHECKING, List, Optional
+backend\domains\users\models.py:10:from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, text
+backend\domains\users\models.py:11:from sqlalchemy.orm import Mapped, mapped_column, relationship
+backend\domains\users\models.py:13:from backend.core.database import Base
+backend\domains\users\models.py:16:    from backend.domains.audit.models import SharedActivityLog
+backend\domains\users\models.py:17:    from backend.domains.categories.models import UserCategory
+backend\domains\users\models.py:18:    from backend.domains.countdowns.models import Countdown
+backend\domains\users\models.py:19:    from backend.domains.events.models import Event
+backend\domains\users\models.py:20:    from backend.domains.habits.models import Habit
+backend\domains\users\models.py:21:    from backend.domains.notifications.models import Notification
+backend\domains\users\models.py:22:    from backend.domains.planning.models import DailyEntry
+backend\domains\users\models.py:23:    from backend.domains.shopping.models import (
+backend\domains\users\models.py:32:    from backend.domains.tasks.models import Task
+backend\domains\users\repository.py:2:from __future__ import annotations
+backend\domains\users\repository.py:4:from datetime import datetime, timezone
+backend\domains\users\repository.py:6:from sqlalchemy import func, or_
+backend\domains\users\repository.py:7:from sqlalchemy.orm import Session
+backend\domains\users\repository.py:9:from backend.domains.users.models import User
+backend\domains\users\router.py:2:from fastapi import APIRouter, Depends, status
+backend\domains\users\router.py:3:from sqlalchemy.orm import Session
+backend\domains\users\router.py:5:from backend.core import deps
+backend\domains\users\router.py:6:from backend.domains.users import schemas, service
+backend\domains\users\router.py:7:from backend.domains.users.models import User
+backend\domains\users\schemas.py:5:from __future__ import annotations
+backend\domains\users\schemas.py:7:from datetime import datetime
+backend\domains\users\schemas.py:8:from typing import Optional
+backend\domains\users\schemas.py:10:from pydantic import EmailStr, Field, field_validator, model_validator
+backend\domains\users\schemas.py:12:from backend.core.schemas import ORMBaseModel, StrictBaseModel
+backend\domains\users\service.py:2:from __future__ import annotations
+backend\domains\users\service.py:4:from fastapi import HTTPException
+backend\domains\users\service.py:5:from sqlalchemy.exc import IntegrityError
+backend\domains\users\service.py:6:from sqlalchemy.orm import Session
+backend\domains\users\service.py:8:from backend.core.deps import get_password_hash, verify_password
+backend\domains\users\service.py:9:from backend.domains.users import repository as repo
+backend\domains\users\service.py:10:from backend.domains.users import schemas
+backend\domains\users\service.py:11:from backend.domains.users.models import User
+backend\domains\users\__init__.py:4:from backend.domains.users.models import User
+backend\domains\users\__init__.py:5:from backend.domains.users.schemas import (
+backend\domains\__init__.py:18:Domain imports:
+backend\domains\__init__.py:19:    from backend.domains.users import User, UserResponse
+backend\domains\__init__.py:20:    from backend.domains.tasks import Task, TaskCreate
+backend\domains\__init__.py:21:    from backend.domains.catalogs import Config, ConfigCode
+backend\domains\__init__.py:24:    from backend import models
+backend\domains\__init__.py:25:    from backend import schemas
+backend\fix_db.py:1:from backend.database import engine
+backend\fix_db.py:2:from sqlalchemy import text
+backend\init_db.py:1:import sys
+backend\init_db.py:3:from backend.database import engine
+backend\init_db.py:4:from backend.models import Base
+backend\main.py:2:# DEVE stare in cima, prima di qualsiasi import che legga le variabili d'ambiente.
+backend\main.py:3:from backend.core import config as _config  # noqa: F401
+backend\main.py:5:from fastapi import FastAPI
+backend\main.py:6:from fastapi.middleware.cors import CORSMiddleware
+backend\main.py:7:# Import all models to register them with SQLAlchemy
+backend\main.py:8:# This MUST be done before any API imports that use models
+backend\main.py:9:from backend.core.models import *  # noqa: F401, F403
+backend\main.py:12:from backend.domains.categories.router import router as categories_router
+backend\main.py:13:from backend.domains.users.router import router as users_router
+backend\main.py:14:from backend.domains.planning.router import router as daily_entries_router
+backend\main.py:15:from backend.domains.countdowns.router import router as countdowns_router
+backend\main.py:16:from backend.domains.admin.router import router as admin_router
+backend\main.py:17:from backend.domains.auth.router import router as auth_router
+backend\main.py:18:from backend.domains.analytics.router import router as analytics_router
+backend\main.py:19:from backend.domains.habits.habit_log_router import router as habit_log_router
+backend\main.py:20:from backend.domains.tasks.router import router as tasks_router
+backend\main.py:21:from backend.domains.events.router import router as events_router
+backend\main.py:22:from backend.domains.habits.habits_router import router as habits_router
+backend\main.py:23:from backend.domains.shopping.router import router as shopping_router
+backend\main.py:24:from backend.domains.sync.router import router as sync_router
+backend\main.py:25:from backend.domains.catalogs.router_public import router as catalogs_router
+backend\main.py:26:from backend.domains.catalogs.router_admin import router as admin_catalogs_router
+backend\main.py:27:from backend.domains.monthly_entries.router import router as monthly_entries_router
+backend\models.py:5:For new code, import directly from the domain modules.
+backend\models.py:7:from __future__ import annotations
+backend\models.py:9:from backend.core.database import Base  # noqa: F401
+backend\models.py:11:from backend.domains.audit.models import SharedActivityLog  # noqa: F401
+backend\models.py:12:from backend.domains.categories.models import CategoryGenre, UserCategory  # noqa: F401
+backend\models.py:13:from backend.domains.catalogs.models import Config, ConfigCode  # noqa: F401
+backend\models.py:14:from backend.domains.countdowns.models import Countdown  # noqa: F401
+backend\models.py:15:from backend.domains.events.models import Event  # noqa: F401
+backend\models.py:16:from backend.domains.habits.models import Habit, HabitLog, HabitPeriod  # noqa: F401
+backend\models.py:17:from backend.domains.notifications.models import Notification  # noqa: F401
+backend\models.py:18:from backend.domains.planning.models import DailyEntry  # noqa: F401
+backend\models.py:19:from backend.domains.shopping.models import (  # noqa: F401
+backend\models.py:28:from backend.domains.tasks.models import PrioritaEnum, Task  # noqa: F401
+backend\models.py:29:from backend.domains.users.models import User  # noqa: F401
+backend\models.py:34:    "ConfigCode",
+backend\NSERIMENTIDB.py:1:import sys
+backend\NSERIMENTIDB.py:3:from sqlalchemy import and_, or_, text
+backend\NSERIMENTIDB.py:5:from backend.api import deps
+backend\NSERIMENTIDB.py:6:from backend.core.database import SessionLocal
+backend\NSERIMENTIDB.py:7:from backend.domains.categories.models import UserCategory
+backend\NSERIMENTIDB.py:8:from backend.domains.config.models import Config, ConfigCode
+backend\NSERIMENTIDB.py:9:from backend.domains.monthly_entries.models import MonthlyFeeling
+backend\NSERIMENTIDB.py:10:from backend.domains.shopping.models import ShoppingSupplier
+backend\NSERIMENTIDB.py:11:from backend.domains.users.models import User
+backend\NSERIMENTIDB.py:12:from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
+backend\NSERIMENTIDB.py:267:                COALESCE((SELECT MAX(id) FROM users), 1),
+backend\NSERIMENTIDB.py:268:                (SELECT MAX(id) IS NOT NULL FROM users)
+backend\NSERIMENTIDB.py:299:            db.query(ConfigCode)
+backend\NSERIMENTIDB.py:301:                ConfigCode.code_type == payload["code_type"],
+backend\NSERIMENTIDB.py:302:                ConfigCode.code_value == payload["code_value"],
+backend\NSERIMENTIDB.py:333:        obj = ConfigCode(**payload)
+backend\NSERIMENTIDB.py:344:        raise RuntimeError(f"ConfigCode mancante: {code_type}.{code_value}")
+backend\NSERIMENTIDB.py:458:        print("[4/6] Verifica ConfigCode globali...")
+backend\NSERIMENTIDB.py:461:        print(f"-> ConfigCode allineati: {len(code_ids)}.")
+backend\pagination_schemas.py:1:from typing import Generic, List, TypeVar
+backend\pagination_schemas.py:3:from pydantic import BaseModel, ConfigDict, Field
+backend\pagination_schemas.py:5:from backend.domains.events.schemas import EventResponse
+backend\pagination_schemas.py:6:from backend.domains.tasks.schemas import TaskResponse
+backend\pagination_schemas.py:12:    model_config = ConfigDict(from_attributes=True)
+backend\RIGENERADB.py:1:from __future__ import annotations
+backend\RIGENERADB.py:3:import importlib
+backend\RIGENERADB.py:4:import pkgutil
+backend\RIGENERADB.py:5:from pathlib import Path
+backend\RIGENERADB.py:7:from backend.core.database import Base, SessionLocal, engine
+backend\RIGENERADB.py:10:def _import_domain_models() -> list[str]:
+backend\RIGENERADB.py:11:    imported_modules: list[str] = []
+backend\RIGENERADB.py:13:    domains_pkg = importlib.import_module("backend.domains")
+backend\RIGENERADB.py:23:            models_module = importlib.import_module(models_module_name)
+backend\RIGENERADB.py:24:            imported_modules.append(models_module_name)
+backend\RIGENERADB.py:43:                    importlib.import_module(full_submodule_name)
+backend\RIGENERADB.py:44:                    imported_modules.append(full_submodule_name)
+backend\RIGENERADB.py:50:    return imported_modules
+backend\RIGENERADB.py:54:    imported_modules = _import_domain_models()
+backend\RIGENERADB.py:56:    print(f"Moduli models importati: {len(imported_modules)}")
+backend\RIGENERADB.py:57:    for module_name in imported_modules:
+backend\RIGENERADB.py:66:    from backend.seed import seed_database
+backend\schemas.py:19:For new code, import directly from the domain modules.
+backend\schemas.py:22:from __future__ import annotations
+backend\schemas.py:25:from backend.core.schemas import ORMBaseModel, ORMStrictBaseModel, StrictBaseModel  # noqa: F401
+backend\schemas.py:28:from backend.domains.audit.schemas import SharedActivityLogResponse  # noqa: F401
+backend\schemas.py:29:from backend.domains.auth.schemas import RefreshTokenRequest, Token, TokenPairResponse  # noqa: F401
+backend\schemas.py:30:from backend.domains.categories.schemas import (  # noqa: F401
+backend\schemas.py:36:from backend.domains.catalogs.schemas import (  # noqa: F401
+backend\schemas.py:37:    ConfigCodeCreate,
+backend\schemas.py:38:    ConfigCodeResponse,
+backend\schemas.py:39:    ConfigCodeUpdate,
+backend\schemas.py:43:from backend.domains.countdowns.schemas import (  # noqa: F401
+backend\schemas.py:49:from backend.domains.events.schemas import EventCreate, EventResponse, EventUpdate  # noqa: F401
+backend\schemas.py:50:from backend.domains.habits.schemas import (  # noqa: F401
+backend\schemas.py:64:from backend.domains.notifications.schemas import (  # noqa: F401
+backend\schemas.py:68:from backend.domains.planning.schemas import (  # noqa: F401
+backend\schemas.py:74:from backend.domains.shopping.schemas import (  # noqa: F401
+backend\schemas.py:99:from backend.domains.tasks.schemas import TaskCreate, TaskResponse, TaskUpdate  # noqa: F401
+backend\schemas.py:100:from backend.domains.users.schemas import (  # noqa: F401
+backend\schemas.py:120:    "ConfigCodeResponse",
+backend\schemas.py:121:    "ConfigCodeCreate",
+backend\schemas.py:122:    "ConfigCodeUpdate",
+backend\seed.py:1:import sys
+backend\seed.py:3:from sqlalchemy import and_, or_, text
+backend\seed.py:5:from backend.domains.auth.service import get_password_hash
+backend\seed.py:7:from backend.core.database import SessionLocal
+backend\seed.py:8:from backend.domains.categories.models import UserCategory
+backend\seed.py:9:from backend.domains.config import Config, ConfigCode
+backend\seed.py:10:from backend.domains.monthly_entries.models import MonthlyFeeling
+backend\seed.py:11:from backend.domains.shopping.models import ShoppingSupplier
+backend\seed.py:12:from backend.domains.users.models import User
+backend\seed.py:13:from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
+backend\seed.py:14:from backend.domains.tasks.models import Task
+backend\seed.py:15:from backend.domains.events.models import Event
+backend\seed.py:16:from backend.domains.audit.models import SharedActivityLog
+backend\seed.py:17:from backend.domains.notifications.models import Notification
+backend\seed.py:18:from backend.domains.planning.models import DailyEntry
+backend\seed.py:19:from backend.domains.countdowns.models import Countdown
+backend\seed.py:20:from backend.domains.habits.models import Habit
+backend\seed.py:280:                COALESCE((SELECT MAX(id) FROM users), 1),
+backend\seed.py:281:                (SELECT MAX(id) IS NOT NULL FROM users)
+backend\seed.py:312:            db.query(ConfigCode)
+backend\seed.py:314:                ConfigCode.code_type == payload["code_type"],
+backend\seed.py:315:                ConfigCode.code_value == payload["code_value"],
+backend\seed.py:346:        obj = ConfigCode(**payload)
+backend\seed.py:357:        raise RuntimeError(f"ConfigCode mancante: {code_type}.{code_value}")
+backend\seed.py:471:        print("[4/6] Verifica ConfigCode globali...")
+backend\seed.py:474:        print(f"-> ConfigCode allineati: {len(code_ids)}.")
+backend\seeds\legacy_add_new_tables_bridge.py:8:import importlib
+backend\seeds\legacy_add_new_tables_bridge.py:9:from typing import Callable, Optional
+backend\seeds\legacy_add_new_tables_bridge.py:32:                module = importlib.import_module(module_name)
+backend\services\analytics_prices.py:4:Mantenuto per retro-compatibilità degli import esistenti.
+backend\services\analytics_prices.py:6:from backend.domains.analytics.service import (  # noqa: F401
+backend\settings.py:6:valori, così gli import esistenti `from backend.settings import X` continuano
+backend\settings.py:7:a funzionare. Nuovo codice: usare `from backend.core.settings import get_settings`.
+backend\settings.py:9:from backend.core.settings import get_settings
+backend\utils.py:2:from datetime import datetime, time, date, timedelta
+backend\utils.py:3:from typing import List
+backend\utils.py:4:from dateutil.rrule import rrulestr
+backend\utils.py:5:from backend import schemas
+backend\utils.py:6:from backend import models
+backend\utils.py:13:    from datetime import timezone

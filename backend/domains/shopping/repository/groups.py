@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from backend.domains.catalogs.models import ConfigCode
+from backend.domains.config import ConfigCode
 from backend.domains.shopping.models import ShoppingGroup, ShoppingGroupMember
 from backend.domains.users.models import User
 from .common import soft_delete_criteria, _now

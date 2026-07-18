@@ -10,7 +10,7 @@ import backend.domains.habits.models
 import backend.domains.countdowns.models
 import backend.domains.notifications.models
 import backend.domains.audit.models
-import backend.domains.catalogs.models
+import backend.domains.config.models
 import backend.domains.monthly_entries.models  # <<< AGGIUNTO
 
 def bootstrap_db() -> None:
@@ -22,8 +22,8 @@ def bootstrap_db() -> None:
         print(f" - {name}")
 
     # seed integrato
-    from backend.seed import seed_database
-    seed_database()
+    # from backend.seed import seed_database
+    # seed_database()
 
 
 if __name__ == "__main__":

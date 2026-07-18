@@ -9,7 +9,7 @@ from typing import List, Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from backend.domains.catalogs.models import Config, ConfigCode
+from backend.domains.config import Config, ConfigCode
 
 
 # ------------------------------------------------------------------ Generic helpers
