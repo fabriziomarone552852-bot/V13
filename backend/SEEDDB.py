@@ -1,12 +1,8 @@
-# Aggiungere in cima agli import esistenti — nessun'altra modifica al file
-from sqlalchemy.orm import sessionmaker as _sessionmaker
-
 import sys
+from collections.abc import Sequence
 
 from sqlalchemy import and_, or_, text
 from backend.core import deps
-from backend.domains.auth.service import get_password_hash
-
 from backend.core.database import SessionLocal
 from backend.domains.categories.models import UserCategory
 from backend.domains.config import Config, ConfigCode
@@ -14,34 +10,53 @@ from backend.domains.monthly_entries.models import MonthlyFeeling
 from backend.domains.shopping.models import ShoppingSupplier
 from backend.domains.users.models import User
 from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
-from backend.domains.tasks.models import Task
-from backend.domains.events.models import Event
-from backend.domains.audit.models import SharedActivityLog
-from backend.domains.notifications.models import Notification
-from backend.domains.planning.models import DailyEntry
-from backend.domains.countdowns.models import Countdown
-from backend.domains.habits.models import Habit
 
 
-def get_password_hash(password: str) -> str:
-    return deps.get_password_hash(SYSTEM_USER["password"])
-
-
-SYSTEM_USER = {
-    "id": 1,
-    "username": "signori",
-    "email": "signori@sinasce.lol",
-    "password": "signori",
-}
-
-
-DEFAULT_USER_CATEGORIES = [
-    {"user_id": 1, "category_name": "Lavoro", "colore": "#68EEB4", "genre": 3},
-    {"user_id": 1, "category_name": "Famiglia", "colore": "#68EEB4", "genre": 3},
-    {"user_id": 1, "category_name": "Salute", "colore": "#68EEB4", "genre": 3},
-    {"user_id": 1, "category_name": "Studio", "colore": "#68EEB4", "genre": 3},
+DEFAULT_USERS = [
+    {
+        "id": 1,
+        "username": "amedeo",
+        "email": "amedeo@sinasce.lol",
+        "password": "amedeo",
+        "is_superuser": True,
+        "must_change_password": True,
+        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
+    },
+    {
+        "id": 2,
+        "username": "marcello",
+        "email": "marcello@sinasce.lol",
+        "password": "marcello",
+        "is_superuser": True,
+        "must_change_password": True,
+        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
+    },
+    {
+        "id": 3,
+        "username": "signore",
+        "email": "signore@sinasce.lol",
+        "password": "signore",
+        "is_superuser": False,
+        "must_change_password": True,
+        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
+    },
+    {
+        "id": 4,
+        "username": "signori",
+        "email": "signori@sinasce.lol",
+        "password": "signori",
+        "is_superuser": False,
+        "must_change_password": True,
+        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
+    },
 ]
 
+DEFAULT_USER_CATEGORIES = [
+    {"category_name": "Lavoro", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Famiglia", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Salute", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Studio", "colore": "#68EEB4", "genre": 3},
+]
 
 DEFAULT_MONTHLY_FEELINGS = [
     {"feel_name": "Gioia"},
@@ -58,7 +73,6 @@ DEFAULT_MONTHLY_FEELINGS = [
     {"feel_name": "Divertimento"},
     {"feel_name": "Lavoro"},
 ]
-
 
 DEFAULT_CONFIG_CODES = [
     {"code_type": "currency", "code_value": "EUR", "code_name": "Euro", "description": "Euro", "active": True, "sort_order": 1},
@@ -161,15 +175,18 @@ DEFAULT_CONFIG_CODES = [
     {"code_type": "supplier_status", "code_value": "inactive", "code_name": "Inactive", "description": "Fornitore inattivo", "active": True},
 ]
 
-
 DEFAULT_SUPPLIERS = ["Coop", "Carni e Affini", "MD", "Lidl", "Eurospin", "Famila"]
 
 
-def _ensure_system_user(db) -> User:
-    normalized_username = SYSTEM_USER["username"].strip().lower()
-    normalized_email = SYSTEM_USER["email"].strip().lower()
+def _build_password_hash(password: str) -> str:
+    return deps.get_password_hash(password)
 
-    user = db.query(User).filter(User.id == SYSTEM_USER["id"]).first()
+
+def _ensure_default_user(db, payload: dict) -> User:
+    normalized_username = payload["username"].strip().lower()
+    normalized_email = payload["email"].strip().lower()
+
+    user = db.query(User).filter(User.id == payload["id"]).first()
     if user is None:
         user = db.query(User).filter(
             or_(
@@ -180,21 +197,22 @@ def _ensure_system_user(db) -> User:
 
     if user is None:
         user = User(
-            id=SYSTEM_USER["id"],
+            id=payload["id"],
             username=normalized_username,
             email=normalized_email,
-            password_hash=get_password_hash(SYSTEM_USER["password"]),
-            max_subtask_depth_user=DEFAULT_MAX_SUBTASK_DEPTH,
-            is_superuser=True,
-            must_change_password=True,
+            password_hash=_build_password_hash(payload["password"]),
+            max_subtask_depth_user=payload.get("max_subtask_depth_user", DEFAULT_MAX_SUBTASK_DEPTH),
+            is_superuser=payload.get("is_superuser", False),
+            must_change_password=payload.get("must_change_password", True),
         )
         db.add(user)
         db.flush()
         return user
 
-    if user.id != SYSTEM_USER["id"]:
+    if user.id != payload["id"]:
         raise RuntimeError(
-            f"Esiste già un utente con username/email del sistema ma con id diverso da {SYSTEM_USER['id']}."
+            f"Esiste già un utente con username/email={normalized_username}/{normalized_email} "
+            f"ma con id diverso da {payload['id']}."
         )
 
     changed = False
@@ -208,19 +226,22 @@ def _ensure_system_user(db) -> User:
         changed = True
 
     if not user.password_hash:
-        user.password_hash = get_password_hash(SYSTEM_USER["password"])
+        user.password_hash = _build_password_hash(payload["password"])
         changed = True
 
+    wanted_depth = payload.get("max_subtask_depth_user", DEFAULT_MAX_SUBTASK_DEPTH)
     if user.max_subtask_depth_user is None or user.max_subtask_depth_user < 1:
-        user.max_subtask_depth_user = DEFAULT_MAX_SUBTASK_DEPTH
+        user.max_subtask_depth_user = wanted_depth
         changed = True
 
-    if user.is_superuser is not True:
-        user.is_superuser = True
+    wanted_superuser = payload.get("is_superuser", False)
+    if user.is_superuser != wanted_superuser:
+        user.is_superuser = wanted_superuser
         changed = True
 
-    if user.must_change_password is not True:
-        user.must_change_password = True
+    wanted_mcp = payload.get("must_change_password", True)
+    if user.must_change_password != wanted_mcp:
+        user.must_change_password = wanted_mcp
         changed = True
 
     if changed:
@@ -230,11 +251,20 @@ def _ensure_system_user(db) -> User:
     return user
 
 
-def _seed_default_user_categories(db, system_user_id: int) -> int:
+def _seed_default_users(db) -> list[User]:
+    users: list[User] = []
+    for payload in DEFAULT_USERS:
+        user = _ensure_default_user(db, payload)
+        users.append(user)
+    db.flush()
+    return users
+
+
+def _seed_default_user_categories_for_user(db, user_id: int) -> int:
     inserted = 0
 
     for item in DEFAULT_USER_CATEGORIES:
-        payload = {**item, "user_id": system_user_id}
+        payload = {**item, "user_id": user_id}
 
         existing = (
             db.query(UserCategory)
@@ -273,6 +303,13 @@ def _seed_default_user_categories(db, system_user_id: int) -> int:
     return inserted
 
 
+def _seed_default_user_categories(db, users: Sequence[User]) -> dict[int, int]:
+    inserted_by_user: dict[int, int] = {}
+    for user in users:
+        inserted_by_user[user.id] = _seed_default_user_categories_for_user(db, user.id)
+    return inserted_by_user
+
+
 def _sync_users_id_sequence(db) -> None:
     db.execute(
         text(
@@ -305,10 +342,7 @@ def _seed_config_codes(db) -> dict[tuple[str, str], int]:
     code_ids: dict[tuple[str, str], int] = {}
 
     for code in DEFAULT_CONFIG_CODES:
-        payload = {
-            "sort_order": None,
-            **code,
-        }
+        payload = {"sort_order": None, **code}
 
         existing = (
             db.query(ConfigCode)
@@ -360,7 +394,7 @@ def _get_code_id(code_ids: dict[tuple[str, str], int], code_type: str, code_valu
     return code_ids[key]
 
 
-def _seed_default_suppliers(db, system_user_id: int, supplier_status_id: int) -> int:
+def _seed_default_suppliers(db, created_by_user_id: int, supplier_status_id: int) -> int:
     inserted = 0
 
     for supplier_name in DEFAULT_SUPPLIERS:
@@ -382,8 +416,8 @@ def _seed_default_suppliers(db, system_user_id: int, supplier_status_id: int) ->
                 existing.status_id = supplier_status_id
                 updated = True
 
-            if existing.created_by_user_id != system_user_id:
-                existing.created_by_user_id = system_user_id
+            if existing.created_by_user_id != created_by_user_id:
+                existing.created_by_user_id = created_by_user_id
                 updated = True
 
             if updated:
@@ -397,7 +431,7 @@ def _seed_default_suppliers(db, system_user_id: int, supplier_status_id: int) ->
                 name=supplier_name,
                 name_normalized=normalized,
                 status_id=supplier_status_id,
-                created_by_user_id=system_user_id,
+                created_by_user_id=created_by_user_id,
             )
         )
         inserted += 1
@@ -439,7 +473,6 @@ def _align_users_subtask_depth(db) -> int:
 
     return len(users_without_depth)
 
-# ...tutto il resto invariato fino a seed_database()...
 
 def seed_database(session_factory=None) -> None:
     """
@@ -453,26 +486,33 @@ def seed_database(session_factory=None) -> None:
 
     _SessionFactory = session_factory if session_factory is not None else SessionLocal
 
-    db = _SessionFactory()   # ← unica riga cambiata rispetto all'originale
+    db = _SessionFactory()
     try:
-        # ... tutto il corpo rimane IDENTICO all'originale ...
-        print("[1/6] Verifica o creazione utente di sistema...")
-        system_user = _ensure_system_user(db)
+        print("[1/6] Verifica o creazione utenti di default...")
+        seed_users = _seed_default_users(db)
         db.commit()
         _sync_users_id_sequence(db)
         db.commit()
-        db.refresh(system_user)
-        print(
-            f"-> Utente di sistema pronto: id={system_user.id}, "
-            f"username={system_user.username}, email={system_user.email}, "
-            f"is_superuser={system_user.is_superuser}, "
-            f"must_change_password={system_user.must_change_password}"
-        )
 
-        print("[2/6] Verifica user_categories di default per admin...")
-        inserted_user_categories = _seed_default_user_categories(db, system_user.id)
+        for user in seed_users:
+            db.refresh(user)
+            print(
+                f"-> Utente pronto: id={user.id}, "
+                f"username={user.username}, email={user.email}, "
+                f"is_superuser={user.is_superuser}, "
+                f"must_change_password={user.must_change_password}"
+            )
+
+        seed_owner = seed_users[0]
+
+        print("[2/6] Verifica user_categories di default per ogni utente seed...")
+        inserted_user_categories = _seed_default_user_categories(db, seed_users)
         db.commit()
-        print(f"-> User categories inserite/aggiornate per admin: {inserted_user_categories}.")
+        for user in seed_users:
+            print(
+                f"-> User categories inserite/aggiornate per {user.username}: "
+                f"{inserted_user_categories.get(user.id, 0)}."
+            )
 
         print("[3/6] Verifica configurazioni amministrative...")
         _ensure_config(db)
@@ -488,7 +528,7 @@ def seed_database(session_factory=None) -> None:
         supplier_status_id = _get_code_id(code_ids, "supplier_status", "active")
         inserted_suppliers = _seed_default_suppliers(
             db=db,
-            system_user_id=system_user.id,
+            created_by_user_id=seed_owner.id,
             supplier_status_id=supplier_status_id,
         )
         inserted_monthly_feelings = _seed_monthly_feelings(db)
