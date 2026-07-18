@@ -10,7 +10,7 @@ from typing import List, Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload, with_loader_criteria
 
-from backend.domains.catalogs.models import ConfigCode
+from backend.domains.config import ConfigCode
 from backend.domains.shopping.models.catalog import ShoppingProduct, ShoppingSupplier
 from backend.domains.shopping.models.groups import ShoppingGroup, ShoppingGroupMember
 from backend.domains.shopping.models.inventory import InventoryBatch

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.domains.catalogs import repository as repo
 from backend.domains.catalogs import schemas
-from backend.domains.catalogs.models import Config, ConfigCode
+from backend.domains.config import Config, ConfigCode
 from backend.domains.users.models import User
 
 

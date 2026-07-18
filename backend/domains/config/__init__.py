@@ -1,8 +1,8 @@
 """
 Config domain - System-wide configuration management.
 """
-from backend.domains.catalogs.models import Config, ConfigCode
-from backend.domains.catalogs.schemas import (
+from backend.domains.config.models import Config, ConfigCode
+from backend.domains.config.schemas import (
     ConfigCodeCreate,
     ConfigCodeResponse,
     ConfigCodeUpdate,

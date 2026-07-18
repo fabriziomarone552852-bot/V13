@@ -13,7 +13,46 @@ from backend.domains.auth.schemas import Token, TokenPairResponse
 from backend.domains.users import repository as users_repo
 from backend.domains.users import schemas as users_schemas
 from backend.domains.users.models import User
+from backend.domains.categories.models import UserCategory
 
+
+DEFAULT_USER_CATEGORY_TEMPLATES = [
+    {"category_name": "Lavoro", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Famiglia", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Salute", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Studio", "colore": "#68EEB4", "genre": 3},
+]
+
+
+def _seed_default_user_categories_for_user(db: Session, user_id: int) -> None:
+    """
+    Inserisce le quattro categorie di default per il nuovo utente.
+    La funzione è idempotente: se richiamata più volte non duplica le categorie.
+    """
+    for template in DEFAULT_USER_CATEGORY_TEMPLATES:
+        existing = (
+            db.query(UserCategory)
+            .filter(
+                UserCategory.user_id == user_id,
+                UserCategory.category_name == template["category_name"],
+            )
+            .first()
+        )
+
+        if existing:
+            existing.colore = template["colore"]
+            existing.genre = template["genre"]
+            continue
+
+        obj = UserCategory(
+            user_id=user_id,
+            category_name=template["category_name"],
+            colore=template["colore"],
+            genre=template["genre"],
+        )
+        db.add(obj)
+
+    db.commit()
 
 
 def register(db: Session, user_in: users_schemas.UserCreate) -> User:
@@ -33,7 +72,17 @@ def register(db: Session, user_in: users_schemas.UserCreate) -> User:
     if users_repo.username_or_email_exists(db, username, email):
         raise HTTPException(status_code=400, detail="Username o Email già registrati")
 
-    return users_repo.create_user(db, username, email, get_password_hash(user_in.password))
+    user = users_repo.create_user(
+        db,
+        username,
+        email,
+        get_password_hash(user_in.password),
+    )
+
+    _seed_default_user_categories_for_user(db, user.id)
+    db.refresh(user)
+
+    return user
 
 
 def login(db: Session, username: str, password: str) -> TokenPairResponse:

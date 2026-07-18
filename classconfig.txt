@@ -1,0 +1,208 @@
+backend\core\database.py:3:Contains shared database configuration and the SQLAlchemy Base class.
+backend\core\database.py:15:class Base(DeclarativeBase):
+backend\core\database.py:16:    """Classe base per tutti i modelli SQLAlchemy (stile 2.0)."""
+backend\core\schemas.py:3:Contains shared Pydantic base classes used across all domains.
+backend\core\schemas.py:10:class ORMBaseModel(BaseModel):
+backend\core\schemas.py:15:class StrictBaseModel(BaseModel):
+backend\core\schemas.py:20:class ORMStrictBaseModel(ORMBaseModel):
+backend\core\settings.py:24:class Settings(BaseSettings):
+backend\database.py:3:Uses shared Base class from backend.core.database.
+backend\domains\analytics\service.py:5:from dataclasses import dataclass
+backend\domains\analytics\service.py:20:@dataclass
+backend\domains\analytics\service.py:21:class SupplierPriceMetrics:
+backend\domains\audit\models.py:20:class SharedActivityLog(Base):
+backend\domains\audit\schemas.py:13:class SharedActivityLogResponse(ORMBaseModel):
+backend\domains\auth\schemas.py:10:class Token(StrictBaseModel):
+backend\domains\auth\schemas.py:19:class TokenPairResponse(StrictBaseModel):
+backend\domains\auth\schemas.py:29:class RefreshTokenRequest(StrictBaseModel):
+backend\domains\catalogs\models.py:16:class Config(Base):
+backend\domains\catalogs\models.py:41:class ConfigCode(Base):
+backend\domains\catalogs\repository.py:29:def list_config(db: Session) -> List[Config]:
+backend\domains\catalogs\repository.py:33:def get_config(db: Session, key: str) -> Optional[Config]:
+backend\domains\catalogs\router_admin.py:22:def update_config(
+backend\domains\catalogs\router_admin.py:28:    return service.update_config(db, current_user, key, config_in)
+backend\domains\catalogs\router_public.py:20:def list_config(
+backend\domains\catalogs\router_public.py:24:    return service.list_config(db, current_user)
+backend\domains\catalogs\router_public.py:28:def get_config(
+backend\domains\catalogs\router_public.py:33:    return service.get_config(db, current_user, key)
+backend\domains\catalogs\schemas.py:15:class ConfigResponse(ORMBaseModel):
+backend\domains\catalogs\schemas.py:22:class ConfigUpdate(StrictBaseModel):
+backend\domains\catalogs\schemas.py:28:class ConfigCodeResponse(ORMBaseModel):
+backend\domains\catalogs\schemas.py:41:class ConfigCodeOptionResponse(ORMBaseModel):
+backend\domains\catalogs\schemas.py:50:class ConfigCodeCreate(StrictBaseModel):
+backend\domains\catalogs\schemas.py:60:class ConfigCodeUpdate(StrictBaseModel):
+backend\domains\catalogs\service.py:37:def list_config(db: Session, current_user: User) -> list[Config]:
+backend\domains\catalogs\service.py:38:    return repo.list_config(db)
+backend\domains\catalogs\service.py:41:def get_config(db: Session, current_user: User, key: str) -> Config:
+backend\domains\catalogs\service.py:42:    db_config = repo.get_config(db, key)
+backend\domains\catalogs\service.py:48:def update_config(
+backend\domains\catalogs\service.py:54:    db_config = repo.get_config(db, key)
+backend\domains\categories\models.py:22:class CategoryGenre(IntEnum):
+backend\domains\categories\models.py:31:class UserCategory(Base):
+backend\domains\categories\schemas.py:15:class CategoryGenre(IntEnum):
+backend\domains\categories\schemas.py:45:class CategoryBase(StrictBaseModel):
+backend\domains\categories\schemas.py:60:    @classmethod
+backend\domains\categories\schemas.py:65:    @classmethod
+backend\domains\categories\schemas.py:70:class CategoryCreate(CategoryBase):
+backend\domains\categories\schemas.py:74:class CategoryUpdate(StrictBaseModel):
+backend\domains\categories\schemas.py:87:    @classmethod
+backend\domains\categories\schemas.py:94:    @classmethod
+backend\domains\categories\schemas.py:99:class CategoryResponse(ORMBaseModel):
+backend\domains\config\models.py:16:class Config(Base):
+backend\domains\config\models.py:41:class ConfigCode(Base):
+backend\domains\config\schemas.py:15:class ConfigResponse(ORMBaseModel):
+backend\domains\config\schemas.py:22:class ConfigUpdate(StrictBaseModel):
+backend\domains\config\schemas.py:28:class ConfigCodeResponse(ORMBaseModel):
+backend\domains\config\schemas.py:41:class ConfigCodeCreate(StrictBaseModel):
+backend\domains\config\schemas.py:51:class ConfigCodeUpdate(StrictBaseModel):
+backend\domains\countdowns\models.py:19:class Countdown(Base):
+backend\domains\countdowns\schemas.py:17:class CountdownBase(StrictBaseModel):
+backend\domains\countdowns\schemas.py:25:    @classmethod
+backend\domains\countdowns\schemas.py:33:class CountdownCreate(CountdownBase):
+backend\domains\countdowns\schemas.py:37:class CountdownUpdate(StrictBaseModel):
+backend\domains\countdowns\schemas.py:48:    @classmethod
+backend\domains\countdowns\schemas.py:58:    @classmethod
+backend\domains\countdowns\schemas.py:67:class CountdownResponse(ORMBaseModel):
+backend\domains\events\models.py:20:class Event(Base):
+backend\domains\events\schemas.py:16:class EventCreate(StrictBaseModel):
+backend\domains\events\schemas.py:29:    @classmethod
+backend\domains\events\schemas.py:43:class EventUpdate(StrictBaseModel):
+backend\domains\events\schemas.py:57:    @classmethod
+backend\domains\events\schemas.py:73:class EventResponse(ORMBaseModel):
+backend\domains\habits\models.py:19:class Habit(Base):
+backend\domains\habits\models.py:53:class HabitPeriod(Base):
+backend\domains\habits\models.py:87:class HabitLog(Base):
+backend\domains\habits\schemas.py:15:class HabitPeriodBase(StrictBaseModel):
+backend\domains\habits\schemas.py:29:class HabitPeriodCreate(HabitPeriodBase):
+backend\domains\habits\schemas.py:33:class HabitPeriodUpdate(StrictBaseModel):
+backend\domains\habits\schemas.py:47:class HabitPeriodResponse(ORMBaseModel):
+backend\domains\habits\schemas.py:57:class HabitLogBase(StrictBaseModel):
+backend\domains\habits\schemas.py:63:class HabitLogCreate(HabitLogBase):
+backend\domains\habits\schemas.py:67:class HabitLogResponse(ORMBaseModel):
+backend\domains\habits\schemas.py:76:class HabitLogToggleResponse(StrictBaseModel):
+backend\domains\habits\schemas.py:86:class HabitBase(StrictBaseModel):
+backend\domains\habits\schemas.py:95:    @classmethod
+backend\domains\habits\schemas.py:103:    @classmethod
+backend\domains\habits\schemas.py:111:class HabitCreate(HabitBase):
+backend\domains\habits\schemas.py:117:class HabitUpdate(StrictBaseModel):
+backend\domains\habits\schemas.py:126:    @classmethod
+backend\domains\habits\schemas.py:136:    @classmethod
+backend\domains\habits\schemas.py:146:class HabitResponse(ORMBaseModel):
+backend\domains\monthly_entries\models.py:18:class MonthlyFeeling(Base):
+backend\domains\monthly_entries\models.py:40:class MonthlyEntry(Base):
+backend\domains\monthly_entries\schemas.py:14:class MonthlyFeelingBase(StrictBaseModel):
+backend\domains\monthly_entries\schemas.py:18:    @classmethod
+backend\domains\monthly_entries\schemas.py:26:class MonthlyFeelingCreate(MonthlyFeelingBase):
+backend\domains\monthly_entries\schemas.py:30:class MonthlyFeelingUpdate(StrictBaseModel):
+backend\domains\monthly_entries\schemas.py:34:    @classmethod
+backend\domains\monthly_entries\schemas.py:44:class MonthlyFeelingResponse(ORMBaseModel):
+backend\domains\monthly_entries\schemas.py:49:class MonthlyEntryBase(StrictBaseModel):
+backend\domains\monthly_entries\schemas.py:56:class MonthlyEntryCreate(MonthlyEntryBase):
+backend\domains\monthly_entries\schemas.py:60:class MonthlyEntryUpdate(StrictBaseModel):
+backend\domains\monthly_entries\schemas.py:64:class MonthlyEntryResponse(ORMBaseModel):
+backend\domains\notifications\models.py:20:class Notification(Base):
+backend\domains\notifications\schemas.py:15:class NotificationCreate(StrictBaseModel):
+backend\domains\notifications\schemas.py:24:    @classmethod
+backend\domains\notifications\schemas.py:32:class NotificationResponse(ORMBaseModel):
+backend\domains\planning\models.py:20:class DailyEntry(Base):
+backend\domains\planning\schemas.py:23:class DailyEntryBase(StrictBaseModel):
+backend\domains\planning\schemas.py:34:    @classmethod
+backend\domains\planning\schemas.py:42:class DailyEntryCreate(DailyEntryBase):
+backend\domains\planning\schemas.py:47:class DailyEntryUpdate(StrictBaseModel):
+backend\domains\planning\schemas.py:54:class DailyEntryResponse(ORMBaseModel):
+backend\domains\shopping\models\catalog.py:21:class ShoppingProduct(Base):
+backend\domains\shopping\models\catalog.py:84:class ShoppingSupplier(Base):
+backend\domains\shopping\models\groups.py:20:class ShoppingGroup(Base):
+backend\domains\shopping\models\groups.py:82:class ShoppingGroupMember(Base):
+backend\domains\shopping\models\inventory.py:22:class InventoryBatch(Base):
+backend\domains\shopping\models\lists.py:34:class ShoppingList(Base):
+backend\domains\shopping\models\lists.py:115:class ShoppingListItem(Base):
+backend\domains\shopping\router.py:68:    response_class=Response,
+backend\domains\shopping\router.py:131:    response_class=Response,
+backend\domains\shopping\router.py:178:    response_class=Response,
+backend\domains\shopping\router.py:250:    response_class=Response,
+backend\domains\shopping\router.py:263:def get_shopping_config(
+backend\domains\shopping\router.py:307:    response_class=Response,
+backend\domains\shopping\router.py:346:    response_class=Response,
+backend\domains\shopping\schemas\catalog.py:9:class ShoppingProductCreate(StrictBaseModel):
+backend\domains\shopping\schemas\catalog.py:13:    @classmethod
+backend\domains\shopping\schemas\catalog.py:20:class ShoppingProductUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\catalog.py:24:    @classmethod
+backend\domains\shopping\schemas\catalog.py:33:class ShoppingProductResponse(ORMBaseModel):
+backend\domains\shopping\schemas\catalog.py:42:class ShoppingSupplierCreate(StrictBaseModel):
+backend\domains\shopping\schemas\catalog.py:47:    @classmethod
+backend\domains\shopping\schemas\catalog.py:54:class ShoppingSupplierUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\catalog.py:59:    @classmethod
+backend\domains\shopping\schemas\catalog.py:68:class ShoppingSupplierResponse(ORMBaseModel):
+backend\domains\shopping\schemas\config.py:12:class ConfigOption(StrictBaseModel):
+backend\domains\shopping\schemas\config.py:20:class ShoppingConfigBundle(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:11:class ShoppingGroupCreate(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:17:    @classmethod
+backend\domains\shopping\schemas\groups.py:24:class ShoppingGroupUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:30:    @classmethod
+backend\domains\shopping\schemas\groups.py:39:class ShoppingGroupResponse(ORMBaseModel):
+backend\domains\shopping\schemas\groups.py:50:class ShoppingGroupMemberCreate(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:56:    @classmethod
+backend\domains\shopping\schemas\groups.py:76:class ShoppingGroupMemberUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:79:class ShoppingGroupMemberInvite(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:85:    @classmethod
+backend\domains\shopping\schemas\groups.py:93:    @classmethod
+backend\domains\shopping\schemas\groups.py:100:    @classmethod
+backend\domains\shopping\schemas\groups.py:113:class ShoppingGroupMemberRoleUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\groups.py:117:    @classmethod
+backend\domains\shopping\schemas\groups.py:124:class ShoppingGroupMemberResponse(ORMBaseModel):
+backend\domains\shopping\schemas\inventory.py:22:class InventoryBatchBase(StrictBaseModel):
+backend\domains\shopping\schemas\inventory.py:48:    @classmethod
+backend\domains\shopping\schemas\inventory.py:55:class InventoryBatchCreate(InventoryBatchBase):
+backend\domains\shopping\schemas\inventory.py:59:class InventoryBatchUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\inventory.py:85:    @classmethod
+backend\domains\shopping\schemas\inventory.py:92:class InventoryBatchResponse(ORMBaseModel):
+backend\domains\shopping\schemas\inventory.py:116:class SupplierPriceSummary(ORMBaseModel):
+backend\domains\shopping\schemas\inventory.py:126:class PriceHistoryPoint(ORMBaseModel):
+backend\domains\shopping\schemas\lists.py:22:class ShoppingListCreate(StrictBaseModel):
+backend\domains\shopping\schemas\lists.py:30:    @classmethod
+backend\domains\shopping\schemas\lists.py:38:class ShoppingListUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\lists.py:49:    @classmethod
+backend\domains\shopping\schemas\lists.py:59:class ShoppingListItemCreate(StrictBaseModel):
+backend\domains\shopping\schemas\lists.py:72:    @classmethod
+backend\domains\shopping\schemas\lists.py:80:    @classmethod
+backend\domains\shopping\schemas\lists.py:87:class ShoppingListItemUpdate(StrictBaseModel):
+backend\domains\shopping\schemas\lists.py:99:    @classmethod
+backend\domains\shopping\schemas\lists.py:109:    @classmethod
+backend\domains\shopping\schemas\lists.py:116:class _ShoppingProductLiteResponse(ORMBaseModel):
+backend\domains\shopping\schemas\lists.py:121:class _ShoppingUnitLiteResponse(ORMBaseModel):
+backend\domains\shopping\schemas\lists.py:126:class ShoppingListItemResponse(ORMBaseModel):
+backend\domains\shopping\schemas\lists.py:164:class ShoppingListResponse(ORMBaseModel):
+backend\domains\sync\schemas.py:21:class SyncDayResponse(BaseModel):
+backend\domains\sync\schemas.py:39:class SyncWeekResponse(BaseModel):
+backend\domains\tasks\models.py:23:class PrioritaEnum(str, enum.Enum):
+backend\domains\tasks\models.py:31:class Task(Base):
+backend\domains\tasks\schemas.py:17:class TaskCreate(StrictBaseModel):
+backend\domains\tasks\schemas.py:30:    @classmethod
+backend\domains\tasks\schemas.py:44:class TaskUpdate(StrictBaseModel):
+backend\domains\tasks\schemas.py:59:    @classmethod
+backend\domains\tasks\schemas.py:82:class TaskResponse(ORMBaseModel):
+backend\domains\users\models.py:35:class User(Base):
+backend\domains\users\schemas.py:15:class UserCreate(StrictBaseModel):
+backend\domains\users\schemas.py:22:    @classmethod
+backend\domains\users\schemas.py:27:    @classmethod
+backend\domains\users\schemas.py:32:class UserResponse(ORMBaseModel):
+backend\domains\users\schemas.py:42:class UserPublicResponse(ORMBaseModel):
+backend\domains\users\schemas.py:48:class UserSettingsResponse(ORMBaseModel):
+backend\domains\users\schemas.py:58:class UserAdminResponse(ORMBaseModel):
+backend\domains\users\schemas.py:70:class UserSettingsUpdate(StrictBaseModel):
+backend\domains\users\schemas.py:91:    @classmethod
+backend\NSERIMENTIDB.py:276:def _ensure_config(db) -> None:
+backend\NSERIMENTIDB.py:280:            Config(
+backend\NSERIMENTIDB.py:454:        _ensure_config(db)
+backend\pagination_schemas.py:11:class PaginatedBase(BaseModel, Generic[T]):
+backend\pagination_schemas.py:20:class PaginatedTasks(PaginatedBase[TaskResponse]):
+backend\pagination_schemas.py:24:class PaginatedEvents(PaginatedBase[EventResponse]):
+backend\schemas.py:24:# Re-export shared base classes
+backend\schemas.py:109:    # Core base classes
+backend\seed.py:289:def _ensure_config(db) -> None:
+backend\seed.py:293:            Config(
+backend\seed.py:467:        _ensure_config(db)
+backend\seeds\backend_seeds_base_data_Version2.py:1:class BaseDataProvider:
+backend\seeds\base_data.py:1:class BaseDataProvider:
+backend\seeds\legacy_add_new_tables_bridge.py:12:class LegacyAddNewTablesBridgeProvider:

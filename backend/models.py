@@ -10,7 +10,7 @@ from backend.core.database import Base  # noqa: F401
 
 from backend.domains.audit.models import SharedActivityLog  # noqa: F401
 from backend.domains.categories.models import CategoryGenre, UserCategory  # noqa: F401
-from backend.domains.catalogs.models import Config, ConfigCode  # noqa: F401
+from backend.domains.config import Config, ConfigCode  # noqa: F401
 from backend.domains.countdowns.models import Countdown  # noqa: F401
 from backend.domains.events.models import Event  # noqa: F401
 from backend.domains.habits.models import Habit, HabitLog, HabitPeriod  # noqa: F401

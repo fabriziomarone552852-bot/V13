@@ -21,9 +21,9 @@ from backend.domains.events.service import (
     populate_category_name as _populate_event_category_name,
 )
 from backend.domains.habits.schemas import HabitResponse
+from backend.domains.planning.schemas import DailyEntryResponse
 from backend.domains.shopping.schemas import ShoppingListResponse
 from backend.domains.sync.schemas import (
-    DailyEntryResponse,
     SyncDayResponse,
     SyncWeekResponse,
 )
@@ -34,7 +34,6 @@ from backend.domains.tasks.service import (
 from backend.domains.users.models import User
 from backend.utils import expand_events_for_range
 
-
 _settings = get_settings()
 DEFAULT_COMPLETED_TASK_LOOKBACK_DAYS = _settings.default_completed_task_lookback_days
 UTC = timezone.utc
@@ -44,6 +43,16 @@ def _to_utc_naive(dt: datetime) -> datetime:
     if dt.tzinfo is None:
         return dt
     return dt.astimezone(UTC).replace(tzinfo=None)
+
+
+def _category_to_response(category: models.UserCategory) -> CategoryResponse:
+    return CategoryResponse(
+        id=category.id,
+        name=category.category_name,
+        colore=category.colore,
+        user_id=category.user_id,
+        genre=category.genre,
+    )
 
 
 def get_day_sync(
@@ -192,7 +201,7 @@ def get_day_sync(
         tasks=[TaskResponse.model_validate(t) for t in tasks_db],
         events=events_payload,
         habits=[HabitResponse.model_validate(h) for h in habits_db],
-        categories=[CategoryResponse.model_validate(c) for c in categories_db],
+        categories=[_category_to_response(c) for c in categories_db],
         shopping_lists=[ShoppingListResponse.model_validate(s) for s in shopping_db],
         countdowns=[CountdownResponse.model_validate(c) for c in countdowns_db],
     )

@@ -1,4 +1,3 @@
-// src/views/UserSettingsPage.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { apiUrl } from '@/api/client';
 import { useAuth } from '@/context/AuthContext';
@@ -35,41 +34,49 @@ const UserSettingsPage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   const authHeaderObj = useMemo(
-    () => ({
-      Authorization: `Bearer ${token}`,
-    }),
+    () =>
+      token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
     [token]
   );
 
-  // Carica impostazioni da /me/settings
   useEffect(() => {
     const fetchSettings = async () => {
+      if (!token) {
+        setSettings(null);
+        setError('Utente non autenticato.');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
-      try {
-        const url = apiUrl('/me/settings');
-        console.log('GET /me/settings URL', url);
+      setSuccess(null);
 
-        const res = await fetch(url, {
+      try {
+        const res = await fetch(apiUrl('/users/me/settings'), {
           headers: authHeaderObj,
         });
-        console.log('GET /me/settings status', res.status);
 
-        const text = await res.text();
-        console.log('GET /me/settings response:', text);
+        const raw = await res.text();
+        const data = raw ? JSON.parse(raw) : null;
 
         if (!res.ok) {
-          setError('Errore nel caricamento delle impostazioni.');
+          setSettings(null);
+          setError(data?.detail || 'Errore nel caricamento delle impostazioni.');
           return;
         }
 
-        const data = JSON.parse(text) as UserSettings;
-        setSettings(data);
+        const userSettings = data as UserSettings;
+        setSettings(userSettings);
         setForm({
-          email: data.email,
+          email: userSettings.email ?? '',
           maxDepth:
-            data.max_subtask_depth_user !== null
-              ? data.max_subtask_depth_user
+            userSettings.max_subtask_depth_user !== null
+              ? userSettings.max_subtask_depth_user
               : '',
           currentPassword: '',
           newPassword: '',
@@ -77,6 +84,7 @@ const UserSettingsPage: React.FC = () => {
         });
       } catch (err) {
         console.error('Exception in fetchSettings', err);
+        setSettings(null);
         setError('Eccezione nel caricamento delle impostazioni.');
       } finally {
         setLoading(false);
@@ -84,17 +92,23 @@ const UserSettingsPage: React.FC = () => {
     };
 
     fetchSettings();
-  }, [authHeaderObj]);
+  }, [authHeaderObj, token]);
 
   const handleChange =
     (field: keyof SettingsForm) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+
+      setError(null);
+      setSuccess(null);
+
       setForm((prev) => ({
         ...prev,
         [field]:
-          field === 'maxDepth' && value !== ''
-            ? Number(value)
+          field === 'maxDepth'
+            ? value === ''
+              ? ''
+              : Number(value)
             : value,
       }));
     };
@@ -104,26 +118,34 @@ const UserSettingsPage: React.FC = () => {
     setError(null);
     setSuccess(null);
 
-    if (!settings) return;
-
-    const payload: any = {};
-
-    // Solo se è cambiata l'email
-    if (form.email && form.email !== settings.email) {
-      payload.email = form.email;
+    if (!token) {
+      setError('Utente non autenticato.');
+      return;
     }
 
-    // Cambio limite nidificazione, se valorizzato
-    if (form.maxDepth !== '') {
+    if (!settings) {
+      setError('Impostazioni non disponibili.');
+      return;
+    }
+
+    const payload: Record<string, unknown> = {};
+
+    const trimmedEmail = form.email.trim();
+    if (trimmedEmail && trimmedEmail !== settings.email) {
+      payload.email = trimmedEmail;
+    }
+
+    if (
+      form.maxDepth !== '' &&
+      form.maxDepth !== settings.max_subtask_depth_user
+    ) {
       payload.max_subtask_depth_user = form.maxDepth;
     }
 
-    // Cambio password se almeno un campo è compilato
-    if (
-      form.currentPassword ||
-      form.newPassword ||
-      form.confirmNewPassword
-    ) {
+    const isChangingPassword =
+      !!form.currentPassword || !!form.newPassword || !!form.confirmNewPassword;
+
+    if (isChangingPassword) {
       payload.current_password = form.currentPassword;
       payload.new_password = form.newPassword;
       payload.confirm_new_password = form.confirmNewPassword;
@@ -135,11 +157,9 @@ const UserSettingsPage: React.FC = () => {
     }
 
     setSaving(true);
-    try {
-      const url = apiUrl('/me/settings');
-      console.log('PATCH /me/settings URL', url, 'payload', payload);
 
-      const res = await fetch(url, {
+    try {
+      const res = await fetch(apiUrl('/users/me/settings'), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -148,22 +168,18 @@ const UserSettingsPage: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const text = await res.text();
-      console.log('PATCH /me/settings status', res.status, 'response', text);
+      const raw = await res.text();
+      const data = raw ? JSON.parse(raw) : null;
 
       if (!res.ok) {
-        setError(
-          text || 'Errore nel salvataggio delle impostazioni.'
-        );
+        setError(data?.detail || 'Errore nel salvataggio delle impostazioni.');
         return;
       }
 
-      const updated = JSON.parse(text) as UserSettings;
+      const updated = data as UserSettings;
       setSettings(updated);
-      setForm((prev) => ({
-        ...prev,
-        // aggiorno solo i campi persistenti, svuoto i campi password
-        email: updated.email,
+      setForm({
+        email: updated.email ?? '',
         maxDepth:
           updated.max_subtask_depth_user !== null
             ? updated.max_subtask_depth_user
@@ -171,7 +187,7 @@ const UserSettingsPage: React.FC = () => {
         currentPassword: '',
         newPassword: '',
         confirmNewPassword: '',
-      }));
+      });
       setSuccess('Impostazioni salvate con successo.');
     } catch (err) {
       console.error('Exception in handleSubmit', err);
@@ -181,11 +197,21 @@ const UserSettingsPage: React.FC = () => {
     }
   };
 
-  if (loading || !settings) {
+  if (loading) {
     return (
       <div style={{ padding: 24 }}>
         <h1>Impostazioni utente</h1>
         <p>Caricamento...</p>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div style={{ padding: 24 }}>
+        <h1>Impostazioni utente</h1>
+        <p>Impossibile caricare le impostazioni.</p>
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
     );
@@ -202,49 +228,45 @@ const UserSettingsPage: React.FC = () => {
         onSubmit={handleSubmit}
         style={{ display: 'grid', gap: 16, maxWidth: 500 }}
       >
-        {/* Email */}
         <div>
           <label
-            style={{
-              display: 'block',
-              fontWeight: 600,
-              marginBottom: 4,
-            }}
+            htmlFor="email"
+            style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}
           >
             Email
           </label>
           <input
+            id="email"
             type="email"
             value={form.email}
             onChange={handleChange('email')}
+            style={{ width: '100%' }}
+            autoComplete="email"
           />
         </div>
 
-        {/* Max profondità sottotask */}
         <div>
           <label
-            style={{
-              display: 'block',
-              fontWeight: 600,
-              marginBottom: 4,
-            }}
+            htmlFor="maxDepth"
+            style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}
           >
             Profondità massima sottotask (utente)
           </label>
           <input
+            id="maxDepth"
             type="number"
             min={1}
             max={15}
             value={form.maxDepth}
             onChange={handleChange('maxDepth')}
+            style={{ width: '100%' }}
           />
           <small>
-            Il valore effettivo sarà il minimo tra questo e il limite
-            globale impostato dall&apos;admin.
+            Il valore effettivo sarà il minimo tra questo e il limite globale
+            impostato dall&apos;admin.
           </small>
         </div>
 
-        {/* Cambio password */}
         <fieldset
           style={{
             border: '1px solid #ccc',
@@ -256,58 +278,58 @@ const UserSettingsPage: React.FC = () => {
 
           <div style={{ marginBottom: 8 }}>
             <label
-              style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: 4,
-              }}
+              htmlFor="currentPassword"
+              style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}
             >
               Password corrente
             </label>
             <input
+              id="currentPassword"
               type="password"
               value={form.currentPassword}
               onChange={handleChange('currentPassword')}
+              style={{ width: '100%' }}
+              autoComplete="current-password"
             />
           </div>
 
           <div style={{ marginBottom: 8 }}>
             <label
-              style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: 4,
-              }}
+              htmlFor="newPassword"
+              style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}
             >
               Nuova password
             </label>
             <input
+              id="newPassword"
               type="password"
               value={form.newPassword}
               onChange={handleChange('newPassword')}
+              style={{ width: '100%' }}
+              autoComplete="new-password"
             />
           </div>
 
           <div>
             <label
-              style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: 4,
-              }}
+              htmlFor="confirmNewPassword"
+              style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}
             >
               Conferma nuova password
             </label>
             <input
+              id="confirmNewPassword"
               type="password"
               value={form.confirmNewPassword}
               onChange={handleChange('confirmNewPassword')}
+              style={{ width: '100%' }}
+              autoComplete="new-password"
             />
           </div>
         </fieldset>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+        {error && <p style={{ color: 'red', margin: 0 }}>{error}</p>}
+        {success && <p style={{ color: 'green', margin: 0 }}>{success}</p>}
 
         <button type="submit" disabled={saving}>
           {saving ? 'Salvataggio...' : 'Salva impostazioni'}
