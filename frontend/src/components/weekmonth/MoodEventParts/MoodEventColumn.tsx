@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlusIcon } from '@/components/shared/utils/Icons';
-import type { MoodEvent, MoodEventType } from '@/types';
+import type { DailyEntry, MoodEventType } from '@/types';
 import { getGridClasses, getOriginClass, getNumCols } from '@/utils/uiUtils';
 import { AutoExpandingTextarea } from '@/components/shared/utils/AutoExpandingTextarea';
 import { MoodEventCard } from './MoodEventCard';
@@ -9,7 +9,7 @@ import { MoodEventCard } from './MoodEventCard';
 interface MoodEventColumnProps {
   title: string;
   type: MoodEventType;
-  events: MoodEvent[];
+  events: DailyEntry[];
   themeColor: 'green' | 'red';
   onAdd: (type: MoodEventType, title: string) => Promise<void> | void; 
   onUpdate: (id: number, newTitle: string) => Promise<void> | void;

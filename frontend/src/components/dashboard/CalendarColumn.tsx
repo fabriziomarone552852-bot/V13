@@ -3,17 +3,17 @@ import React, { useEffect } from 'react';
 import { useCalendarState } from '../../hooks/useCalendarState';
 import CalendarHeader from './calendar/CalendarHeader';
 import { PlusIcon } from '@/components/shared/utils/Icons';
-import type { DbTask, CalendarEvent } from '@/types';
+import type { DbTask, CalendarEvent, Category } from '@/types';
 
 import WeekGridClassic from './calendar/WeekGridClassic';
 import WeekGridDetailed from './calendar/WeekGridDetailed';
 import MonthGrid from './calendar/MonthGrid';
 import MonthGridDetailed from './calendar/MonthGridDetailed';
-import type { DailyMood } from './calendar/MonthDayCell';
 
 interface CalendarColumnProps {
   events: CalendarEvent[];
   tasks: DbTask[];
+  allCategories?: Category[];
   onSelectEvent: (event: CalendarEvent) => void;
   onAddEventClick?: (dateStr?: string) => void; 
   onDayClick?: (dateStr: string) => void;
@@ -24,11 +24,11 @@ interface CalendarColumnProps {
   variant?: 'classic' | 'detailed';
   onSelectTask?: (task: DbTask) => void;
   onToggleTask?: (task: DbTask, newStatus: boolean) => void;
-  onMoodChange?: (dateStr: string, newMood: DailyMood | null) => void;
+  onMoodChange?: (dateStr: string, categoryId: number | null) => void;
 }
 
 const CalendarColumn: React.FC<CalendarColumnProps> = ({ 
-  events, tasks, onSelectEvent, onAddEventClick, onDayClick, onMonthChange,
+  events, tasks, allCategories, onSelectEvent, onAddEventClick, onDayClick, onMonthChange,
   hideHeader, forceView, targetDate, variant = 'classic', onSelectTask,
   onToggleTask, onMoodChange
 }) => {

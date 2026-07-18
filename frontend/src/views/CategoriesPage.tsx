@@ -8,7 +8,7 @@ import CategoryForm, { type CategoryFormValues } from '@/components/CategoryForm
 export interface Category {
   id: number;
   name: string;
-  colore?: string | null;
+  color?: string | null;
   genre: number; // 1=Tasks, 2=Events, 3=Comuni
 }
 
@@ -85,7 +85,7 @@ const CategoriesPage: React.FC = () => {
   const handleCreate = async (values: CategoryFormValues) => {
     const payload = {
       name: values.name,
-      colore: values.colore || null,
+      color: values.color || null,
       genre: values.genre,
     };
 
@@ -166,14 +166,14 @@ const CategoriesPage: React.FC = () => {
                 <tr key={c.id}>
                   <td>{c.name}</td>
                   <td>
-                    {c.colore ? (
+                    {c.color ? (
                       <span
                         style={{
                           display: 'inline-block',
                           width: 16,
                           height: 16,
                           borderRadius: 4,
-                          background: c.colore,
+                          background: c.color,
                           border: '1px solid #ccc',
                         }}
                       />

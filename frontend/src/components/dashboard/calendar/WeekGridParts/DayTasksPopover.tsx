@@ -12,7 +12,7 @@ type SafeTask = DbTask & {
   category?: TaskCategoryFields;
   category_color?: string;
   categoryColor?: string;
-  colore?: string;
+  color?: string;
   priorita?: string | number | null;
 };
 
@@ -24,11 +24,11 @@ interface DayTasksPopoverProps {
 
 const getTaskColorHex = (task: SafeTask): string => {
   const rawColor = 
-    task.category?.colore || 
+    task.category?.color || 
     task.category?.color || 
     task.category_color || 
     task.categoryColor || 
-    task.colore || 
+    task.color ||
     '#3b82f6';
   return getHexColor(rawColor);
 };

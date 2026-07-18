@@ -1,7 +1,7 @@
 export interface Category {
   id: number;
   name: string;
-  colore: string | null;
+  color: string | null;
   user_id: number | null;
   genre: number;
 }
@@ -9,7 +9,8 @@ export interface Category {
 export const CategoryGenre = {
   TASKS: 1,
   EVENTS: 2,
-  COMMON: 3
+  COMMON: 3,
+  MOOD: 4,
 } as const;
 
 export type CategoryGenre = typeof CategoryGenre[keyof typeof CategoryGenre];

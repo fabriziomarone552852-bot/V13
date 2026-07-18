@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TrashIcon } from '@/components/shared/utils/Icons';
-import type { MoodEvent } from '@/types/dailyentries';
+import type { DailyEntry } from '@/types/dailyentries';
 import { getOriginClass, getNumCols } from '@/utils/uiUtils';
 import { AutoExpandingTextarea } from '@/components/shared/utils/AutoExpandingTextarea';
 
@@ -8,7 +8,7 @@ import { AutoExpandingTextarea } from '@/components/shared/utils/AutoExpandingTe
 const textStyle = "text-[length:clamp(0.85rem,10cqmin,1.15rem)] font-black leading-tight break-words whitespace-pre-wrap w-full min-w-0 max-w-full";
 
 interface MoodEventCardProps {
-  ev: MoodEvent;
+  ev: DailyEntry;
   index: number;
   totalBlocks: number;
   themeColor: 'green' | 'red';
@@ -58,7 +58,7 @@ export const MoodEventCard: React.FC<MoodEventCardProps> = ({
         <div className="w-full flex flex-col items-center justify-center min-w-0 flex-1">
           {isEditing ? (
             <AutoExpandingTextarea 
-              initialValue={ev.title}
+              initialValue={ev.testo}
               onBlur={(e) => handleSave(e.target.value)} 
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSave(e.currentTarget.value); }
@@ -69,7 +69,7 @@ export const MoodEventCard: React.FC<MoodEventCardProps> = ({
             />
           ) : (
             <span className={`${textStyle} line-clamp-3 group-hover:line-clamp-none`}>
-              {ev.title}
+              {ev.testo}
             </span>
           )}
         </div>

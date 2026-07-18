@@ -8,7 +8,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 export interface Category {
   id: number;
   name: string;
-  colore?: string | null;
+  color?: string | null;
   genre: number; // 1=Tasks, 2=Events, 3=Comuni
 }
 

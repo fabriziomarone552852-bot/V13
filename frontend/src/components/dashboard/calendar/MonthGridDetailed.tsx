@@ -1,10 +1,9 @@
 // frontend/src/components/dashboard/calendar/MonthGridDetailed.tsx
 import React, { useMemo } from 'react';
 import type { CalendarState } from '@/hooks/useCalendarState';
-import type { CalendarEvent, DbTask } from '@/types';
+import type { CalendarEvent, DbTask, Category } from '@/types';
 import { pad } from '@/utils/dateUtils';
 import { isEventInDay } from '@/utils/eventUtils';
-import { type DailyMood } from './MonthDayCell';
 import { MonthDayCell } from './MonthDayCell';
 
 import type { CalendarGridItem } from './MonthGrid';
@@ -13,15 +12,17 @@ interface MonthGridDetailedProps {
   state: CalendarState;
   events: CalendarEvent[];
   tasks?: DbTask[];
+  allCategories?: Category[];
   onDayClick?: (dateStr: string) => void;
   onAddEventClick?: (dateStr: string) => void;
-  onMoodChange?: (dateStr: string, newMood: DailyMood | null) => void;
+  onMoodChange?: (dateStr: string, categoryId: number | null) => void;
 }
 
 const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
   state,
   events,
   tasks = [],
+  allCategories = [],
   onDayClick,
   onAddEventClick,
   onMoodChange
@@ -53,7 +54,7 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
             type: 'task', 
             category: t.category?.name || 'Generico',
             isMultiDay: false, 
-            categoryColor: t.category?.colore || '#9CA3AF', // Fallback sicuro
+            categoryColor: t.category?.color || '#9CA3AF', // Fallback sicuro
             done: !!t.fatto // Assicura che sia un booleano
           });
         }
@@ -129,8 +130,9 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
               items={itemsByDate[dateKey] || []}
               onDayClick={onDayClick}
               onAddEventClick={onAddEventClick}
-              showMoodSelector={true} // <-- ACCENDE LA FACCINA SOLO QUI
-              onMoodChange={onMoodChange} // <-- PASSA IL DATO IN SU
+              showMoodSelector={true} 
+              onMoodChange={onMoodChange}
+              allCategories={allCategories} 
             />
           );
         })}

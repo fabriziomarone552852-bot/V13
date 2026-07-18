@@ -8,6 +8,7 @@ import { useTaskMutations } from '@/hooks/mutations/useTaskMutations';
 import { useEventMutations } from '@/hooks/mutations/useEventMutations';
 import { useTaskModals } from '@/context/TaskModalContext';
 import { useEventModals } from '@/context/EventModalContext';
+import { useCategories } from '@/hooks/useCategories'; // 🪄 IMPORTANTE: Aggiunto per i pallini colorati
 
 // I "blocchi" visivi della pagina (Componenti)
 import CalendarColumn from '@/components/dashboard/CalendarColumn';
@@ -24,8 +25,8 @@ import { calculateYearProgress } from '@/utils/dateUtils';
 import { buildTaskTree, filterAndSortTree, getUpcomingTasks } from '@/utils/taskUtils';
 import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils';
 
-// Le definizioni di come sono fatti i dati (Tipi)
-import type { CalendarEvent, DbEvent, TaskSummary, UITask } from '@/types';
+// Le definizioni di come sono fatti i dati (Tipi - Zero 'any')
+import type { CalendarEvent, TaskSummary, UITask } from '@/types'; // Rimosso DbEvent inutilizzato
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ const HomePage: React.FC = () => {
   // Memorizziamo il mese attuale (il tipo è palesemente Date)
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const today = useMemo(() => new Date(), []);
+
+  // 🪄 LA VIA LUNGA: Recuperiamo le categorie dal server per alimentare i colori nel calendario
+  const { dbCategories } = useCategories();
 
   // Recuperiamo tutte le carte dal server
   const { events: eventiDalServer, tasks, isLoading, isFetching, isError } = useAgendaHome(currentMonth);
@@ -58,7 +62,6 @@ const HomePage: React.FC = () => {
   const yearProgress: number = useMemo(() => calculateYearProgress(), []);
   
   const taskTree: UITask[] = useMemo(() => {
-    // I due punti interrogativi evitano errori se 'tasks' non è ancora arrivato
     const rawTree = buildTaskTree(tasks ?? []); 
     return filterAndSortTree(rawTree, false, 'priority');
   }, [tasks]);
@@ -67,7 +70,6 @@ const HomePage: React.FC = () => {
     return mapDbEventsToCalendarEvents(eventiDalServer ?? []);
   }, [eventiDalServer]);
 
-  // Usiamo il numero fisso 30 come limite di giorni
   const next30DaysTasks: TaskSummary[] = useMemo(
     () => getUpcomingTasks(tasks ?? [], 30), 
     [tasks]
@@ -92,7 +94,7 @@ const HomePage: React.FC = () => {
 
   const handleEditEvent = (): void => {
     if (selectedEvent) {
-      openEventForm(selectedEvent, null); // 🪄 Cambiato con la funzione globale
+      openEventForm(selectedEvent, null); 
       closeEventDetail(); 
     }
   };
@@ -144,11 +146,12 @@ const HomePage: React.FC = () => {
             hideHeader={false}
             events={calendarEvents} 
             tasks={tasks ?? []}
+            allCategories={dbCategories} // 🪄 MAGIA: Ora i pallini dei Mood colorati funzioneranno anche in Home!
             onMonthChange={setCurrentMonth}
-            onSelectEvent={(event: CalendarEvent) => openEventDetail(event)} // 🪄 Usiamo la funzione del context
+            onSelectEvent={(event: CalendarEvent) => openEventDetail(event)} 
             onDayClick={handleGoToDay} 
             onAddEventClick={(dataCliccata?: string) => {
-              openEventForm(null, dataCliccata ?? null); // 🪄 Usiamo la funzione del context
+              openEventForm(null, dataCliccata ?? null); 
             }} 
           />
         </div>
@@ -157,14 +160,14 @@ const HomePage: React.FC = () => {
           <EventsColumn 
             events={calendarEvents} 
             selectedDate={today} 
-            onSelectEvent={(event: CalendarEvent) => openEventDetail(event)} // 🪄 Usiamo la funzione del context
+            onSelectEvent={(event: CalendarEvent) => openEventDetail(event)} 
           />
         </div>
       </div>
 
       <UpcomingTasksWidget tasks={next30DaysTasks} />
 
-      {/* --- MODALS ADATTATI AI VALORI DEL CONTEXT --- */}
+      {/* --- MODALS DEGLI EVENTI (Locali) --- */}
       <EventDetailModal 
         isOpen={isDetailOpen} 
         onClose={closeEventDetail} 

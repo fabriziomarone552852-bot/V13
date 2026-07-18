@@ -11,7 +11,7 @@ export type SafeTask = DbTask & {
   category?: TaskCategoryFields;
   category_color?: string;
   categoryColor?: string;
-  colore?: string;
+  color?: string;
   priorita?: string | number | null;
 };
 

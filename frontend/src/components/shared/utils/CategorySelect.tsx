@@ -18,11 +18,11 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
-  const [newCatForm, setNewCatForm] = useState({ name: '', colore: '#3B82F6' });
+  const [newCatForm, setNewCatForm] = useState({ name: '', color: '#3B82F6' });
   const [errorMsg, setErrorMsg] = useState('');
   const [openUpwards, setOpenUpwards] = useState(false);
 
-  const activeColor = categories.find((c: Category) => c.name === value)?.colore || '#9CA3AF';
+  const activeColor = categories.find((c: Category) => c.name === value)?.color || '#9CA3AF';
 
   const wrapperRef = useOutsideClick<HTMLDivElement>(() => {
     if (isDropdownOpen) setIsDropdownOpen(false);
@@ -58,7 +58,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
         
         onChange(promotedCat.name || nomePulito);
         setIsNewModalOpen(false);
-        setNewCatForm({ name: '', colore: '#3B82F6' });
+        setNewCatForm({ name: '', color: '#3B82F6' });
         setErrorMsg('');
         return; 
       }
@@ -66,13 +66,13 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
       // 🪄 FIX: Sintassi React Query (Singolo oggetto payload)
       const cat = await addCategory({ 
         name: nomePulito, 
-        colore: newCatForm.colore, 
+        color: newCatForm.color, 
         genre: genreType 
       });
       
       onChange(cat.name || nomePulito);
       setIsNewModalOpen(false);
-      setNewCatForm({ name: '', colore: '#3B82F6' });
+      setNewCatForm({ name: '', color: '#3B82F6' });
       setErrorMsg('');
     } catch (err) {
       console.error(err);
@@ -103,7 +103,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
         }`}>
           {categories.map((cat: Category) => (
             <div key={cat.id} onClick={() => { onChange(cat.name); setIsDropdownOpen(false); }} className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-2 transition-colors">
-              <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.colore || '#9CA3AF' }}></span>
+              <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.color || '#9CA3AF' }}></span>
               <span className="text-gray-700 truncate">{cat.name}</span>
             </div>
           ))}
@@ -126,8 +126,8 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Colore (HEX)</label>
                 <div className="flex gap-2">
-                  <input type="color" value={newCatForm.colore} onChange={e => setNewCatForm({...newCatForm, colore: e.target.value})} className="w-10 h-10 p-0.5 border rounded-lg cursor-pointer" />
-                  <input type="text" value={newCatForm.colore} onChange={e => setNewCatForm({...newCatForm, colore: e.target.value})} className="flex-1 px-3 py-2 border rounded-lg text-sm uppercase outline-none focus:border-blue-500" />
+                  <input type="color" value={newCatForm.color} onChange={e => setNewCatForm({...newCatForm, color: e.target.value})} className="w-10 h-10 p-0.5 border rounded-lg cursor-pointer" />
+                  <input type="text" value={newCatForm.color} onChange={e => setNewCatForm({...newCatForm, color: e.target.value})} className="flex-1 px-3 py-2 border rounded-lg text-sm uppercase outline-none focus:border-blue-500" />
                 </div>
               </div>
               {errorMsg && <p className="text-xs text-red-500 font-bold">{errorMsg}</p>}

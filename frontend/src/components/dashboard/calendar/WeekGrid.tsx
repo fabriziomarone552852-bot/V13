@@ -41,11 +41,11 @@ const getTaskColorHex = (task: DbTask): string => {
   const cat = t.category as Record<string, unknown> | undefined;
   
   const rawColor = 
-    (cat?.colore as string) || 
+    (cat?.color as string) || 
     (cat?.color as string) || 
     (t.category_color as string) || 
     (t.categoryColor as string) || 
-    (t.colore as string) || 
+    (t.color as string) || 
     '#3b82f6'; // Blu di fallback
 
   return getHexColor(rawColor);

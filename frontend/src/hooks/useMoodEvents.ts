@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/apiService';
-import type { DailyEntry, MoodEvent, MoodEventType, CreateMoodPayload } from '@/types';
-import type { ApiClient } from '@/hooks/useApi';
+import type { DailyEntry, MoodEventType } from '@/types';
+
+export interface SaveMoodPayload {
+  tipo: MoodEventType;
+  testo: string;
+  data_riferimento: string;
+}
 
 export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
   const queryClient = useQueryClient();
@@ -11,7 +16,7 @@ export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
   // 1. LETTURA DEI DATI CON CACHING (RAM)
   const { data, isLoading } = useQuery({
     queryKey,
-    queryFn: async (): Promise<{ positive: MoodEvent[]; negative: MoodEvent[] }> => {
+    queryFn: async (): Promise<{ positive: DailyEntry[]; negative: DailyEntry[] }> => {
       // Passiamo il tipo atteso <DailyEntry[]> al Generic del metodo GET
       const response = await api.get<DailyEntry[]>(
         `/daily-entries?start_date=${mondayStr}&end_date=${sundayStr}`
@@ -19,24 +24,8 @@ export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
 
       const safeData = response ?? [];
 
-      // Filtriamo e mappiamo i dati in modo puramente tipizzato
-      const positive = safeData
-        .filter((e) => e.tipo === 'EP')
-        .map((e) => ({
-          id: e.id,
-          title: e.testo,
-          type: 'EP' as MoodEventType,
-          date: e.data_riferimento.substring(0, 10),
-        }));
-
-      const negative = safeData
-        .filter((e) => e.tipo === 'EN')
-        .map((e) => ({
-          id: e.id,
-          title: e.testo,
-          type: 'EN' as MoodEventType,
-          date: e.data_riferimento.substring(0, 10),
-        }));
+      const positive = safeData.filter((e) => e.tipo === 'EP');
+      const negative = safeData.filter((e) => e.tipo === 'EN');
 
       return { positive, negative };
     },
@@ -46,21 +35,22 @@ export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
 
   // 2. MUTAZIONE: AGGIUNTA EVENTO (Con Optimistic UI / Cache locale)
   const addMoodMutation = useMutation({
-    mutationFn: async (payload: CreateMoodPayload) => {
-      const result = await api.post<DailyEntry, CreateMoodPayload>('/daily-entries', payload);
+    mutationFn: async (payload: SaveMoodPayload) => {
+      const result = await api.post<DailyEntry, SaveMoodPayload>('/daily-entries', payload);
       if (!result) throw new Error("Errore durante la creazione dell'evento umore");
       return result;
     },
     onSuccess: (newEntry) => {
       // Aggiorna istantaneamente la RAM senza fare un nuovo fetch di rete completo
-      queryClient.setQueryData<{ positive: MoodEvent[]; negative: MoodEvent[] }>(queryKey, (oldData) => {
+      queryClient.setQueryData<{ positive: DailyEntry[]; negative: DailyEntry[] }>(queryKey, (oldData) => {
         if (!oldData) return { positive: [], negative: [] };
         
-        const mappedNewEvent: MoodEvent = {
+        const mappedNewEvent: DailyEntry = {
           id: newEntry.id,
-          title: newEntry.testo,
-          type: newEntry.tipo as MoodEventType,
-          date: newEntry.data_riferimento,
+          user_id: newEntry.user_id,
+          testo: newEntry.testo,
+          tipo: newEntry.tipo as MoodEventType,
+          data_riferimento: newEntry.data_riferimento,
         };
 
         return {
@@ -79,11 +69,11 @@ export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
       return result;
     },
     onSuccess: (updatedEntry) => {
-      queryClient.setQueryData<{ positive: MoodEvent[]; negative: MoodEvent[] }>(queryKey, (oldData) => {
+      queryClient.setQueryData<{ positive: DailyEntry[]; negative: DailyEntry[] }>(queryKey, (oldData) => {
         if (!oldData) return { positive: [], negative: [] };
         
-        const updateItem = (list: MoodEvent[]) =>
-          list.map((item) => (item.id === updatedEntry.id ? { ...item, title: updatedEntry.testo } : item));
+        const updateItem = (list: DailyEntry[]) =>
+          list.map((item) => (item.id === updatedEntry.id ? { ...item, testo: updatedEntry.testo } : item));
 
         return {
           positive: updatedEntry.tipo === 'EP' ? updateItem(oldData.positive) : oldData.positive,
@@ -100,7 +90,7 @@ export const useMoodEvents = (mondayStr: string, sundayStr: string) => {
       return id;
     },
     onSuccess: (_, id) => {
-      queryClient.setQueryData<{ positive: MoodEvent[]; negative: MoodEvent[] }>(queryKey, (oldData) => {
+      queryClient.setQueryData<{ positive: DailyEntry[]; negative: DailyEntry[] }>(queryKey, (oldData) => {
         if (!oldData) return { positive: [], negative: [] };
 
         return {

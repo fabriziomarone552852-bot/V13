@@ -214,7 +214,7 @@ export const mapDbEventsToCalendarEvents = (
       dateStr: baseDateStr,
       endDateStr: (e.data_fine && e.data_fine.length >= 10) ? e.data_fine.substring(0, 10) : undefined,
       category: e.category?.name || e.category_name || 'Generico',
-      categoryColor: e.category?.colore || '#9ca3af',
+      categoryColor: e.category?.color || '#9ca3af',
       description: e.descrizione || undefined,
       location: e.luogo || undefined,
       tutto_il_giorno: e.tutto_il_giorno || false,
