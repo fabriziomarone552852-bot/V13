@@ -9,7 +9,7 @@ import { useWeekNotes } from './useWeekNotes';
 import { useWeekGoals } from './useWeekGoals';
 
 // Tipi
-import type { DbTask, CalendarEvent, NoteItem, NoteVariant, SyncWeekResponse } from '@/types'; 
+import type { DbTask, CalendarEvent, NoteVariant, SyncWeekResponse, LocalNoteEntry } from '@/types'; 
 
 export interface UseWeekPageLogicResult {
   state: {
@@ -31,7 +31,7 @@ export interface UseWeekPageLogicResult {
   data: {
     filteredTasks: DbTask[];
     mappedEvents: CalendarEvent[];
-    mappedNotes: NoteItem[];
+    mappedNotes: LocalNoteEntry[];
   };
   moodBoard: ReturnType<typeof useMoodEvents>;
   goals: ReturnType<typeof useWeekGoals>;

@@ -25,3 +25,11 @@ export interface SyncWeekResponse {
   events: DbEvent[]; 
   tasks: DbTask[];
 }
+
+export interface SyncMonthResponse {
+  start_date: string;
+  end_date: string;
+  events: DbEvent[];
+  tasks: DbTask[];
+  daily_entries: DailyEntry[];
+}

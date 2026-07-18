@@ -47,9 +47,20 @@ class SyncWeekResponse(BaseModel):
     events: List[EventResponse] = Field(default_factory=list)
     tasks: List[TaskResponse] = Field(default_factory=list)
 
+class SyncMonthResponse(BaseModel):
+    """
+    Risposta aggregata per /sync/month.
+    """
+    start_date: date
+    end_date: date
+    events: List[EventResponse] = Field(default_factory=list)
+    tasks: List[TaskResponse] = Field(default_factory=list)
+    daily_entries: List[DailyEntryResponse] = Field(default_factory=list)
+
 
 __all__ = [
     "SyncDayResponse",
     "SyncWeekResponse",
-    "DailyEntryResponse",
+    "SyncMonthResponse",
+    "DailyEntryResponse"
 ]

@@ -18,7 +18,7 @@ import { buildTaskTree, filterAndSortTree } from '@/utils/taskUtils';
 import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils';
 import { mapHabitsToRoutines, mapHabitsToItems } from '@/utils/habitUtils';
 import { mapToCountdownItems } from '@/utils/countdownUtils';
-import { getRandomVariant, mapToNoteItems } from '@/utils/noteUtils';
+import { filterNotes, getRandomVariant } from '@/utils/noteUtils';
 import { type NoteVariant } from '@/types';
 
 const DayPage: React.FC = () => {
@@ -76,7 +76,7 @@ const DayPage: React.FC = () => {
   [dayData?.habits, targetDateStr]);
 
   const mappedNotes = useMemo(() => 
-    mapToNoteItems(dayData?.note), 
+    filterNotes(dayData?.note), 
   [dayData?.note]);
 
   // --- 4. HANDLERS DATE SICURI (Zero Mutazioni Dirette) ---
@@ -107,16 +107,16 @@ const DayPage: React.FC = () => {
     const tempId = Date.now();
     saveNote({ 
       id: tempId, 
-      dateStr: targetDateStr, 
-      text: "", 
-      variant: getRandomVariant(), 
+      data_riferimento: targetDateStr, 
+      testo: "", 
+      tipo: getRandomVariant(), 
       isNew: true 
     });
     setEditingNoteId(tempId);
   }, [saveNote, targetDateStr]);
 
-  const handleAutoSaveNote = useCallback((id: number, text: string, variant: NoteVariant, isNew?: boolean) => {
-    saveNote({ id, text, dateStr: targetDateStr, variant, isNew });
+  const handleAutoSaveNote = useCallback((id: number, testo: string, tipo: NoteVariant, isNew?: boolean) => {
+    saveNote({ id, testo, data_riferimento: targetDateStr, tipo, isNew });
   }, [saveNote, targetDateStr]);
 
   const handleDeleteNote = useCallback((id: number, isNew?: boolean) => {

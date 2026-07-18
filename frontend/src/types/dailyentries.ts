@@ -23,14 +23,6 @@ export interface LocalNoteEntry extends DailyEntry {
 // ANCHE SE SARANNO FORMULATI I COLORIN NEL BACKEND IN USER_CATEGORIES TABLE
 export type PixelColor = 'blu' | 'giallo' | 'rosso' | 'verde' | 'viola' | 'transparent';
 
-export interface NoteItem {
-  id: number;
-  text: string;
-  dateStr: string;
-  variant: NoteVariant;
-  isNew?: boolean; 
-}
-
 export const isNoteVariant = (tipo: string): tipo is NoteVariant => {
   return ['N1', 'N2', 'N3', 'N4'].includes(tipo);
 };

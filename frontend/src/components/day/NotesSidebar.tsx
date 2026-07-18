@@ -1,38 +1,43 @@
 // src/components/day/NotesSidebar.tsx
 import React, { useState, useEffect } from 'react';
-import type { NoteItem, NoteVariant } from '@/types';
+import type { LocalNoteEntry, NoteVariant } from '@/types';
+import { isNoteVariant } from '@/types'; // 🪄 Importiamo la guardia di tipo!
 import { CloseIcon, TrashIcon, PlusIcon, NoteIcon } from '@/components/shared/utils/Icons';
 import { useAutoResizeTextArea } from '@/hooks/useAutoResizeTextArea';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// Mappatura tipizzata delle varianti ai colori dei veri Post-it (Niente 'any'!)
 const NOTE_STYLES: Record<NoteVariant, { card: string; ring: string; text: string; placeholder: string; btnHover: string; btnBg: string; btnText: string }> = {
-  N1: { card: 'bg-yellow-100', ring: 'ring-yellow-400/50', text: 'text-yellow-900', placeholder: 'placeholder-yellow-800/40', btnBg: 'bg-yellow-300/30', btnHover: 'hover:bg-yellow-300/80', btnText: 'text-yellow-800/40 hover:text-red-600' }, // Giallo
-  N2: { card: 'bg-green-100', ring: 'ring-green-400/50', text: 'text-green-900', placeholder: 'placeholder-green-800/40', btnBg: 'bg-green-300/30', btnHover: 'hover:bg-green-300/80', btnText: 'text-green-800/40 hover:text-red-600' },   // Verde
-  N3: { card: 'bg-blue-100', ring: 'ring-blue-400/50', text: 'text-blue-900', placeholder: 'placeholder-blue-800/40', btnBg: 'bg-blue-300/30', btnHover: 'hover:bg-blue-300/80', btnText: 'text-blue-800/40 hover:text-red-600' },   // Azzurro
-  N4: { card: 'bg-pink-100', ring: 'ring-pink-400/50', text: 'text-pink-900', placeholder: 'placeholder-pink-800/40', btnBg: 'bg-pink-300/30', btnHover: 'hover:bg-pink-300/80', btnText: 'text-pink-800/40 hover:text-red-600' },   // Rosa
+  N1: { card: 'bg-yellow-100', ring: 'ring-yellow-400/50', text: 'text-yellow-900', placeholder: 'placeholder-yellow-800/40', btnBg: 'bg-yellow-300/30', btnHover: 'hover:bg-yellow-300/80', btnText: 'text-yellow-800/40 hover:text-red-600' },
+  N2: { card: 'bg-green-100', ring: 'ring-green-400/50', text: 'text-green-900', placeholder: 'placeholder-green-800/40', btnBg: 'bg-green-300/30', btnHover: 'hover:bg-green-300/80', btnText: 'text-green-800/40 hover:text-red-600' },
+  N3: { card: 'bg-blue-100', ring: 'ring-blue-400/50', text: 'text-blue-900', placeholder: 'placeholder-blue-800/40', btnBg: 'bg-blue-300/30', btnHover: 'hover:bg-blue-300/80', btnText: 'text-blue-800/40 hover:text-red-600' },
+  N4: { card: 'bg-pink-100', ring: 'ring-pink-400/50', text: 'text-pink-900', placeholder: 'placeholder-pink-800/40', btnBg: 'bg-pink-300/30', btnHover: 'hover:bg-pink-300/80', btnText: 'text-pink-800/40 hover:text-red-600' },
 };
 
 const SmartNoteCard: React.FC<{
-  nota: NoteItem;
+  nota: LocalNoteEntry;
   isInitiallyEditing: boolean;
-  onAutoSave: (id: number, text: string, variant: NoteVariant, isNew?: boolean) => void;
+  onAutoSave: (id: number, testo: string, tipo: NoteVariant, isNew?: boolean) => void;
   onDelete: (id: number, isNew?: boolean) => void;
   clearNewStatus: () => void;
 }> = ({ nota, isInitiallyEditing, onAutoSave, onDelete, clearNewStatus }) => {
   const [isEditing, setIsEditing] = useState(isInitiallyEditing);
-  const [text, setText] = useState(nota.text);
+  const [testoLocal, setTestoLocal] = useState(nota.testo);
   
-  const debouncedText = useDebounce(text, 1000);
-  const textareaRef = useAutoResizeTextArea(text);
-  const styles = NOTE_STYLES[nota.variant];
+  const debouncedText = useDebounce(testoLocal, 1000);
+  const textareaRef = useAutoResizeTextArea(testoLocal);
+
+  // 🪄 VERIFICA DI SICUREZZA
+  // Se il tipo che arriva dal database è corretto lo usiamo, altrimenti forziamo 'N1' di default.
+  // Nessun "as" necessario, TypeScript ora sa che safeVariant è sicuramente una NoteVariant.
+  const safeVariant: NoteVariant = isNoteVariant(nota.tipo) ? nota.tipo : 'N1';
+  const styles = NOTE_STYLES[safeVariant];
 
   useEffect(() => {
-    if (debouncedText !== nota.text) {
+    if (debouncedText !== nota.testo) {
       if (debouncedText.trim() === "") {
         onDelete(nota.id, nota.isNew);
       } else {
-        onAutoSave(nota.id, debouncedText, nota.variant, nota.isNew);
+        onAutoSave(nota.id, debouncedText, safeVariant, nota.isNew);
         clearNewStatus();
       }
     }
@@ -40,10 +45,10 @@ const SmartNoteCard: React.FC<{
 
   const handleBlur = () => {
     setIsEditing(false);
-    if (text.trim() === "") {
+    if (testoLocal.trim() === "") {
       onDelete(nota.id, nota.isNew);
-    } else if (text !== nota.text) {
-      onAutoSave(nota.id, text, nota.variant, nota.isNew);
+    } else if (testoLocal !== nota.testo) {
+      onAutoSave(nota.id, testoLocal, safeVariant, nota.isNew);
       clearNewStatus();
     }
   };
@@ -67,8 +72,8 @@ const SmartNoteCard: React.FC<{
         <textarea
           ref={textareaRef}
           autoFocus
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          value={testoLocal}
+          onChange={(e) => setTestoLocal(e.target.value)}
           onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
           onBlur={handleBlur}
           placeholder="Scrivi qui la tua nota..."
@@ -77,7 +82,7 @@ const SmartNoteCard: React.FC<{
         />
       ) : (
         <p className={`text-sm font-medium leading-relaxed font-mono whitespace-pre-wrap break-words pr-6 ${styles.text}`}>
-          {text || <span className="italic opacity-60">Nota vuota... Clicca per scrivere.</span>}
+          {testoLocal || <span className="italic opacity-60">Nota vuota... Clicca per scrivere.</span>}
         </p>
       )}
     </div>
@@ -86,12 +91,12 @@ const SmartNoteCard: React.FC<{
 
 interface NotesSidebarProps {
   isOpen: boolean;
-  notes: NoteItem[];
+  notes: LocalNoteEntry[];
   editingNoteId: number | null;
   onOpen: () => void;
   onClose: () => void;
   onAddNote: () => void;
-  onAutoSaveNote: (id: number, text: string, variant: NoteVariant, isNew?: boolean) => void;
+  onAutoSaveNote: (id: number, testo: string, tipo: NoteVariant, isNew?: boolean) => void;
   onDeleteNote: (id: number, isNew?: boolean) => void;
   clearEditingNoteId: () => void;
 }
