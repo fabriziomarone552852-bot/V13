@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 from backend.core import deps
 from backend.domains.users.models import User
 from backend.domains.sync import service
-from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse
+from backend.domains.sync.schemas import (
+    SyncDayResponse,
+    SyncWeekResponse,
+    SyncMonthResponse,
+)
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 

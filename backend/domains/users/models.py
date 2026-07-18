@@ -178,7 +178,7 @@ class User(Base):
 
     shared_logs: Mapped[List["SharedActivityLog"]] = relationship(
         "SharedActivityLog",
-        foreign_keys="SharedActivityLog.performed_by_user_id",
+        back_populates="performed_by_user",
     )
     notifications: Mapped[List["Notification"]] = relationship(
         "Notification",

@@ -1,7 +1,9 @@
 """
-Monthly entries domain - monthly feeling tracking.
+Monthly entries domain public exports.
 """
+
 from backend.domains.monthly_entries.models import MonthlyEntry, MonthlyFeeling
+from backend.domains.monthly_entries.router import router
 from backend.domains.monthly_entries.schemas import (
     MonthlyEntryCreate,
     MonthlyEntryResponse,
@@ -20,4 +22,5 @@ __all__ = [
     "MonthlyFeelingCreate",
     "MonthlyFeelingResponse",
     "MonthlyFeelingUpdate",
+    "router",
 ]

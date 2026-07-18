@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Generator, Optional
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
@@ -9,9 +11,11 @@ from jose import JWTError, jwt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from backend.core import models
 from backend.core.database import SessionLocal
 from backend.core.settings import get_settings
+from backend.domains.config import Config
+from backend.domains.tasks.models import Task
+from backend.domains.users.models import User
 
 settings = get_settings()
 
@@ -19,7 +23,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 ph = PasswordHasher()
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
@@ -68,7 +72,7 @@ def verify_refresh_token(token: str) -> Optional[str]:
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
-) -> models.User:
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Credenziali non valide",
@@ -84,21 +88,20 @@ def get_current_user(
         raise credentials_exception
 
     user = (
-        db.query(models.User)
-        .filter(func.lower(models.User.username) == username.lower())
-        .filter(models.User.deleted_at.is_(None))
+        db.query(User)
+        .filter(func.lower(User.username) == username.lower())
+        .filter(User.deleted_at.is_(None))
         .first()
     )
+
     if user is None:
         raise credentials_exception
 
     return user
 
 
-def require_superuser(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
-    if not current_user.is_superuser:
+def require_superuser(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.issuperuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permessi insufficienti",
@@ -108,42 +111,41 @@ def require_superuser(
 
 def get_admin_max_depth(db: Session) -> int:
     config_db = (
-        db.query(models.Config)
-        .filter(models.Config.key == "max_subtask_depth")
+        db.query(Config)
+        .filter(Config.key == "maxsubtaskdepth")
         .first()
     )
     return int(config_db.value) if config_db else settings.default_max_subtask_depth
 
 
-def get_effective_max_depth(user: models.User, db: Session) -> int:
+def get_effective_max_depth(user: User, db: Session) -> int:
     admin_limit = get_admin_max_depth(db)
     user_limit = (
-        user.max_subtask_depth_user
-        if user.max_subtask_depth_user is not None
+        user.maxsubtaskdepthuser
+        if user.maxsubtaskdepthuser is not None
         else settings.default_max_subtask_depth
     )
     return min(user_limit, admin_limit)
 
 
-def get_task_owned(
-    task_id: int,
-    current_user: models.User,
-    db: Session,
-) -> models.Task:
+def get_task_owned(task_id: int, current_user: User, db: Session) -> Task:
     task = (
-        db.query(models.Task)
-        .filter(models.Task.id == task_id, models.Task.user_id == current_user.id)
+        db.query(Task)
+        .filter(Task.id == task_id, Task.userid == current_user.id)
         .first()
     )
     if not task:
-        raise HTTPException(status_code=404, detail="Task non trovato o non accessibile")
+        raise HTTPException(
+            status_code=404,
+            detail="Task non trovato o non accessibile",
+        )
     return task
 
 
 def would_create_cycle(
     task_id: int,
     new_parent_id: Optional[int],
-    current_user: models.User,
+    current_user: User,
     db: Session,
 ) -> bool:
     if new_parent_id is None:
@@ -153,21 +155,34 @@ def would_create_cycle(
         return True
 
     ancestor_cte = (
-        select(models.Task.id, models.Task.parent_id)
-        .filter(
-            models.Task.id == new_parent_id,
-            models.Task.user_id == current_user.id,
-        )
+        select(Task.id, Task.parentid)
+        .filter(Task.id == new_parent_id, Task.userid == current_user.id)
         .cte(name="cycle_ancestors", recursive=True)
     )
 
     recursive_part = (
-        select(models.Task.id, models.Task.parent_id)
-        .join(ancestor_cte, models.Task.id == ancestor_cte.c.parent_id)
-        .filter(models.Task.user_id == current_user.id)
+        select(Task.id, Task.parentid)
+        .join(ancestor_cte, Task.id == ancestor_cte.c.parentid)
+        .filter(Task.userid == current_user.id)
     )
 
     ancestor_cte = ancestor_cte.union_all(recursive_part)
     cycle_query = select(ancestor_cte.c.id).filter(ancestor_cte.c.id == task_id)
     result = db.execute(cycle_query).first()
     return result is not None
+
+
+# Backward compatibility aliases
+oauth2scheme = oauth2_scheme
+getdb = get_db
+getpasswordhash = get_password_hash
+verifypassword = verify_password
+createaccesstoken = create_access_token
+createrefreshtoken = create_refresh_token
+verifyrefreshtoken = verify_refresh_token
+getcurrentuser = get_current_user
+requiresuperuser = require_superuser
+getadminmaxdepth = get_admin_max_depth
+geteffectivemaxdepth = get_effective_max_depth
+gettaskowned = get_task_owned
+wouldcreatecycle = would_create_cycle
