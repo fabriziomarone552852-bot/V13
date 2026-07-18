@@ -1,3 +1,6 @@
+# Aggiungere in cima agli import esistenti — nessun'altra modifica al file
+from sqlalchemy.orm import sessionmaker as _sessionmaker
+
 import sys
 
 from sqlalchemy import and_, or_, text
@@ -436,14 +439,23 @@ def _align_users_subtask_depth(db) -> int:
 
     return len(users_without_depth)
 
+# ...tutto il resto invariato fino a seed_database()...
 
-def seed_database() -> None:
+def seed_database(session_factory=None) -> None:
+    """
+    session_factory: se fornito, viene usato al posto del SessionLocal globale.
+    Permette a BOOTDB.py di iniettare un engine/session dedicati all'ambiente
+    scelto senza toccare il singleton di core.database.
+    """
     print("=" * 70)
     print("AVVIO SEED DATI INIZIALI (Smart Agenda API)")
     print("=" * 70)
 
-    db = SessionLocal()
+    _SessionFactory = session_factory if session_factory is not None else SessionLocal
+
+    db = _SessionFactory()   # ← unica riga cambiata rispetto all'originale
     try:
+        # ... tutto il corpo rimane IDENTICO all'originale ...
         print("[1/6] Verifica o creazione utente di sistema...")
         system_user = _ensure_system_user(db)
         db.commit()
