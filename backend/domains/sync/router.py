@@ -39,3 +39,16 @@ def get_week_sync(
     Ritorna tutti i dati di una data settimana per l'utente corrente.
     """
     return service.get_week_sync(db, current_user, start_date, end_date)
+
+# Assicurati di importare anche SyncMonthResponse in cima al file!
+@router.get("/month", response_model=SyncMonthResponse)
+def get_month_sync(
+    start_date: date = Query(...),
+    end_date: date = Query(...),
+    current_user: User = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    Ritorna tutti i dati di un dato mese per l'utente corrente.
+    """
+    return service.get_month_sync(db, current_user, start_date, end_date)

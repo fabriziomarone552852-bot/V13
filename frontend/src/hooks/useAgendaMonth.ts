@@ -5,14 +5,14 @@ import { useTaskMutations } from './mutations/useTaskMutations';
 import { useNoteMutations } from './mutations/useNoteMutations';
 import { useDailyEntryMutations } from './mutations/useDailyEntryMutations';
 import { useEventMutations } from './mutations/useEventMutations';
-import type { DbTask, CalendarEvent, NoteItem, DailyEntry, MonthlyEntry } from '@/types';
+import type { DbTask, DbEvent, DailyEntry, MonthlyEntry } from '@/types'; 
 
 export interface SyncMonthResponse {
   start_date: string;
   end_date: string;
   tasks: DbTask[];
-  events: CalendarEvent[];
-  note: NoteItem[];
+  events: DbEvent[]; 
+  note: DailyEntry[]; 
   obiettivi: DailyEntry[];
   priorita: DailyEntry[];
   eventi_positivi: DailyEntry[]; 
@@ -24,6 +24,8 @@ export const useAgendaMonth = (startStr: string, endStr: string) => {
   const queryKey = ['monthSync', startStr];
 
   const taskMutations = useTaskMutations(['tasks']);
+  
+  // Ora TypeScript è felice perché SyncMonthResponse ha note: DailyEntry[]
   const noteMutations = useNoteMutations<SyncMonthResponse>(queryKey);
   const entryMutations = useDailyEntryMutations<SyncMonthResponse>(queryKey);
   const eventMutations = useEventMutations<SyncMonthResponse>(queryKey);
@@ -31,22 +33,21 @@ export const useAgendaMonth = (startStr: string, endStr: string) => {
   const { data: monthData, isLoading, isError } = useQuery({
     queryKey,
     queryFn: async (): Promise<SyncMonthResponse> => {
-      const response = await api.get(`/sync/month?start_date=${startStr}&end_date=${endStr}`);
-      if (!response) throw new Error("Impossibile caricare i dati mensili");
+      const data = await api.get<SyncMonthResponse>(`/sync/month?start_date=${startStr}&end_date=${endStr}`);
       
-      const rawData = response as SyncMonthResponse;
-
+      if (!data) throw new Error("Impossibile caricare i dati mensili");
+      
       return {
-        start_date: rawData.start_date || startStr,
-        end_date: rawData.end_date || endStr,
-        tasks: rawData.tasks ?? [],
-        events: rawData.events ?? [],
-        note: rawData.note ?? [],
-        obiettivi: rawData.obiettivi ?? [],
-        priorita: rawData.priorita ?? [],
-        eventi_positivi: rawData.eventi_positivi ?? [],
-        eventi_negativi: rawData.eventi_negativi ?? [],
-        tracker_entries: rawData.tracker_entries ?? []
+        start_date: data.start_date || startStr,
+        end_date: data.end_date || endStr,
+        tasks: data.tasks ?? [],
+        events: data.events ?? [],
+        note: data.note ?? [], 
+        obiettivi: data.obiettivi ?? [],
+        priorita: data.priorita ?? [],
+        eventi_positivi: data.eventi_positivi ?? [],
+        eventi_negativi: data.eventi_negativi ?? [],
+        tracker_entries: data.tracker_entries ?? []
       };
     },
     staleTime: 5 * 60 * 1000,

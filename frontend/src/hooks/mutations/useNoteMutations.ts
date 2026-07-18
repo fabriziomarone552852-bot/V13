@@ -8,14 +8,40 @@ export interface CacheWithNotes {
   note?: DailyEntry[];
 }
 
+// 1. IL CONTRATTO DEI DATI INVIATI (Perfettamente allineato al Backend)
+export interface SaveNotePayload {
+  id?: number;
+  data_riferimento: string; 
+  testo: string;            
+  tipo: NoteVariant;        
+  isNew?: boolean;
+}
+
+// 2. 🪄 IL CONTRATTO DEL CONTESTO: Elimina i tipi "any/unknown" in onSuccess/onError
+export interface NoteMutationContext<T> {
+  previousData: T | undefined;
+  tempId: number;
+}
+
 export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
   const queryClient = useQueryClient();
 
-  const saveNoteMutation = useMutation({
-    mutationFn: async (note: { id?: number; dateStr: string; text: string; variant: NoteVariant; isNew?: boolean }) => {
-      if (!note.text.trim()) return Promise.resolve(null);
+  // 3. Tipizziamo ESATTAMENTE la mutazione: <DatiDalServer, Errore, DatiInviati, Contesto>
+  const saveNoteMutation = useMutation<
+    DailyEntry | null,      // TData
+    Error,                  // TError
+    SaveNotePayload,        // TVariables
+    NoteMutationContext<T>  // TContext
+  >({
+    mutationFn: async (note) => {
+      if (!note.testo.trim()) return Promise.resolve(null);
 
-      const payload = { data_riferimento: note.dateStr, tipo: note.variant, testo: note.text };
+      const payload = { 
+        data_riferimento: note.data_riferimento, 
+        tipo: note.tipo, 
+        testo: note.testo 
+      };
+      
       const result = note.id && !note.isNew 
         ? await api.patch<DailyEntry>(`/daily-entries/${note.id}`, payload)
         : await api.post<DailyEntry>('/daily-entries', payload);
@@ -23,11 +49,11 @@ export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
       return result;
     },
     
-    onMutate: async (newNote) => {
+    // onMutate ora DEVE restituire una Promise che contiene esattamente NoteMutationContext<T>
+    onMutate: async (newNote): Promise<NoteMutationContext<T>> => {
       await queryClient.cancelQueries({ queryKey });
       const previousData = queryClient.getQueryData<T>(queryKey);
 
-      // 1. Generiamo il tempId
       const tempId = newNote.id || Date.now();
 
       queryClient.setQueryData<T>(queryKey, (old) => {
@@ -37,9 +63,9 @@ export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
         
         const noteEntry: LocalNoteEntry = {
           id: tempId, 
-          data_riferimento: newNote.dateStr,
-          tipo: newNote.variant,
-          testo: newNote.text,
+          data_riferimento: newNote.data_riferimento,
+          tipo: newNote.tipo,
+          testo: newNote.testo,
           user_id: 0,
           isNew: newNote.isNew
         };
@@ -49,27 +75,27 @@ export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
         return {
           ...old,
           note: exists 
-            // ✅ Se esiste (es. autosalvataggio mentre digiti), AGGIORNIAMO quella riga
             ? currentNotes.map(n => n.id === tempId ? { ...n, ...noteEntry } : n)
-            // ✅ Se non esiste, la PREPENDIAMO in cima alla lista
             : [noteEntry, ...currentNotes]
         };
       });
 
-      // 2. Passiamo il tempId al contesto per il successo
       return { previousData, tempId };
     },
 
     onError: (err, newNote, context) => {
       console.error("Errore salvataggio nota:", err);
-      if (context?.previousData) queryClient.setQueryData(queryKey, context.previousData);
+      // context è ora fortemente tipizzato, l'editor sa che previousData esiste
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
     },
 
     onSuccess: (savedNoteFromDB, newNote, context) => {
-      if (!savedNoteFromDB) return;
+      if (!savedNoteFromDB || !context) return;
 
-      // 3. Scambiamo silenziosamente il tempId con l'ID reale del DB
-      if ((newNote.isNew || !newNote.id) && context?.tempId) {
+      // context.tempId è riconosciuto come 'number' al 100%
+      if ((newNote.isNew || !newNote.id) && context.tempId) {
         queryClient.setQueryData<T>(queryKey, (old) => {
           if (!old) return old;
           return {
@@ -83,14 +109,19 @@ export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
     }
   });
 
-  const deleteNoteMutation = useMutation({
+  // 4. Stessa cosa per l'eliminazione: Tipizziamo il Contesto per il Rollback
+  const deleteNoteMutation = useMutation<
+    number, 
+    Error, 
+    number, 
+    { previousData: T | undefined }
+  >({
     mutationFn: async (id: number) => {
        await api.delete(`/daily-entries/${id}`);
        return id; 
     },
     
-    // 🚀 OPTIMISTIC DELETE IN RAM
-    onMutate: async (deletedId) => {
+    onMutate: async (deletedId): Promise<{ previousData: T | undefined }> => {
       await queryClient.cancelQueries({ queryKey });
       const previousData = queryClient.getQueryData<T>(queryKey);
 
@@ -105,7 +136,9 @@ export function useNoteMutations<T extends CacheWithNotes>(queryKey: QueryKey) {
       return { previousData };
     },
     onError: (err, deletedId, context) => {
-      if (context?.previousData) queryClient.setQueryData(queryKey, context.previousData);
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
     },
   });
 

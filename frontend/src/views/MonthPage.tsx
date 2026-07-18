@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; //[cite: 14]
+// frontend/src/pages/MonthPage.tsx
+import React, { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-// --- IMPORT COMPONENTI CONDIVISI ---[cite: 14]
+// --- IMPORT COMPONENTI CONDIVISI ---
 import NotesSidebar from '@/components/day/NotesSidebar';
 import { SharedAgendaHeader } from '@/components/shared/SharedAgendaHeader';
 import { GoalsAndPrioritiesPanel } from '@/components/shared/GoalsAndPrioritiesPanel';
@@ -17,35 +18,42 @@ import EventDetailModal from '@/components/shared/events/EventDetailModal';
 // --- HOOKS LOGICI E DATI ---
 import { useMonthPageLogic } from '@/hooks/uiMonth/useMonthPageLogic';
 import { useDay } from '@/context/DayContext';
-import { useCategories } from '@/hooks/useCategories'; // 🪄 IMPORTANTE: Il mazzo delle categorie
+import { useCategories } from '@/hooks/useCategories';
+import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils'; 
 
 const MonthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { dataRiferimento: targetDate, changeDate: setTargetDate } = useDay(); //[cite: 14]
+  const { dataRiferimento: targetDate, changeDate: setTargetDate } = useDay();
   
-  // 1. Estraiamo la logica di pagina (Zero 'any', Zero mock!)
+  // Estraiamo la logica di pagina (Zero 'any', Zero mock!)
   const { state, modals, apiData, handlers } = useMonthPageLogic();
 
-  // 2. Estraiamo tutte le categorie dal DB per i pallini colorati del calendario
+  // Estraiamo tutte le categorie dal DB per i pallini colorati del calendario
   const { dbCategories } = useCategories();
 
   const displayName = format(state.monthTargetDate, 'MMMM', { locale: it }).toUpperCase();
-  const formattedDate = format(state.monthTargetDate, 'yyyy', { locale: it }); //[cite: 14]
+  const formattedDate = format(state.monthTargetDate, 'yyyy', { locale: it });
 
   const isCurrentMonth = new Date().getMonth() === state.monthTargetDate.getMonth() && new Date().getFullYear() === state.monthTargetDate.getFullYear();
 
+  // 🪄 TRADUTTORE SICURO: Nessun 'any' richiesto.
+  // mapDbEventsToCalendarEvents deve accettare (DbEvent[] | undefined) e restituire CalendarEvent[]
+  const mappedEvents = useMemo(() => {
+    return mapDbEventsToCalendarEvents(apiData?.events || [], state.startStr);
+  }, [apiData?.events, state.startStr]);
+
   const handlePrevMonth = useCallback(() => { 
     const d = new Date(state.monthTargetDate); d.setMonth(d.getMonth() - 1); setTargetDate(d); 
-  }, [state.monthTargetDate, setTargetDate]); //[cite: 14]
+  }, [state.monthTargetDate, setTargetDate]);
 
   const handleNextMonth = useCallback(() => { 
     const d = new Date(state.monthTargetDate); d.setMonth(d.getMonth() + 1); setTargetDate(d); 
-  }, [state.monthTargetDate, setTargetDate]); //[cite: 14]
+  }, [state.monthTargetDate, setTargetDate]);
 
-  const handleResetToday = useCallback(() => { setTargetDate(new Date()); }, [setTargetDate]); //[cite: 14]
+  const handleResetToday = useCallback(() => { setTargetDate(new Date()); }, [setTargetDate]);
 
   if (state.isLoading) {
-    return <div className="flex h-full items-center justify-center font-bold text-gray-500 animate-pulse">Caricamento mese...</div>; //[cite: 14]
+    return <div className="flex h-full items-center justify-center font-bold text-gray-500 animate-pulse">Caricamento mese...</div>;
   }
 
   if (state.isError) {
@@ -84,7 +92,6 @@ const MonthPage: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1 min-h-0">
         
         <div className="xl:col-span-1 h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 relative z-40">
-           
            <div className="flex bg-gray-50 border-b border-gray-200 shrink-0 rounded-t-xl">
              <button className={`flex-1 py-3 text-xl transition-all flex items-center justify-center ${state.activeSidebarTab === 'moods' ? 'bg-white border-b-2 border-blue-500 opacity-100 scale-110' : 'hover:bg-gray-100 opacity-40 grayscale hover:grayscale-0'}`} onClick={() => state.setActiveSidebarTab('moods')} title="Umori">😊</button>
              <button className={`flex-1 py-3 text-xl transition-all flex items-center justify-center ${state.activeSidebarTab === 'spheres' ? 'bg-white border-b-2 border-blue-500 opacity-100 scale-110' : 'hover:bg-gray-100 opacity-40 grayscale hover:grayscale-0'}`} onClick={() => state.setActiveSidebarTab('spheres')} title="Sfere">🎯</button>
@@ -93,7 +100,6 @@ const MonthPage: React.FC = () => {
            </div>
            
            <div className="flex-1 flex flex-col min-h-0 bg-gray-50/50 rounded-b-xl overflow-visible">
-              {/* 🪄 Usiamo state.moodsUI e state.spheresUI generati dinamicamente */}
               {state.activeSidebarTab === 'moods' && (
                 <TrackerPanel titleTop="Come mi sento" titleBottom="Review Mese Scorso" items={state.moodsUI} onUpdateValue={handlers.handleUpdateMood} />
               )}
@@ -113,23 +119,17 @@ const MonthPage: React.FC = () => {
 
         <div className="xl:col-span-3 h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 p-4 min-h-0 w-full min-w-0 overflow-visible relative z-10">
           <CalendarColumn 
-             events={apiData?.events || []} 
+             events={mappedEvents} 
              tasks={apiData?.tasks || []}
-             
-             // 🪄 MAGIA: Passiamo le categorie al Calendario per far funzionare i pallini!
              allCategories={dbCategories}
-             
              hideHeader={true}        
              forceView="Mese"   
              targetDate={state.monthTargetDate} 
              variant="detailed"    
-             onDayClick={(dateStr) => navigate('/giorno', { state: { selectedDate: dateStr } })} //[cite: 14]
+             onDayClick={(dateStr) => navigate('/giorno', { state: { selectedDate: dateStr } })} 
              onSelectEvent={modals.openEventDetail} 
              onAddEventClick={(dataCliccata) => modals.openEventForm(null, dataCliccata ?? null)} 
-             
-             // Gestone rigorosa del Pixel giornaliero (PX)
              onMoodChange={(dateStr, categoryId) => {
-               // Chiameremo la mutation saveDailyEntry qui passando tipo 'PX' e category_id
                console.log(`Salva PX: Data ${dateStr}, Categoria ID: ${categoryId}`);
              }}
            />
@@ -145,7 +145,7 @@ const MonthPage: React.FC = () => {
         onAddNote={handlers.handleAddNote} 
         onAutoSaveNote={handlers.handleAutoSaveNote}
         onDeleteNote={handlers.handleDeleteNote}
-        clearEditingNoteId={() => state.setEditingNoteId(null)} //[cite: 14]
+        clearEditingNoteId={() => state.setEditingNoteId(null)} 
       />
 
       <div className="relative z-[9999]">

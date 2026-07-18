@@ -308,3 +308,68 @@ def get_week_sync(
         events=events_payload,
         tasks=[TaskResponse.model_validate(t) for t in tasks_db],
     )
+
+def get_month_sync(
+    db: Session,
+    current_user: User,
+    start_date: date,
+    end_date: date,
+) -> SyncMonthResponse:
+    """Aggrega tutti i dati di un dato mese per l'utente corrente."""
+    
+    # 1. Recuperiamo le Daily Entries del mese (es. per i pallini Mood)
+    entries_db = (
+        db.query(models.DailyEntry)
+        .filter(
+            models.DailyEntry.user_id == current_user.id,
+            models.DailyEntry.data_riferimento >= start_date,
+            models.DailyEntry.data_riferimento <= end_date,
+        )
+        .all()
+    )
+
+    # 2. Recuperiamo ed espandiamo gli Eventi nel range mensile
+    eventi_db = (
+        db.query(models.Event)
+        .filter(models.Event.user_id == current_user.id)
+        .options(selectinload(models.Event.category))
+        .all()
+    )
+    _populate_event_category_name(eventi_db)
+    eventi_espansi = expand_events_for_range(eventi_db, start_date, end_date)
+    eventi_espansi.sort(key=lambda event: _to_utc_naive(event.data_inizio))
+    events_payload = [EventResponse.model_validate(event) for event in eventi_espansi]
+
+    # 3. Recuperiamo i Task (stessa logica attiva/completati di recente)
+    lookback_threshold = datetime.now(UTC) - timedelta(
+        days=DEFAULT_COMPLETED_TASK_LOOKBACK_DAYS
+    )
+    tasks_db = (
+        db.query(models.Task)
+        .filter(models.Task.user_id == current_user.id)
+        .filter(
+            or_(
+                models.Task.fatto.is_(False),
+                and_(
+                    models.Task.fatto.is_(True),
+                    models.Task.data_fatto >= lookback_threshold,
+                ),
+            )
+        )
+        .options(
+            selectinload(models.Task.category),
+            selectinload(models.Task.subtasks),
+        )
+        .all()
+    )
+    _populate_task_category_name(tasks_db)
+
+    return SyncMonthResponse(
+        start_date=start_date,
+        end_date=end_date,
+        daily_entries=[DailyEntryResponse.model_validate(e) for e in entries_db],
+        events=events_payload,
+        tasks=[TaskResponse.model_validate(t) for t in tasks_db],
+    )
+
+

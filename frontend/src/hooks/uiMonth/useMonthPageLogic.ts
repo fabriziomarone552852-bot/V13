@@ -10,12 +10,10 @@ import { formatDateString } from '@/utils/dateUtils';
 import { buildTaskTree } from '@/utils/taskUtils';
 import { getRandomVariant } from '@/utils/noteUtils';
 import type { TrackerItem } from '@/components/weekmonth/TrackerPanel';
-// 🪄 Importiamo i tipi corretti per mappare i grafici[cite: 6, 12]
 import type { NoteVariant, DailyEntry, CalendarEvent, UITask, MonthlyEntryType } from '@/types';
 
 export type SidebarTab = 'moods' | 'spheres' | 'todos' | 'reflections';
 
-// MAPPE DI DEFINIZIONE: Tipizzazione rigorosa invece di stringhe libere[cite: 6]
 const MOOD_DEFS: { id: MonthlyEntryType; name: string; colorHex: string }[] = [
   { id: 'mood_happiness', name: 'Gioia', colorHex: '#EAB308' },
   { id: 'mood_sadness', name: 'Tristezza', colorHex: '#3B82F6' },
@@ -34,6 +32,14 @@ const SPHERE_DEFS: { id: MonthlyEntryType; name: string; colorHex: string }[] = 
   { id: 'sphere_work', name: 'Lavoro', colorHex: '#3B82F6' },
   { id: 'sphere_love', name: 'Coppia', colorHex: '#A855F7' },
 ];
+
+// 🪄 LA VIA LUNGA E SICURA: La Guardia di Tipo
+// Controlla dinamicamente se la stringa in ingresso fa parte delle nostre definizioni valide.
+const isMonthlyEntryType = (value: string): value is MonthlyEntryType => {
+  const validMoods = MOOD_DEFS.map(def => def.id as string);
+  const validSpheres = SPHERE_DEFS.map(def => def.id as string);
+  return validMoods.includes(value) || validSpheres.includes(value);
+};
 
 export const useMonthPageLogic = () => {
   const { dataRiferimento: targetDate, changeDate: setTargetDate } = useDay();
@@ -56,7 +62,6 @@ export const useMonthPageLogic = () => {
 
   const monthTasksUI: UITask[] = useMemo(() => buildTaskTree(monthData?.tasks || []), [monthData?.tasks]);
 
-  // 🪄 LA VIA LUNGA: Addio mock, creiamo i dati per i grafici partendo dinamicamente dal database[cite: 12]
   const moodsUI: TrackerItem[] = useMemo(() => {
     return MOOD_DEFS.map(def => {
       const entry = monthData?.tracker_entries?.find(e => e.type === def.id);
@@ -65,7 +70,7 @@ export const useMonthPageLogic = () => {
         name: def.name,
         colorHex: def.colorHex,
         currentValue: entry?.value || 0,
-        previousValue: 0 // In futuro scaricheremo anche il dato del mese scorso
+        previousValue: 0 
       };
     });
   }, [monthData?.tracker_entries]);
@@ -89,23 +94,37 @@ export const useMonthPageLogic = () => {
   };
 
   const handleUpdateMood = (id: string, val: number) => {
-    const type = id as MonthlyEntryType; 
-    saveMonthlyEntry({ type, value: val, dateStr: startStr });
+    // 🪄 VERIFICA DI SICUREZZA: Niente più 'as'!
+    if (isMonthlyEntryType(id)) {
+      saveMonthlyEntry({ type: id, value: val, dateStr: startStr });
+    } else {
+      console.error(`Tentativo di salvataggio fallito: L'ID "${id}" non è un tipo di umore valido.`);
+    }
   };
 
   const handleUpdateSphere = (id: string, val: number) => {
-    const type = id as MonthlyEntryType;
-    saveMonthlyEntry({ type, value: val, dateStr: startStr });
+    // 🪄 VERIFICA DI SICUREZZA
+    if (isMonthlyEntryType(id)) {
+      saveMonthlyEntry({ type: id, value: val, dateStr: startStr });
+    } else {
+      console.error(`Tentativo di salvataggio fallito: L'ID "${id}" non è un tipo di sfera valido.`);
+    }
   };
 
   const handleAddNote = useCallback(() => {
     const tempId = Date.now();
-    saveNote({ id: tempId, dateStr: startStr, text: "", variant: getRandomVariant(), isNew: true });
+    saveNote({ 
+        id: tempId, 
+        data_riferimento: startStr, 
+        testo: "", 
+        tipo: getRandomVariant(), 
+        isNew: true 
+    });
     setEditingNoteId(tempId);
   }, [saveNote, startStr]);
 
-  const handleAutoSaveNote = useCallback((id: number, text: string, variant: NoteVariant, isNew?: boolean) => {
-    saveNote({ id, text, dateStr: startStr, variant, isNew });
+  const handleAutoSaveNote = useCallback((id: number, testo: string, tipo: NoteVariant, isNew?: boolean) => {
+    saveNote({ id, testo, data_riferimento: startStr, tipo, isNew });
   }, [saveNote, startStr]);
 
   const handleDeleteNote = useCallback((id: number, isNew?: boolean) => {
