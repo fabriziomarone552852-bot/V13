@@ -1,4 +1,3 @@
-# backend/domains/sync/repository.py
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,16 +11,12 @@ from backend.domains.categories.models import UserCategory
 from backend.domains.countdowns.models import Countdown
 from backend.domains.events.models import Event
 from backend.domains.events.recurrence import expand_events_for_range
+from backend.domains.events.service import populate_category_name as populate_event_category_name
 from backend.domains.habits.models import Habit, HabitLog, HabitPeriod
 from backend.domains.planning.models import DailyEntry
 from backend.domains.shopping.models import ShoppingList, ShoppingListItem
 from backend.domains.tasks.models import Task
-from backend.domains.tasks.service import (
-    populate_category_name as populate_task_category_name,
-)
-from backend.domains.events.service import (
-    populate_category_name as populate_event_category_name,
-)
+from backend.domains.tasks.service import populate_category_name as populate_task_category_name
 
 UTC = timezone.utc
 _settings = get_settings()
@@ -67,22 +62,14 @@ def get_recent_tasks(db: Session, user_id: int) -> list[Task]:
                 and_(Task.fatto.is_(True), Task.data_fatto >= _recent_task_threshold()),
             )
         )
-        .options(
-            selectinload(Task.category),
-            selectinload(Task.subtasks),
-        )
+        .options(selectinload(Task.category), selectinload(Task.subtasks))
         .all()
     )
     populate_task_category_name(tasks)
     return tasks
 
 
-def get_expanded_events(
-    db: Session,
-    user_id: int,
-    start_date: date,
-    end_date: date,
-) -> list[Event]:
+def get_expanded_events(db: Session, user_id: int, start_date: date, end_date: date) -> list[Event]:
     events = (
         db.query(Event)
         .filter(Event.user_id == user_id)
@@ -92,11 +79,9 @@ def get_expanded_events(
     populate_event_category_name(events)
     expanded = expand_events_for_range(events, start_date, end_date)
     expanded.sort(
-        key=lambda event: (
-            event.data_inizio.astimezone(UTC).replace(tzinfo=None)
-            if event.data_inizio.tzinfo
-            else event.data_inizio
-        )
+        key=lambda event: event.data_inizio.astimezone(UTC).replace(tzinfo=None)
+        if event.data_inizio.tzinfo
+        else event.data_inizio
     )
     return expanded
 
@@ -110,28 +95,16 @@ def get_categories(db: Session, user_id: int) -> list[UserCategory]:
     )
 
 
-def get_daily_entries_for_day(
-    db: Session,
-    user_id: int,
-    data_riferimento: date,
-) -> list[DailyEntry]:
+def get_daily_entries_for_day(db: Session, user_id: int, data_riferimento: date) -> list[DailyEntry]:
     return (
         db.query(DailyEntry)
-        .filter(
-            DailyEntry.user_id == user_id,
-            DailyEntry.data_riferimento == data_riferimento,
-        )
+        .filter(DailyEntry.user_id == user_id, DailyEntry.data_riferimento == data_riferimento)
         .order_by(DailyEntry.id.asc())
         .all()
     )
 
 
-def get_daily_entries_for_range(
-    db: Session,
-    user_id: int,
-    start_date: date,
-    end_date: date,
-) -> list[DailyEntry]:
+def get_daily_entries_for_range(db: Session, user_id: int, start_date: date, end_date: date) -> list[DailyEntry]:
     return (
         db.query(DailyEntry)
         .filter(
@@ -153,30 +126,17 @@ def get_countdowns(db: Session, user_id: int) -> list[Countdown]:
     )
 
 
-def get_habits_for_day(
-    db: Session,
-    user_id: int,
-    data_riferimento: date,
-) -> list[Habit]:
+def get_habits_for_day(db: Session, user_id: int, data_riferimento: date) -> list[Habit]:
     return (
         db.query(Habit)
         .options(
             selectinload(Habit.periods),
             selectinload(Habit.logs),
-            with_loader_criteria(
-                HabitLog,
-                HabitLog.data_riferimento == data_riferimento,
-            ),
+            with_loader_criteria(HabitLog, HabitLog.data_riferimento == data_riferimento),
         )
         .filter(Habit.user_id == user_id)
         .join(HabitPeriod)
-        .filter(
-            HabitPeriod.data_inizio <= data_riferimento,
-            or_(
-                HabitPeriod.data_fine.is_(None),
-                HabitPeriod.data_fine >= data_riferimento,
-            ),
-        )
+        .filter(HabitPeriod.data_inizio <= data_riferimento, or_(HabitPeriod.data_fine.is_(None), HabitPeriod.data_fine >= data_riferimento))
         .distinct()
         .order_by(Habit.id.desc())
         .all()
@@ -211,12 +171,7 @@ def build_day_bundle(db: Session, user_id: int, data_riferimento: date) -> DaySy
     )
 
 
-def build_week_bundle(
-    db: Session,
-    user_id: int,
-    start_date: date,
-    end_date: date,
-) -> WeekSyncBundle:
+def build_week_bundle(db: Session, user_id: int, start_date: date, end_date: date) -> WeekSyncBundle:
     return WeekSyncBundle(
         daily_entries=get_daily_entries_for_range(db, user_id, start_date, end_date),
         tasks=get_recent_tasks(db, user_id),
@@ -224,12 +179,7 @@ def build_week_bundle(
     )
 
 
-def build_month_bundle(
-    db: Session,
-    user_id: int,
-    start_date: date,
-    end_date: date,
-) -> MonthSyncBundle:
+def build_month_bundle(db: Session, user_id: int, start_date: date, end_date: date) -> MonthSyncBundle:
     return MonthSyncBundle(
         daily_entries=get_daily_entries_for_range(db, user_id, start_date, end_date),
         tasks=get_recent_tasks(db, user_id),
