@@ -17,6 +17,8 @@ from backend.domains.planning.models import DailyEntry
 from backend.domains.shopping.models import ShoppingList, ShoppingListItem
 from backend.domains.tasks.models import Task
 from backend.domains.tasks.service import populate_category_name as populate_task_category_name
+from backend.domains.monthly_entries.models import MonthlyEntry
+from backend.domains.monthly_entries.repository import list_entries as get_monthly_entries
 
 UTC = timezone.utc
 _settings = get_settings()
@@ -46,6 +48,7 @@ class MonthSyncBundle:
     daily_entries: list[DailyEntry] = field(default_factory=list)
     tasks: list[Task] = field(default_factory=list)
     events: list[Event] = field(default_factory=list)
+    monthly_entries: list[MonthlyEntry] = field(default_factory=list)
 
 
 def _recent_task_threshold() -> datetime:
@@ -179,9 +182,19 @@ def build_week_bundle(db: Session, user_id: int, start_date: date, end_date: dat
     )
 
 
-def build_month_bundle(db: Session, user_id: int, start_date: date, end_date: date) -> MonthSyncBundle:
+def build_month_bundle(
+    db: Session,
+    user_id: int,
+    start_date: date,
+    end_date: date,
+) -> MonthSyncBundle:
+    target_date = start_date + timedelta(days=15)
+    
+    month_entries = get_monthly_entries(db, user_id, year=target_date.year, month=target_date.month)
+
     return MonthSyncBundle(
         daily_entries=get_daily_entries_for_range(db, user_id, start_date, end_date),
         tasks=get_recent_tasks(db, user_id),
         events=get_expanded_events(db, user_id, start_date, end_date),
+        monthly_entries=month_entries
     )

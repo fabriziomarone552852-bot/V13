@@ -11,6 +11,7 @@ from backend.domains.shopping.schemas import ShoppingListResponse
 from backend.domains.sync.repository import DaySyncBundle, MonthSyncBundle, WeekSyncBundle
 from backend.domains.sync.schemas import SyncDayResponse, SyncMonthResponse, SyncWeekResponse
 from backend.domains.tasks.schemas import TaskResponse
+from backend.domains.monthly_entries.schemas import MonthlyEntryResponse
 
 DAY_OBJECTIVE_TYPES = {"OD"}
 DAY_PRIORITY_TYPES = {"PD"}
@@ -35,6 +36,9 @@ def _category_to_response(category) -> CategoryResponse:
 
 def _daily_entries_to_response(items) -> list[DailyEntryResponse]:
     return [DailyEntryResponse.model_validate(x) for x in items]
+
+def _monthly_entries_to_response(items) -> list[MonthlyEntryResponse]:
+    return [MonthlyEntryResponse.model_validate(x) for x in items]
 
 
 def to_day_response(bundle: DaySyncBundle, data_riferimento: date) -> SyncDayResponse:
@@ -76,11 +80,16 @@ def to_week_response(bundle: WeekSyncBundle, start_date: date, end_date: date) -
     )
 
 
-def to_month_response(bundle: MonthSyncBundle, start_date: date, end_date: date) -> SyncMonthResponse:
+def to_month_response(
+    bundle: MonthSyncBundle,
+    start_date: date,
+    end_date: date,
+) -> SyncMonthResponse:
     return SyncMonthResponse(
         start_date=start_date,
         end_date=end_date,
         events=[EventResponse.model_validate(x) for x in bundle.events],
         tasks=[TaskResponse.model_validate(x) for x in bundle.tasks],
         daily_entries=_daily_entries_to_response(bundle.daily_entries),
+        monthly_entries=_monthly_entries_to_response(bundle.monthly_entries)
     )
