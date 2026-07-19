@@ -13,7 +13,7 @@ from backend.domains.habits.schemas import HabitResponse
 from backend.domains.planning.schemas import DailyEntryResponse
 from backend.domains.shopping.schemas import ShoppingListResponse
 from backend.domains.tasks.schemas import TaskResponse
-
+from backend.domains.monthly_entries.schemas import MonthlyEntryResponse
 
 class SyncDayResponse(ORMBaseModel):
     data_riferimento: date
@@ -43,6 +43,7 @@ class SyncWeekResponse(ORMBaseModel):
 class SyncMonthResponse(ORMBaseModel):
     start_date: date
     end_date: date
-    events: list[EventResponse] = Field(default_factory=list)
-    tasks: list[TaskResponse] = Field(default_factory=list)
-    daily_entries: list[DailyEntryResponse] = Field(default_factory=list)
+    events: List[EventResponse] = Field(default_factory=list)
+    tasks: List[TaskResponse] = Field(default_factory=list)
+    daily_entries: List[DailyEntryResponse] = Field(default_factory=list)
+    monthly_entries: List[MonthlyEntryResponse] = Field(default_factory=list)
