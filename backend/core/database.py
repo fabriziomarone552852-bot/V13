@@ -1,49 +1,49 @@
 """
 Core database infrastructure.
-Contains shared database configuration and the SQLAlchemy Base class.
+
+Contiene:
+- Base dichiarativa SQLAlchemy condivisa
+- Engine applicativo
+- Session factory condivisa
 """
 from __future__ import annotations
 
-# IMPORTANTE: la config tipizzata carica il file .env corretto (in base ad APP_ENV)
-# e valida le variabili obbligatorie (es. DATABASE_URL) all'avvio.
-from backend.core.settings import get_settings
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
+from backend.core.settings import get_settings
 
 
 class Base(DeclarativeBase):
-    """Classe base per tutti i modelli SQLAlchemy (stile 2.0)."""
+    """Classe base per tutti i modelli SQLAlchemy (stile 2.x)."""
     pass
 
 
-_settings = get_settings()
+settings = get_settings()
+database_url = settings.database_url.strip()
 
-# DATABASE_URL validato dalla config tipizzata (manca -> errore chiaro all'avvio).
-DATABASE_URL = _settings.database_url
-
-engine_kwargs = {
+engine_kwargs: dict = {
     "pool_pre_ping": True,
-    "future": True,
 }
 
-if DATABASE_URL.startswith("sqlite"):
+if database_url.startswith("sqlite"):
     engine_kwargs["connect_args"] = {"check_same_thread": False}
 else:
     engine_kwargs.update(
         {
-            "pool_size": _settings.db_pool_size,
-            "max_overflow": _settings.db_max_overflow,
-            "pool_recycle": _settings.db_pool_recycle,
-            "pool_timeout": _settings.db_pool_timeout,
+            "pool_size": settings.db_pool_size,
+            "max_overflow": settings.db_max_overflow,
+            "pool_recycle": settings.db_pool_recycle,
+            "pool_timeout": settings.db_pool_timeout,
         }
     )
 
-engine = create_engine(DATABASE_URL, **engine_kwargs)
+engine = create_engine(database_url, **engine_kwargs)
 
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
-    future=True,
 )
+
+__all__ = ["Base", "engine", "SessionLocal"]
