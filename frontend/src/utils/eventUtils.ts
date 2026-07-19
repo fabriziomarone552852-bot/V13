@@ -1,3 +1,4 @@
+// frontend/src/utils/eventUtils.ts
 import { pad } from './dateUtils';
 import type { DbEvent, CalendarEvent } from '@/types';
 
@@ -59,7 +60,6 @@ export const getEventSegmentsForDay = (
     endTime = '23:59';
   }
 
-  // Fallback di sicurezza in caso di formati stringa invalidi
   if (!startTime) startTime = '00:00';
   if (!endTime) endTime = '23:59';
 
@@ -144,14 +144,16 @@ export const calculateDailyEventLayout = (
       totalCols: 1
   }));
 
-  const groups: typeof overlayEvents[] = [];
+  // Uso sicuro del tipo Array per i gruppi invece di typeof
+  const groups: Array<typeof overlayEvents> = [];
+  
   overlayEvents.forEach(ev => {
       const group = groups.find(g => g.some(other => ev.seg.startMins < other.seg.endMins && ev.seg.endMins > other.seg.startMins));
       if (group) group.push(ev); else groups.push([ev]);
   });
 
   groups.forEach(group => {
-      const cols: typeof overlayEvents[] = [];
+      const cols: Array<typeof overlayEvents> = [];
       group.sort((a, b) => a.seg.startMins - b.seg.startMins).forEach(ev => {
         let placed = false;
         for (let i = 0; i < cols.length; i++) {
@@ -177,49 +179,57 @@ export const calculateDailyEventLayout = (
 };
 
 /**
- * Questa funzione ora presuppone che il BACKEND invii l'array Piatto e già esploso 
- * nel time range tramite `expand_events_for_range`
+ * Questa funzione mappa i dati del BACKEND in RAM.
+ * Zero "any" e conversioni stringenti a Runtime.
  */
 export const mapDbEventsToCalendarEvents = (
   events: DbEvent[] = [],
-  forceDateStr?: string
+  fallbackDateStr?: string 
 ): CalendarEvent[] => {
   return events.reduce<CalendarEvent[]>((acc, e) => {
-    // 🛡️ Scarta l'evento se manca la data di inizio e non stiamo forzando la data
-    if (!e.data_inizio && !forceDateStr) {
-      console.warn(`Evento ignorato (ID: ${e.id}): data_inizio mancante.`);
+    
+    // 🛡️ SICUREZZA RUNTIME: Assicuriamoci che i dati siano sempre stringhe, anche se il DB sbaglia
+    const safeDataInizio = typeof e.data_inizio === 'string' ? e.data_inizio : '';
+    const safeDataFine = typeof e.data_fine === 'string' ? e.data_fine : '';
+    
+    const hasValidDate = safeDataInizio.length >= 10;
+
+    if (!hasValidDate && !fallbackDateStr) {
+      console.warn(`Evento ignorato (ID: ${e.id}): data_inizio mancante o invalida.`);
       return acc; 
     }
 
-    const safeDataInizio = e.data_inizio || '';
-    // Assicuriamoci che la stringa abbia una lunghezza sufficiente prima di usare substring
-    const baseDateStr = forceDateStr || (safeDataInizio.length >= 10 ? safeDataInizio.substring(0, 10) : '');
+    // Il DB vince sempre. Usiamo il fallback solo in caso di assoluta emergenza
+    const baseDateStr = hasValidDate 
+      ? safeDataInizio.substring(0, 10) 
+      : fallbackDateStr!;
     
-    // Sicurezza per estrarre l'orario (deve esistere la parte di stringa "T12:00")
     const time = e.tutto_il_giorno || safeDataInizio.length < 16 
         ? undefined 
         : safeDataInizio.substring(11, 16);
 
-    const endTime = e.tutto_il_giorno || !e.data_fine || e.data_fine.length < 16
+    const endTime = e.tutto_il_giorno || safeDataFine.length < 16
         ? undefined 
-        : e.data_fine.substring(11, 16);
+        : safeDataFine.substring(11, 16);
         
     const eventFormattato: CalendarEvent = {
-      // Includiamo la data nell'ID per garantire che ricorrenze diverse abbiano ID frontend unici nel DOM
       id: `${e.id}-${baseDateStr}`,
       originalId: e.id,
-      title: e.titolo || 'Senza Titolo', 
+      title: typeof e.titolo === 'string' ? e.titolo : 'Senza Titolo', 
       time: time,
       endTime: endTime,
       dateStr: baseDateStr,
-      endDateStr: (e.data_fine && e.data_fine.length >= 10) ? e.data_fine.substring(0, 10) : undefined,
+      endDateStr: safeDataFine.length >= 10 ? safeDataFine.substring(0, 10) : undefined,
       category: e.category?.name || e.category_name || 'Generico',
       categoryColor: e.category?.color || '#9ca3af',
-      description: e.descrizione || undefined,
-      location: e.luogo || undefined,
-      tutto_il_giorno: e.tutto_il_giorno || false,
-      rrule: e.rrule || undefined,
-      esclusioni: e.esclusioni ?? undefined
+      description: typeof e.descrizione === 'string' ? e.descrizione : undefined,
+      location: typeof e.luogo === 'string' ? e.luogo : undefined,
+      
+      // Assicuriamoci che diventi un vero Boolean in memoria
+      tutto_il_giorno: Boolean(e.tutto_il_giorno), 
+      
+      rrule: typeof e.rrule === 'string' ? e.rrule : undefined,
+      esclusioni: typeof e.esclusioni === 'string' ? e.esclusioni : undefined
     };
 
     acc.push(eventFormattato);

@@ -1,5 +1,5 @@
 // frontend/src/pages/MonthPage.tsx
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -23,9 +23,11 @@ import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils';
 
 const MonthPage: React.FC = () => {
   const navigate = useNavigate();
+  
+  // Manteniamo solo questo per cambiare data dal calendario
   const { changeDate: setTargetDate } = useDay();
   
-  // Estraiamo la logica di pagina (Zero 'any')
+  // Estraiamo la logica di pagina (Zero 'any', i modali sono già qui dentro!)
   const { state, modals, apiData, handlers } = useMonthPageLogic();
 
   // Estraiamo tutte le categorie dal DB per i pallini colorati del calendario
@@ -99,7 +101,7 @@ const MonthPage: React.FC = () => {
                 <div className="p-3 h-full">
                   <TaskColumn 
                     tasks={state.monthTasksUI} 
-                    onToggleTask={handlers.handleToggleTaskSidebar} /* Usa l'handler per la sidebar */
+                    onToggleTask={handlers.handleToggleTaskSidebar}
                     onSelectTask={modals.openTaskDetail} 
                     onAddTaskClick={() => modals.openTaskForm()} 
                   />
@@ -114,14 +116,14 @@ const MonthPage: React.FC = () => {
         <div className="xl:col-span-3 h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 p-4 min-h-0 w-full min-w-0 overflow-visible relative z-10">
           <CalendarColumn 
             events={mappedEvents} 
-            tasks={apiData?.tasks || []} /* La griglia continua ad usare i task grezzi dal DB */
+            tasks={apiData?.tasks || []}
             allCategories={dbCategories}
             hideHeader={true}        
             forceView="Mese"   
             targetDate={state.monthTargetDate} 
             variant="detailed"    
             onDayClick={handlers.handleGoToDay} 
-            onToggleTask={handlers.handleToggleTaskGrid} /* Usa l'handler per la griglia */
+            onToggleTask={handlers.handleToggleTaskGrid}
             onSelectEvent={modals.openEventDetail} 
             onAddEventClick={(dataCliccata) => modals.openEventForm(null, dataCliccata ?? null)} 
             onMoodChange={(dateStr, categoryId) => {
