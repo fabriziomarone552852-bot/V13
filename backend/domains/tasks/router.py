@@ -1,16 +1,15 @@
 """Router HTTP del dominio Tasks (prefix /tasks)."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from backend.core import deps
 from backend.domains.tasks import schemas, service
 from backend.domains.users.models import User
-from backend.pagination_schemas import PaginatedTasks
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-@router.post("", response_model=schemas.TaskResponse, status_code=201)
+@router.post("", response_model=schemas.TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task(
     task_in: schemas.TaskCreate,
     current_user: User = Depends(deps.get_current_user),
@@ -19,7 +18,7 @@ def create_task(
     return service.create_task(db, current_user, task_in)
 
 
-@router.get("", response_model=PaginatedTasks)
+@router.get("", response_model=schemas.PaginatedTasks)
 def get_user_tasks(
     current_user: User = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db),
@@ -46,10 +45,15 @@ def update_task(
     return service.update_task(db, current_user, task_id, task_in)
 
 
-@router.delete("/{task_id}", status_code=204)
+@router.delete(
+    "/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 def delete_task(
     task_id: int,
     current_user: User = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db),
 ):
     service.delete_task(db, current_user, task_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

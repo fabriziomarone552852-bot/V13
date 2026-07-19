@@ -10,10 +10,8 @@ from backend.domains.categories.models import CategoryGenre
 from backend.domains.events import repository as repo
 from backend.domains.events import schemas
 from backend.domains.events.models import Event
-from backend.domains.users.models import User
-from backend.pagination_schemas import PaginatedEvents
 from backend.domains.events.recurrence import expand_events_for_range
-
+from backend.domains.users.models import User
 
 _NOT_FOUND = "Impegno non trovato o non accessibile"
 
@@ -94,7 +92,7 @@ def list_events(
     end_date: Optional[date] = None,
     limit: int = 100,
     offset: int = 0,
-) -> PaginatedEvents:
+) -> schemas.PaginatedEvents:
     total, events_db = repo.list_filtered(
         db,
         current_user.id,
@@ -114,7 +112,12 @@ def list_events(
     else:
         items = [schemas.EventResponse.model_validate(ev) for ev in events_db]
 
-    return PaginatedEvents(items=items, total=total, limit=limit, offset=offset)
+    return schemas.PaginatedEvents(
+        items=items,
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
 
 
 def update_event(

@@ -1,4 +1,3 @@
-# backend/domains/sync/mappers.py
 from __future__ import annotations
 
 from datetime import date
@@ -9,19 +8,19 @@ from backend.domains.events.schemas import EventResponse
 from backend.domains.habits.schemas import HabitResponse
 from backend.domains.planning.schemas import DailyEntryResponse
 from backend.domains.shopping.schemas import ShoppingListResponse
-from backend.domains.sync.repository import DaySyncBundle, WeekSyncBundle, MonthSyncBundle
-from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse, SyncMonthResponse
+from backend.domains.sync.repository import DaySyncBundle, MonthSyncBundle, WeekSyncBundle
+from backend.domains.sync.schemas import SyncDayResponse, SyncMonthResponse, SyncWeekResponse
 from backend.domains.tasks.schemas import TaskResponse
 
-DAY_OBJECTIVE_TYPES = {"OD", "Obiettivo"}
-DAY_PRIORITY_TYPES = {"PD", "Priorità"}
-DAY_NOTE_TYPES = {"N1", "N2", "N3", "N4", "Nota"}
+DAY_OBJECTIVE_TYPES = {"OD"}
+DAY_PRIORITY_TYPES = {"PD"}
+DAY_NOTE_TYPES = {"N1", "N2", "N3", "N4"}
 
 WEEK_OBJECTIVE_TYPES = {"OW"}
 WEEK_PRIORITY_TYPES = {"PW"}
 WEEK_POSITIVE_TYPES = {"EP"}
 WEEK_NEGATIVE_TYPES = {"EN"}
-WEEK_NOTE_TYPES = {"N1", "N2", "N3", "N4", "Nota"}
+WEEK_NOTE_TYPES = {"N1", "N2", "N3", "N4"}
 
 
 def _category_to_response(category) -> CategoryResponse:
@@ -57,35 +56,17 @@ def to_day_response(bundle: DaySyncBundle, data_riferimento: date) -> SyncDayRes
     )
 
 
-def to_week_response(
-    bundle: WeekSyncBundle,
-    start_date: date,
-    end_date: date,
-) -> SyncWeekResponse:
-    obiettivo_settimanale = next(
-        (e for e in bundle.daily_entries if e.tipo in WEEK_OBJECTIVE_TYPES),
-        None,
-    )
-
-    priorita_settimanali = [
-        e for e in bundle.daily_entries if e.tipo in WEEK_PRIORITY_TYPES
-    ]
-    eventi_positivi = [
-        e for e in bundle.daily_entries if e.tipo in WEEK_POSITIVE_TYPES
-    ]
-    eventi_negativi = [
-        e for e in bundle.daily_entries if e.tipo in WEEK_NEGATIVE_TYPES
-    ]
+def to_week_response(bundle: WeekSyncBundle, start_date: date, end_date: date) -> SyncWeekResponse:
+    obiettivo_settimanale = next((e for e in bundle.daily_entries if e.tipo in WEEK_OBJECTIVE_TYPES), None)
+    priorita_settimanali = [e for e in bundle.daily_entries if e.tipo in WEEK_PRIORITY_TYPES]
+    eventi_positivi = [e for e in bundle.daily_entries if e.tipo in WEEK_POSITIVE_TYPES]
+    eventi_negativi = [e for e in bundle.daily_entries if e.tipo in WEEK_NEGATIVE_TYPES]
     note = [e for e in bundle.daily_entries if e.tipo in WEEK_NOTE_TYPES]
 
     return SyncWeekResponse(
         start_date=start_date,
         end_date=end_date,
-        obiettivo_settimanale=(
-            DailyEntryResponse.model_validate(obiettivo_settimanale)
-            if obiettivo_settimanale
-            else None
-        ),
+        obiettivo_settimanale=DailyEntryResponse.model_validate(obiettivo_settimanale) if obiettivo_settimanale else None,
         priorita_settimanali=_daily_entries_to_response(priorita_settimanali),
         eventi_positivi=_daily_entries_to_response(eventi_positivi),
         eventi_negativi=_daily_entries_to_response(eventi_negativi),
@@ -95,11 +76,7 @@ def to_week_response(
     )
 
 
-def to_month_response(
-    bundle: MonthSyncBundle,
-    start_date: date,
-    end_date: date,
-) -> SyncMonthResponse:
+def to_month_response(bundle: MonthSyncBundle, start_date: date, end_date: date) -> SyncMonthResponse:
     return SyncMonthResponse(
         start_date=start_date,
         end_date=end_date,
