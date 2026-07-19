@@ -28,7 +28,7 @@ def get_day_sync(
     """
     Ritorna tutti i dati di un dato giorno per l'utente corrente:
     tasks, events, habits, categories, shopping lists, countdowns,
-    daily entries (obiettivo, priorit\u00e0, note).
+    daily entries (obiettivo, priorità, note).
     """
     return service.get_day_sync(db, current_user, data_riferimento)
 
@@ -44,7 +44,6 @@ def get_week_sync(
     """
     return service.get_week_sync(db, current_user, start_date, end_date)
 
-# Assicurati di importare anche SyncMonthResponse in cima al file!
 @router.get("/month", response_model=SyncMonthResponse)
 def get_month_sync(
     start_date: date = Query(...),

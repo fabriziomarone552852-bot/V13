@@ -2,7 +2,7 @@ import type { Category } from './categories';
 
 export type MoodEventType = 'EP' | 'EN';
 export type NoteVariant = 'N1' | 'N2' | 'N3' | 'N4';
-export type DailyEntryType = 'OD' | 'PD' | 'OW' | 'PW' | 'PX' | MoodEventType | NoteVariant;
+export type DailyEntryType = 'OD' | 'PD' | 'OW' | 'PW' | 'OM' | 'PM' | 'PX' | MoodEventType | NoteVariant;
 
 export interface DailyEntry {
   id: number;

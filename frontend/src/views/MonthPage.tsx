@@ -23,9 +23,9 @@ import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils';
 
 const MonthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { dataRiferimento: targetDate, changeDate: setTargetDate } = useDay();
+  const { changeDate: setTargetDate } = useDay();
   
-  // Estraiamo la logica di pagina (Zero 'any', Zero mock!)
+  // Estraiamo la logica di pagina (Zero 'any')
   const { state, modals, apiData, handlers } = useMonthPageLogic();
 
   // Estraiamo tutte le categorie dal DB per i pallini colorati del calendario
@@ -36,21 +36,10 @@ const MonthPage: React.FC = () => {
 
   const isCurrentMonth = new Date().getMonth() === state.monthTargetDate.getMonth() && new Date().getFullYear() === state.monthTargetDate.getFullYear();
 
-  // 🪄 TRADUTTORE SICURO: Nessun 'any' richiesto.
-  // mapDbEventsToCalendarEvents deve accettare (DbEvent[] | undefined) e restituire CalendarEvent[]
+  // Mappatura sicura
   const mappedEvents = useMemo(() => {
     return mapDbEventsToCalendarEvents(apiData?.events || [], state.startStr);
   }, [apiData?.events, state.startStr]);
-
-  const handlePrevMonth = useCallback(() => { 
-    const d = new Date(state.monthTargetDate); d.setMonth(d.getMonth() - 1); setTargetDate(d); 
-  }, [state.monthTargetDate, setTargetDate]);
-
-  const handleNextMonth = useCallback(() => { 
-    const d = new Date(state.monthTargetDate); d.setMonth(d.getMonth() + 1); setTargetDate(d); 
-  }, [state.monthTargetDate, setTargetDate]);
-
-  const handleResetToday = useCallback(() => { setTargetDate(new Date()); }, [setTargetDate]);
 
   if (state.isLoading) {
     return <div className="flex h-full items-center justify-center font-bold text-gray-500 animate-pulse">Caricamento mese...</div>;
@@ -69,9 +58,9 @@ const MonthPage: React.FC = () => {
           subtitle={formattedDate} 
           currentDate={state.monthTargetDate} 
           isToday={isCurrentMonth} 
-          onPrev={handlePrevMonth} 
-          onNext={handleNextMonth} 
-          onResetToday={handleResetToday} 
+          onPrev={handlers.handlePrevMonth} 
+          onNext={handlers.handleNextMonth} 
+          onResetToday={handlers.handleResetCurrentMonth} 
           onChangeDate={setTargetDate}
           viewMode="month" 
         />
@@ -83,8 +72,8 @@ const MonthPage: React.FC = () => {
             dateKey={state.startStr}
             goalEntry={apiData?.obiettivi?.[0]}
             prioritiesEntries={apiData?.priorita}
-            onSaveGoal={(testo) => console.log("Da implementare: Salva Obiettivo", testo)} 
-            onSavePriority={(id, testo) => console.log("Da implementare: Salva Priorità", id, testo)}
+            onSaveGoal={handlers.handleSaveGoal} 
+            onSavePriority={handlers.handleSavePriority}
           />
         </div>
       </div>
@@ -108,7 +97,12 @@ const MonthPage: React.FC = () => {
               )}
               {state.activeSidebarTab === 'todos' && (
                 <div className="p-3 h-full">
-                  <TaskColumn tasks={state.monthTasksUI} onToggleTask={handlers.handleToggleTask} onSelectTask={modals.openTaskDetail} onAddTaskClick={() => modals.openTaskForm()} />
+                  <TaskColumn 
+                    tasks={state.monthTasksUI} 
+                    onToggleTask={handlers.handleToggleTaskSidebar} /* Usa l'handler per la sidebar */
+                    onSelectTask={modals.openTaskDetail} 
+                    onAddTaskClick={() => modals.openTaskForm()} 
+                  />
                 </div>
               )}
               {state.activeSidebarTab === 'reflections' && (
@@ -119,26 +113,27 @@ const MonthPage: React.FC = () => {
 
         <div className="xl:col-span-3 h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 p-4 min-h-0 w-full min-w-0 overflow-visible relative z-10">
           <CalendarColumn 
-             events={mappedEvents} 
-             tasks={apiData?.tasks || []}
-             allCategories={dbCategories}
-             hideHeader={true}        
-             forceView="Mese"   
-             targetDate={state.monthTargetDate} 
-             variant="detailed"    
-             onDayClick={(dateStr) => navigate('/giorno', { state: { selectedDate: dateStr } })} 
-             onSelectEvent={modals.openEventDetail} 
-             onAddEventClick={(dataCliccata) => modals.openEventForm(null, dataCliccata ?? null)} 
-             onMoodChange={(dateStr, categoryId) => {
-               console.log(`Salva PX: Data ${dateStr}, Categoria ID: ${categoryId}`);
-             }}
-           />
+            events={mappedEvents} 
+            tasks={apiData?.tasks || []} /* La griglia continua ad usare i task grezzi dal DB */
+            allCategories={dbCategories}
+            hideHeader={true}        
+            forceView="Mese"   
+            targetDate={state.monthTargetDate} 
+            variant="detailed"    
+            onDayClick={handlers.handleGoToDay} 
+            onToggleTask={handlers.handleToggleTaskGrid} /* Usa l'handler per la griglia */
+            onSelectEvent={modals.openEventDetail} 
+            onAddEventClick={(dataCliccata) => modals.openEventForm(null, dataCliccata ?? null)} 
+            onMoodChange={(dateStr, categoryId) => {
+              console.log(`Salva PX: Data ${dateStr}, Categoria ID: ${categoryId}`);
+            }}
+          />
          </div>    
       </div>
 
       <NotesSidebar 
         isOpen={state.isNotesOpen} 
-        notes={apiData?.note || []} 
+        notes={state.mappedNotes} 
         editingNoteId={state.editingNoteId}
         onOpen={() => state.setIsNotesOpen(true)} 
         onClose={() => state.setIsNotesOpen(false)}
