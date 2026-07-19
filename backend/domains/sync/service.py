@@ -26,6 +26,7 @@ from backend.domains.shopping.schemas import ShoppingListResponse
 from backend.domains.sync.schemas import (
     SyncDayResponse,
     SyncWeekResponse,
+    SyncMonthResponse
 )
 from backend.domains.tasks.schemas import TaskResponse
 from backend.domains.tasks.service import (

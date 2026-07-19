@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 from backend.core import deps
 from backend.domains.users.models import User
 from backend.domains.sync import service
-from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse
+
+# 🪄 ECCO LA CORREZIONE: Abbiamo aggiunto SyncMonthResponse all'importazione!
+from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse, SyncMonthResponse
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 
@@ -24,7 +26,7 @@ def get_day_sync(
     """
     Ritorna tutti i dati di un dato giorno per l'utente corrente:
     tasks, events, habits, categories, shopping lists, countdowns,
-    daily entries (obiettivo, priorit\u00e0, note).
+    daily entries (obiettivo, priorità, note).
     """
     return service.get_day_sync(db, current_user, data_riferimento)
 
@@ -40,7 +42,6 @@ def get_week_sync(
     """
     return service.get_week_sync(db, current_user, start_date, end_date)
 
-# Assicurati di importare anche SyncMonthResponse in cima al file!
 @router.get("/month", response_model=SyncMonthResponse)
 def get_month_sync(
     start_date: date = Query(...),
