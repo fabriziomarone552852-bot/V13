@@ -12,7 +12,6 @@ from backend.domains.tasks import repository as repo
 from backend.domains.tasks import schemas
 from backend.domains.tasks.models import Task
 from backend.domains.users.models import User
-from backend.pagination_schemas import PaginatedTasks
 
 
 _COMPLETED_LOOKBACK_DAYS = 90
@@ -98,11 +97,16 @@ def create_task(db: Session, current_user: User, task_in: schemas.TaskCreate) ->
     return new_task
 
 
-def list_tasks(db: Session, current_user: User) -> PaginatedTasks:
+def list_tasks(db: Session, current_user: User) -> schemas.PaginatedTasks:
     results = repo.list_active(db, current_user.id, _COMPLETED_LOOKBACK_DAYS)
     populate_category_name(results)
     total = len(results)
-    return PaginatedTasks(items=results, total=total, limit=max(total, 1), offset=0)
+    return schemas.PaginatedTasks(
+        items=results,
+        total=total,
+        limit=max(total, 1),
+        offset=0,
+    )
 
 
 def get_task_family(db: Session, current_user: User, task_id: int) -> Task:

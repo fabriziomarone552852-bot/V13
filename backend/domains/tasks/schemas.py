@@ -5,13 +5,15 @@ Pydantic models for task API validation and serialization.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import Field, field_validator, model_validator
 
 from backend.core.schemas import ORMBaseModel, StrictBaseModel
 from backend.domains.categories.schemas import CategoryResponse
 from backend.domains.tasks.models import PrioritaEnum
+
+T = TypeVar("T")
 
 
 class TaskCreate(StrictBaseModel):
@@ -99,4 +101,18 @@ class TaskResponse(ORMBaseModel):
     subtasks: List["TaskResponse"] = Field(default_factory=list)
 
 
+class PaginatedBase(ORMBaseModel, Generic[T]):
+    """Generic paginated response."""
+
+    items: List[T] = Field(default_factory=list)
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=1)
+    offset: int = Field(..., ge=0)
+
+
+class PaginatedTasks(PaginatedBase[TaskResponse]):
+    """Paginated task response."""
+
+
 TaskResponse.model_rebuild()
+PaginatedTasks.model_rebuild()
