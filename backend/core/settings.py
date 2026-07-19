@@ -1,57 +1,76 @@
 """
 Configurazione tipizzata e centralizzata dell'applicazione.
 
-Unica fonte di verità per le impostazioni runtime, basata su pydantic-settings.
-Le variabili vengono lette dall'ambiente (popolato da backend.core.config in
-base ad APP_ENV) e validate all'avvio: se manca una variabile obbligatoria
-(es. DATABASE_URL) l'app fallisce subito con un messaggio chiaro.
-
-Uso:
-    from backend.core.settings import get_settings
-    settings = get_settings()
-    settings.database_url
+Unica fonte di verità per le impostazioni runtime.
+Il bootstrap dell'ambiente viene eseguito da `backend.core.env`.
 """
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Literal
 
-# Garantisce che il file .env corretto sia già caricato in os.environ.
-from backend.core import config as _config  # noqa: F401
-
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+import backend.core.env as _env  # noqa: F401
+
+
+DEV_FALLBACK_SECRET = "dev-insecure-default-key-change-me"
 
 
 class Settings(BaseSettings):
-    # case_sensitive=False -> DATABASE_URL matcha il campo database_url.
-    # extra="ignore" -> variabili extra (POSTGRES_USER, ...) non causano errori.
-    model_config = SettingsConfigDict(case_sensitive=False, extra="ignore")
+    model_config = SettingsConfigDict(
+        case_sensitive=False,
+        extra="ignore",
+        hide_input_in_errors=True,
+    )
 
-    # Ambiente attivo (dev|test|prod)
-    app_env: str = "dev"
+    app_env: Literal["dev", "test", "prod"] = "dev"
 
-    # --- Database (obbligatorio) ---
-    database_url: str
-    db_pool_size: int = 10
-    db_max_overflow: int = 20
-    db_pool_recycle: int = 1800
-    db_pool_timeout: int = 30
+    database_url: str = Field(..., min_length=1)
+    db_pool_size: int = Field(10, ge=1)
+    db_max_overflow: int = Field(20, ge=0)
+    db_pool_recycle: int = Field(1800, ge=0)
+    db_pool_timeout: int = Field(30, ge=1)
 
-    # --- Autenticazione / JWT ---
-    secret_key: str = "chiave_di_fallback_se_manca_env"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
-    refresh_token_expire_days: int = 7
+    secret_key: SecretStr = Field(
+        default=SecretStr(DEV_FALLBACK_SECRET),
+        min_length=16,
+    )
+    algorithm: Literal["HS256"] = "HS256"
+    access_token_expire_minutes: int = Field(60, ge=1)
+    refresh_token_expire_days: int = Field(7, ge=1)
 
-    # --- Default di dominio ---
-    default_max_subtask_depth: int = 3
-    default_habit_log_lookback_days: int = 30
-    default_completed_task_lookback_days: int = 90
+    default_max_subtask_depth: int = Field(3, ge=0)
+    default_habit_log_lookback_days: int = Field(30, ge=1)
+    default_completed_task_lookback_days: int = Field(90, ge=1)
+
+    @field_validator("database_url")
+    @classmethod
+    def validate_database_url(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("DATABASE_URL non può essere vuota.")
+        return normalized
+
+    @field_validator("secret_key")
+    @classmethod
+    def validate_secret_key(cls, value: SecretStr, info) -> SecretStr:
+        app_env = info.data.get("app_env", "dev")
+        secret = value.get_secret_value()
+
+        if app_env != "dev" and secret == DEV_FALLBACK_SECRET:
+            raise ValueError(
+                "SECRET_KEY deve essere valorizzata esplicitamente negli ambienti non-dev."
+            )
+
+        return value
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Ritorna l'istanza (singleton in cache) delle impostazioni validate."""
+    """Ritorna l'istanza singleton delle impostazioni validate."""
     return Settings()
 
 
-__all__ = ["Settings", "get_settings"]
+__all__ = ["Settings", "get_settings", "DEV_FALLBACK_SECRET"]

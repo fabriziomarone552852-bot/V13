@@ -1,6 +1,6 @@
 # Selezione ambiente + caricamento .env in base ad APP_ENV (nessuna scrittura su disco).
 # DEVE stare in cima, prima di qualsiasi import che legga le variabili d'ambiente.
-from backend.core import config as _config  # noqa: F401
+import backend.core.env as _env  # noqa: F401
 from backend.core.models import import_all_models
 
 import_all_models()
