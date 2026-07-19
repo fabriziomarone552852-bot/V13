@@ -21,6 +21,11 @@ DEFAULT_USER_CATEGORY_TEMPLATES = [
     {"category_name": "Famiglia", "colore": "#68EEB4", "genre": 3},
     {"category_name": "Salute", "colore": "#68EEB4", "genre": 3},
     {"category_name": "Studio", "colore": "#68EEB4", "genre": 3},
+    {"category_name": "Gioia", "colore": "#68EEB4", "genre": 4},
+    {"category_name": "Tristezza", "colore": "#68EEB4", "genre": 4},
+    {"category_name": "Rabbia", "colore": "#68EEB4", "genre": 4},
+    {"category_name": "Disgusto", "colore": "#68EEB4", "genre": 4},
+    {"category_name": "Paura", "colore": "#68EEB4", "genre": 4},
 ]
 
 
