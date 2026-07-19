@@ -58,7 +58,7 @@ export interface UseMonthPageLogicResult {
 export const useMonthPageLogic = (): UseMonthPageLogicResult => {
   const nav = useMonthNavigation();
   const agenda = useAgendaMonth(nav.firstDayStr, nav.lastDayStr);
-  const sidebar = useMonthSidebar();
+  const sidebar = useMonthSidebar(agenda.monthData);
   const modals = useMonthModals();
 
   const tasksAndEvents = useMonthTasksEvents(
