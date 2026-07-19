@@ -1,55 +1,142 @@
+"""
+SEEDDB.py — inserimento dati iniziali.
+
+Uso:
+    python -m backend.SEEDDB --env dev
+    python -m backend.SEEDDB --env test
+    python -m backend.SEEDDB --env prod
+    python -m backend.SEEDDB             # menu interattivo
+"""
+from __future__ import annotations
+
+import argparse
 import sys
 from collections.abc import Sequence
 
-from sqlalchemy import and_, or_, text
-from backend.core import deps
-from backend.core.database import SessionLocal
+from dotenv import dotenv_values
+from sqlalchemy import or_, text
+
+from backend.core.env import BACKEND_DIR
+from backend.core.database import build_engine, build_session_factory
+from backend.core.models import import_all_models
+from backend.core.deps import get_password_hash
 from backend.domains.categories.models import UserCategory
 from backend.domains.config import Config, ConfigCode
 from backend.domains.monthly_entries.models import MonthlyFeeling
 from backend.domains.shopping.models import ShoppingSupplier
 from backend.domains.users.models import User
-from backend.settings import DEFAULT_MAX_SUBTASK_DEPTH
 
 
-DEFAULT_USERS = [
-    {
-        "id": 1,
-        "username": "amedeo",
-        "email": "amedeo@sinasce.lol",
-        "password": "amedeo",
-        "is_superuser": True,
-        "must_change_password": True,
-        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
-    },
-    {
-        "id": 2,
-        "username": "marcello",
-        "email": "marcello@sinasce.lol",
-        "password": "marcello",
-        "is_superuser": True,
-        "must_change_password": True,
-        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
-    },
-    {
-        "id": 3,
-        "username": "signore",
-        "email": "signore@sinasce.lol",
-        "password": "signore",
-        "is_superuser": False,
-        "must_change_password": True,
-        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
-    },
-    {
-        "id": 4,
-        "username": "signori",
-        "email": "signori@sinasce.lol",
-        "password": "signori",
-        "is_superuser": False,
-        "must_change_password": True,
-        "max_subtask_depth_user": DEFAULT_MAX_SUBTASK_DEPTH,
-    },
-]
+VALID_ENVS = ("dev", "test", "prod")
+
+
+def _parse_args() -> str | None:
+    parser = argparse.ArgumentParser(
+        description="Seed dei dati iniziali per l'ambiente selezionato.",
+    )
+    parser.add_argument(
+        "--env",
+        choices=VALID_ENVS,
+        metavar="{dev|test|prod}",
+        help="Ambiente target: dev, test oppure prod.",
+    )
+    args, _ = parser.parse_known_args()
+    return args.env
+
+
+def _pick_env_interactive() -> str:
+    print("\n╔══════════════════════════════════════════════════════════════╗")
+    print("║         SEEDDB — Selezione ambiente target                  ║")
+    print("╠══════════════════════════════════════════════════════════════╣")
+    print("║  [1] dev                                                   ║")
+    print("║  [2] test                                                  ║")
+    print("║  [3] prod                                                  ║")
+    print("╚══════════════════════════════════════════════════════════════╝")
+    while True:
+        raw = input("\n  Scegli (1/2/3) oppure digita 'dev'/'test'/'prod': ").strip().lower()
+        if raw in VALID_ENVS:
+            return raw
+        if raw in ("1", "2", "3"):
+            return VALID_ENVS[int(raw) - 1]
+        print(f"  ✗ Valore non valido. Ammessi: {', '.join(VALID_ENVS)} oppure 1/2/3.")
+
+
+def _confirm_prod() -> bool:
+    print("\n  ⚠️  Stai per eseguire il seed sul database di PRODUZIONE.")
+    answer = input("     Digita 'PROD' per confermare: ").strip()
+    return answer == "PROD"
+
+
+def _load_env_values(target_env: str) -> dict[str, str]:
+    env_file = BACKEND_DIR / f".env.{target_env}"
+
+    if not env_file.is_file():
+        print(f"\n  ✗ File '{env_file}' non trovato.")
+        sys.exit(1)
+
+    env_values = {
+        key: value
+        for key, value in dotenv_values(env_file).items()
+        if value is not None
+    }
+
+    database_url = str(env_values.get("DATABASE_URL", "")).strip()
+    if not database_url:
+        print(f"\n  ✗ DATABASE_URL non trovata in '{env_file.name}'.")
+        sys.exit(1)
+
+    return env_values
+
+
+def _get_default_max_subtask_depth(env_values: dict[str, str]) -> int:
+    raw = env_values.get("DEFAULT_MAX_SUBTASK_DEPTH", "10")
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        print(f"\n  ✗ DEFAULT_MAX_SUBTASK_DEPTH non valido: {raw!r}")
+        sys.exit(1)
+
+
+def _get_default_users(default_max_subtask_depth: int) -> list[dict]:
+    return [
+        {
+            "id": 1,
+            "username": "amedeo",
+            "email": "amedeo@sinasce.lol",
+            "password": "amedeo",
+            "is_superuser": True,
+            "must_change_password": True,
+            "max_subtask_depth_user": default_max_subtask_depth,
+        },
+        {
+            "id": 2,
+            "username": "marcello",
+            "email": "marcello@sinasce.lol",
+            "password": "marcello",
+            "is_superuser": True,
+            "must_change_password": True,
+            "max_subtask_depth_user": default_max_subtask_depth,
+        },
+        {
+            "id": 3,
+            "username": "signore",
+            "email": "signore@sinasce.lol",
+            "password": "signore",
+            "is_superuser": False,
+            "must_change_password": True,
+            "max_subtask_depth_user": default_max_subtask_depth,
+        },
+        {
+            "id": 4,
+            "username": "signori",
+            "email": "signori@sinasce.lol",
+            "password": "signori",
+            "is_superuser": False,
+            "must_change_password": True,
+            "max_subtask_depth_user": default_max_subtask_depth,
+        },
+    ]
+
 
 DEFAULT_USER_CATEGORIES = [
     {"category_name": "Lavoro", "colore": "#68EEB4", "genre": 3},
@@ -184,83 +271,52 @@ DEFAULT_SUPPLIERS = ["Coop", "Carni e Affini", "MD", "Lidl", "Eurospin", "Famila
 
 
 def _build_password_hash(password: str) -> str:
-    return deps.get_password_hash(password)
+    return get_password_hash(password)
 
 
-def _ensure_default_user(db, payload: dict) -> User:
+def _find_existing_user(db, payload: dict) -> User | None:
     normalized_username = payload["username"].strip().lower()
     normalized_email = payload["email"].strip().lower()
 
     user = db.query(User).filter(User.id == payload["id"]).first()
-    if user is None:
-        user = db.query(User).filter(
+    if user is not None:
+        return user
+
+    return (
+        db.query(User)
+        .filter(
             or_(
                 User.username == normalized_username,
                 User.email == normalized_email,
             )
-        ).first()
-
-    if user is None:
-        user = User(
-            id=payload["id"],
-            username=normalized_username,
-            email=normalized_email,
-            password_hash=_build_password_hash(payload["password"]),
-            max_subtask_depth_user=payload.get("max_subtask_depth_user", DEFAULT_MAX_SUBTASK_DEPTH),
-            is_superuser=payload.get("is_superuser", False),
-            must_change_password=payload.get("must_change_password", True),
         )
-        db.add(user)
-        db.flush()
-        return user
+        .first()
+    )
 
-    if user.id != payload["id"]:
-        raise RuntimeError(
-            f"Esiste già un utente con username/email={normalized_username}/{normalized_email} "
-            f"ma con id diverso da {payload['id']}."
-        )
 
-    changed = False
+def _insert_default_user_if_missing(db, payload: dict) -> User:
+    existing = _find_existing_user(db, payload)
+    if existing is not None:
+        return existing
 
-    if user.username != normalized_username:
-        user.username = normalized_username
-        changed = True
-
-    if user.email != normalized_email:
-        user.email = normalized_email
-        changed = True
-
-    if not user.password_hash:
-        user.password_hash = _build_password_hash(payload["password"])
-        changed = True
-
-    wanted_depth = payload.get("max_subtask_depth_user", DEFAULT_MAX_SUBTASK_DEPTH)
-    if user.max_subtask_depth_user is None or user.max_subtask_depth_user < 1:
-        user.max_subtask_depth_user = wanted_depth
-        changed = True
-
-    wanted_superuser = payload.get("is_superuser", False)
-    if user.is_superuser != wanted_superuser:
-        user.is_superuser = wanted_superuser
-        changed = True
-
-    wanted_mcp = payload.get("must_change_password", True)
-    if user.must_change_password != wanted_mcp:
-        user.must_change_password = wanted_mcp
-        changed = True
-
-    if changed:
-        db.add(user)
-        db.flush()
-
+    user = User(
+        id=payload["id"],
+        username=payload["username"].strip().lower(),
+        email=payload["email"].strip().lower(),
+        password_hash=_build_password_hash(payload["password"]),
+        max_subtask_depth_user=payload["max_subtask_depth_user"],
+        is_superuser=payload.get("is_superuser", False),
+        must_change_password=payload.get("must_change_password", True),
+    )
+    db.add(user)
+    db.flush()
     return user
 
 
-def _seed_default_users(db) -> list[User]:
+def _seed_default_users(db, default_users: Sequence[dict]) -> list[User]:
     users: list[User] = []
-    for payload in DEFAULT_USERS:
-        user = _ensure_default_user(db, payload)
-        users.append(user)
+    for payload in default_users:
+        users.append(_insert_default_user_if_missing(db, payload))
     db.flush()
     return users
 
@@ -269,41 +325,29 @@ def _seed_default_user_categories_for_user(db, user_id: int) -> int:
     inserted = 0
 
     for item in DEFAULT_USER_CATEGORIES:
-        payload = {**item, "user_id": user_id}
+        normalized_category_name = item["category_name"].strip().lower()
 
         existing = (
             db.query(UserCategory)
             .filter(
-                and_(
-                    UserCategory.user_id == payload["user_id"],
-                    UserCategory.category_name == payload["category_name"],
-                )
+                UserCategory.user_id == user_id,
+                UserCategory.category_name == normalized_category_name,
             )
             .first()
         )
-
-        if existing:
-            updated = False
-
-            if getattr(existing, "colore", None) != payload["colore"]:
-                existing.colore = payload["colore"]
-                updated = True
-
-            if getattr(existing, "genre", None) != payload["genre"]:
-                existing.genre = payload["genre"]
-                updated = True
-
-            if updated:
-                db.add(existing)
-                db.flush()
-
+        if existing is not None:
             continue
 
-        db.add(UserCategory(**payload))
-        inserted += 1
-
-    if inserted:
+        db.add(
+            UserCategory(
+                user_id=user_id,
+                category_name=normalized_category_name,
+                colore=item["colore"],
+                genre=item["genre"],
+            )
+        )
         db.flush()
+        inserted += 1
 
     return inserted
 
@@ -330,17 +374,20 @@ def _sync_users_id_sequence(db) -> None:
     db.flush()
 
 
-def _ensure_config(db) -> None:
+def _ensure_config(db, default_max_subtask_depth: int) -> bool:
     existing = db.query(Config).filter(Config.key == "max_subtask_depth").first()
-    if existing is None:
-        db.add(
-            Config(
-                key="max_subtask_depth",
-                value=str(DEFAULT_MAX_SUBTASK_DEPTH),
-                descrizione="Numero massimo di livelli consentiti per la nidificazione dei sottotask.",
-            )
+    if existing is not None:
+        return False
+
+    db.add(
+        Config(
+            key="max_subtask_depth",
+            value=str(default_max_subtask_depth),
+            descrizione="Numero massimo di livelli consentiti per la nidificazione dei sottotask.",
         )
-        db.flush()
+    )
+    db.flush()
+    return True
 
 
 def _seed_config_codes(db) -> dict[tuple[str, str], int]:
@@ -358,29 +405,7 @@ def _seed_config_codes(db) -> dict[tuple[str, str], int]:
             .first()
         )
 
-        if existing:
-            updated = False
-
-            if existing.code_name != payload["code_name"]:
-                existing.code_name = payload["code_name"]
-                updated = True
-
-            if existing.description != payload["description"]:
-                existing.description = payload["description"]
-                updated = True
-
-            if existing.active != payload["active"]:
-                existing.active = payload["active"]
-                updated = True
-
-            if getattr(existing, "sort_order", None) != payload["sort_order"]:
-                existing.sort_order = payload["sort_order"]
-                updated = True
-
-            if updated:
-                db.add(existing)
-                db.flush()
-
+        if existing is not None:
             code_ids[(existing.code_type, existing.code_value)] = existing.id
             continue
 
@@ -404,31 +429,13 @@ def _seed_default_suppliers(db, created_by_user_id: int, supplier_status_id: int
 
     for supplier_name in DEFAULT_SUPPLIERS:
         normalized = supplier_name.strip().lower()
+
         existing = (
             db.query(ShoppingSupplier)
             .filter(ShoppingSupplier.name_normalized == normalized)
             .first()
         )
-
-        if existing:
-            updated = False
-
-            if existing.name != supplier_name:
-                existing.name = supplier_name
-                updated = True
-
-            if existing.status_id != supplier_status_id:
-                existing.status_id = supplier_status_id
-                updated = True
-
-            if existing.created_by_user_id != created_by_user_id:
-                existing.created_by_user_id = created_by_user_id
-                updated = True
-
-            if updated:
-                db.add(existing)
-                db.flush()
-
+        if existing is not None:
             continue
 
         db.add(
@@ -439,6 +446,7 @@ def _seed_default_suppliers(db, created_by_user_id: int, supplier_status_id: int
                 created_by_user_id=created_by_user_id,
             )
         )
+        db.flush()
         inserted += 1
 
     return inserted
@@ -449,52 +457,43 @@ def _seed_monthly_feelings(db) -> int:
 
     for feeling in DEFAULT_MONTHLY_FEELINGS:
         feel_name = feeling["feel_name"].strip()
-        existing = db.query(MonthlyFeeling).filter(MonthlyFeeling.feel_name == feel_name).first()
-        if existing:
-            continue
-        db.add(MonthlyFeeling(feel_name=feel_name))
-        inserted += 1
 
-    if inserted:
+        existing = (
+            db.query(MonthlyFeeling)
+            .filter(MonthlyFeeling.feel_name == feel_name)
+            .first()
+        )
+        if existing is not None:
+            continue
+
+        db.add(MonthlyFeeling(feel_name=feel_name))
         db.flush()
+        inserted += 1
 
     return inserted
 
 
-def _align_users_subtask_depth(db) -> int:
-    users_without_depth = db.query(User).filter(
-        or_(
-            User.max_subtask_depth_user.is_(None),
-            User.max_subtask_depth_user < 1,
-        )
-    ).all()
-
-    for user in users_without_depth:
-        user.max_subtask_depth_user = DEFAULT_MAX_SUBTASK_DEPTH
-        db.add(user)
-
-    if users_without_depth:
-        db.flush()
-
-    return len(users_without_depth)
-
-
-def seed_database(session_factory=None) -> None:
+def seed_database(
+    session_factory,
+    env_values: dict[str, str],
+) -> None:
     """
-    session_factory: se fornito, viene usato al posto del SessionLocal globale.
-    Permette a BOOTDB.py di iniettare un engine/session dedicati all'ambiente
-    scelto senza toccare il singleton di core.database.
+    session_factory: factory SQLAlchemy esplicita per il DB target.
+    env_values: valori letti deterministicamente da .env.<env>.
     """
+    default_max_subtask_depth = _get_default_max_subtask_depth(env_values)
+    default_users = _get_default_users(default_max_subtask_depth)
+
     print("=" * 70)
     print("AVVIO SEED DATI INIZIALI (Smart Agenda API)")
     print("=" * 70)
 
-    _SessionFactory = session_factory if session_factory is not None else SessionLocal
+    import_all_models()
 
-    db = _SessionFactory()
+    db = session_factory()
     try:
-        print("[1/6] Verifica o creazione utenti di default...")
-        seed_users = _seed_default_users(db)
+        print("[1/5] Verifica o creazione utenti di default...")
+        seed_users = _seed_default_users(db, default_users)
         db.commit()
         _sync_users_id_sequence(db)
         db.commit()
@@ -510,26 +509,26 @@ def seed_database(session_factory=None) -> None:
 
         seed_owner = seed_users[0]
 
-        print("[2/6] Verifica user_categories di default per ogni utente seed...")
+        print("[2/5] Seed user_categories di default per ogni utente seed...")
         inserted_user_categories = _seed_default_user_categories(db, seed_users)
         db.commit()
         for user in seed_users:
             print(
-                f"-> User categories inserite/aggiornate per {user.username}: "
+                f"-> User categories inserite per {user.username}: "
                 f"{inserted_user_categories.get(user.id, 0)}."
             )
 
-        print("[3/6] Verifica configurazioni amministrative...")
-        _ensure_config(db)
+        print("[3/5] Seed configurazioni amministrative di base...")
+        inserted_config = _ensure_config(db, default_max_subtask_depth)
         db.commit()
-        print("-> Configurazioni amministrative verificate/inserite.")
+        print(f"-> Config base inserita: {1 if inserted_config else 0}.")
 
-        print("[4/6] Verifica ConfigCode globali...")
+        print("[4/5] Seed ConfigCode globali...")
         code_ids = _seed_config_codes(db)
         db.commit()
-        print(f"-> ConfigCode allineati: {len(code_ids)}.")
+        print(f"-> ConfigCode disponibili/allineati: {len(code_ids)}.")
 
-        print("[5/6] Verifica fornitori e monthly feelings di default...")
+        print("[5/5] Seed fornitori e monthly feelings di default...")
         supplier_status_id = _get_code_id(code_ids, "supplier_status", "active")
         inserted_suppliers = _seed_default_suppliers(
             db=db,
@@ -542,11 +541,6 @@ def seed_database(session_factory=None) -> None:
             f"-> Fornitori inseriti: {inserted_suppliers}. "
             f"Monthly feelings inseriti: {inserted_monthly_feelings}."
         )
-
-        print("[6/6] Riallineamento utenti esistenti...")
-        aligned_users = _align_users_subtask_depth(db)
-        db.commit()
-        print(f"-> Utenti riallineati su max_subtask_depth_user: {aligned_users}.")
 
     except Exception as exc:
         db.rollback()
@@ -561,4 +555,21 @@ def seed_database(session_factory=None) -> None:
 
 
 if __name__ == "__main__":
-    seed_database()
+    chosen_env = _parse_args()
+
+    if chosen_env is None:
+        chosen_env = _pick_env_interactive()
+
+    if chosen_env == "prod" and not _confirm_prod():
+        print("\n  Operazione annullata.\n")
+        sys.exit(0)
+
+    env_values = _load_env_values(chosen_env)
+    database_url = env_values["DATABASE_URL"].strip()
+    engine = build_engine(database_url)
+    session_factory = build_session_factory(engine)
+
+    try:
+        seed_database(session_factory=session_factory, env_values=env_values)
+    finally:
+        engine.dispose()
