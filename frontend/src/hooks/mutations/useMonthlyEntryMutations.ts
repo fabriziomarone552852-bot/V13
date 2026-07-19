@@ -1,7 +1,7 @@
 // frontend/src/hooks/mutations/useMonthlyEntryMutations.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/apiService';
-import type { MonthlyEntryType, MonthlyEntry } from '@/types';
+import type { MonthlyEntryType, DbMonthlyEntry } from '@/types';
 
 // IL CONTRATTO DEL PAYLOAD: Zero 'any'
 export interface SaveMonthlyEntryPayload {
@@ -14,10 +14,10 @@ export const useMonthlyEntryMutations = (queryKeyToInvalidate: string[]) => {
   const queryClient = useQueryClient();
 
   const saveEntryMutation = useMutation({
-    mutationFn: async (payload: SaveMonthlyEntryPayload): Promise<MonthlyEntry> => {
+    mutationFn: async (payload: SaveMonthlyEntryPayload): Promise<DbMonthlyEntry> => {
       // Chiamata API rigorosamente tipizzata
       const response = await api.post('/monthly-entries', payload);
-      return response as MonthlyEntry;
+      return response as DbMonthlyEntry;
     },
     onSuccess: () => {
       // Quando il salvataggio va a buon fine, invalidiamo la cache 

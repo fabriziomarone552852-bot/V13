@@ -3,7 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { filterNotes, getRandomVariant } from '@/utils/noteUtils';
 import { getLocalTodayStr } from '@/utils/dateUtils';
 import type { NoteVariant, LocalNoteEntry } from '@/types';
-import type { SyncMonthResponse } from '@/hooks/useAgendaMonth';
+import type { SyncMonthResponse } from '@/types';
 
 export interface UseMonthNotesDependencies {
   firstDayStr: string;
@@ -19,8 +19,8 @@ export const useMonthNotes = ({ firstDayStr, lastDayStr, monthData, saveNote, de
 
   // Filtraggio rigoroso senza 'any'
   const mappedNotes = useMemo((): LocalNoteEntry[] => {
-    return filterNotes(monthData?.note); 
-  }, [monthData?.note]);
+    return filterNotes(monthData?.daily_entries); 
+  }, [monthData?.daily_entries]);
 
   const handleAddNote = useCallback((): void => {
     const tempId = Date.now();

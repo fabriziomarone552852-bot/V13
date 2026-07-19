@@ -93,13 +93,30 @@ export function useDailyEntryMutations<T extends CacheWithDailyEntries>(queryKey
             list.map(item => item.id === tempId ? (savedEntryFromDB as DailyEntry) : item);
 
           switch (payload.tipo) {
-            case 'OD': return { ...old, obiettivi: swapEntry(old.obiettivi) };
-            case 'PD': return { ...old, priorita: swapEntry(old.priorita) };
-            case 'OW': return { ...old, obiettivo_settimanale: savedEntryFromDB as DailyEntry };
-            case 'PW': return { ...old, priorita_settimanali: swapEntry(old.priorita_settimanali) };
-            case 'EP': return { ...old, eventi_positivi: swapEntry(old.eventi_positivi) };
-            case 'EN': return { ...old, eventi_negativi: swapEntry(old.eventi_negativi) };
-            default: return old;
+            // Giorno e Mese vanno nello stesso cassetto (array)
+            case 'OM':
+            case 'OD': 
+              return { ...old, obiettivi: swapEntry(old.obiettivi) };
+            
+            // Giorno e Mese vanno nello stesso cassetto (array)
+            case 'PM':
+            case 'PD': 
+              return { ...old, priorita: swapEntry(old.priorita) };
+            
+            // La Settimana ha i suoi cassetti separati!
+            case 'OW': 
+              return { ...old, obiettivo_settimanale: savedEntryFromDB as DailyEntry };
+            case 'PW': 
+              return { ...old, priorita_settimanali: swapEntry(old.priorita_settimanali) };
+            
+            // Eventi
+            case 'EP': 
+              return { ...old, eventi_positivi: swapEntry(old.eventi_positivi) };
+            case 'EN': 
+              return { ...old, eventi_negativi: swapEntry(old.eventi_negativi) };
+              
+            default: 
+              return old;
           }
         });
       }

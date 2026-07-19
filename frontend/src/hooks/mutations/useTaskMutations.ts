@@ -1,32 +1,33 @@
-// frontend/src/hooks/mutations/useTaskMutations.ts
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { api } from '@/api/apiService';
 import type { DbTask } from '@/types';
 
-// 🪄 1. Definiamo i tipi
-type TaskCacheData = DbTask[] | { tasks?: DbTask[]; [key: string]: unknown };
+// 🪄 1. Definiamo i contratti in modo rigoroso, zero unknown.
+export interface CacheWithTasks {
+  tasks?: DbTask[];
+}
 
-// 🪄 2. Accettiamo "unknown" così React Query è felice, e gestiamo il tipo internamente
-const updateCacheSafely = (
-  oldData: unknown, 
+// Uniamo i due casi possibili per la cache
+type TaskCacheData = DbTask[] | CacheWithTasks;
+
+// 🪄 2. Funzione generica protetta
+const updateCacheSafely = <T extends TaskCacheData>(
+  oldData: T | undefined, 
   updaterFn: (tasks: DbTask[]) => DbTask[]
-): unknown => {
+): T | undefined => {
   if (!oldData) return oldData;
-
-  // Diciamo a TypeScript: "Fidati, trattalo come TaskCacheData"
-  const typedData = oldData as TaskCacheData;
-
-  // CASO 1: Array diretto
-  if (Array.isArray(typedData)) {
-    return updaterFn(typedData);
+  
+  // CASO 1: È direttamente un array
+  if (Array.isArray(oldData)) {
+    return updaterFn(oldData) as T;
   }
 
-  // CASO 2: Oggetto con proprietà 'tasks'
-  if (typeof typedData === 'object' && typedData !== null && 'tasks' in typedData && Array.isArray(typedData.tasks)) {
+  // CASO 2: È un oggetto che contiene la proprietà 'tasks'
+  if (typeof oldData === 'object' && oldData !== null && 'tasks' in oldData) {
     return {
-      ...typedData,
-      tasks: updaterFn(typedData.tasks)
-    };
+      ...oldData,
+      tasks: updaterFn(oldData.tasks || [])
+    } as T;
   }
 
   return oldData;
@@ -44,7 +45,6 @@ export function useTaskMutations(queryKey: QueryKey) {
     },
     
     onMutate: async ({ id, isDone }) => {
-      // Definiamo come la task deve cambiare
       const toggleUpdater = (tasks: DbTask[]) => tasks.map(t => 
         t.id === id ? { 
           ...t, 
@@ -54,24 +54,22 @@ export function useTaskMutations(queryKey: QueryKey) {
         } : t
       );
 
-      // Applichiamo l'aggiornamento sicuro a TUTTE le cache
-      queryClient.setQueriesData({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, toggleUpdater));
-      queryClient.setQueriesData({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, toggleUpdater));
-      queryClient.setQueriesData({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, toggleUpdater));
+      // 🪄 3. Diciamo a setQueriesData l'esatto tipo in ingresso: <TaskCacheData>
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, toggleUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, toggleUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, toggleUpdater));
 
       return { id };
     },
     
     onError: (err) => {
       console.error("Errore durante il toggle del task:", err);
-      // Rollback forzato in caso di errore server
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'daySync' });
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'weekSync' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     
     onSettled: () => {
-      // Sincronizzazione silenziosa in background
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'daySync' });
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'weekSync' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -120,9 +118,9 @@ export function useTaskMutations(queryKey: QueryKey) {
           : [...currentTasks, fakeTask];
       };
 
-      queryClient.setQueriesData({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, saveUpdater));
-      queryClient.setQueriesData({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, saveUpdater));
-      queryClient.setQueriesData({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, saveUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, saveUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, saveUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, saveUpdater));
 
       return { tempId };
     },
@@ -133,9 +131,9 @@ export function useTaskMutations(queryKey: QueryKey) {
           t.id === context.tempId ? savedTaskFromDB : t
         );
         
-        queryClient.setQueriesData({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, swapIdUpdater));
-        queryClient.setQueriesData({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, swapIdUpdater));
-        queryClient.setQueriesData({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, swapIdUpdater));
+        queryClient.setQueriesData<TaskCacheData>({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, swapIdUpdater));
+        queryClient.setQueriesData<TaskCacheData>({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, swapIdUpdater));
+        queryClient.setQueriesData<TaskCacheData>({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, swapIdUpdater));
       }
     },
 
@@ -157,9 +155,9 @@ export function useTaskMutations(queryKey: QueryKey) {
       const deleteUpdater = (currentTasks: DbTask[]) => 
         currentTasks.filter(t => t.id !== taskId && t.parent_id !== taskId);
 
-      queryClient.setQueriesData({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, deleteUpdater));
-      queryClient.setQueriesData({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, deleteUpdater));
-      queryClient.setQueriesData({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, deleteUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['daySync'] }, (old) => updateCacheSafely(old, deleteUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['weekSync'] }, (old) => updateCacheSafely(old, deleteUpdater));
+      queryClient.setQueriesData<TaskCacheData>({ queryKey: ['tasks'] }, (old) => updateCacheSafely(old, deleteUpdater));
 
       return { taskId };
     },

@@ -1,6 +1,6 @@
 // frontend/src/hooks/uiMonth/useMonthSidebar.ts
 import { useState, useMemo } from 'react';
-import type { SyncMonthResponse } from '@/hooks/useAgendaMonth';
+import type { SyncMonthResponse } from '@/types';
 
 export type MonthSidebarTab = 'moods' | 'spheres' | 'todos' | 'reflections';
 

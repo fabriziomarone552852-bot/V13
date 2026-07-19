@@ -5,11 +5,12 @@ export type MonthlyEntryType =
   | 'sphere_work' | 'sphere_love' | 'sphere_family' | 'sphere_finance' 
   | 'sphere_health' | 'sphere_fun' | 'sphere_mind' | 'sphere_friendship';
 
-export interface MonthlyEntry {
+export interface DbMonthlyEntry {
   id: number;
   user_id: number;
-  yearId: number; 
-  monthId: string; 
-  type: MonthlyEntryType; // Invece di string generico!
-  value: number;
+  year: number;
+  month: number;
+  feel_type: number;
+  feel_value: number;
+  feel_name: string | null;
 }

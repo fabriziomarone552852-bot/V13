@@ -6,7 +6,7 @@ import { mapDbEventsToCalendarEvents } from '@/utils/eventUtils';
 // 🪄 Importiamo la funzione per costruire l'albero e il tipo corretto
 import { buildTaskTree } from '@/utils/taskUtils'; 
 import type { DbTask, CalendarEvent, UITask } from '@/types';
-import type { SyncMonthResponse } from '@/hooks/useAgendaMonth'; 
+import type { SyncMonthResponse } from '@/types';
 
 type ToggleTaskFn = (payload: { id: number; isDone: boolean }) => void;
 

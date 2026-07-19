@@ -1,4 +1,3 @@
-// frontend/src/hooks/mutations/useEventMutations.ts
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { api } from '@/api/apiService';
 import type { DbEvent } from '@/types';
@@ -8,11 +7,10 @@ export interface CacheWithEvents {
   events?: DbEvent[];
 }
 
-interface AgendaEventSyncData {
-  events?: DbEvent[];
-  tasks?: unknown[];
-  [key: string]: unknown;
-}
+type CachedEvent = DbEvent & { originalId?: number | string; dateStr?: string };
+
+// Definiamo il contratto unificato
+type EventCacheData = CachedEvent[] | CacheWithEvents;
 
 export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey) {
   const queryClient = useQueryClient();
@@ -21,7 +19,6 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
     mutationFn: async (eventData: Partial<DbEvent> & { id?: string | number, originalId?: string | number }) => {
       const { id, originalId, ...payload } = eventData;
       
-      // Pulizia date per evitare crash del Backend
       if (payload.data_inizio && payload.data_inizio.trim() === "") {
         payload.data_inizio = new Date().toISOString(); 
       }
@@ -45,10 +42,14 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
       const tempId = newEvent.id || `temp-${Date.now()}`;
       const isUpdate = !!newEvent.id && String(newEvent.id).indexOf('temp') === -1;
 
-      const updateGlobalCache = (oldData: AgendaEventSyncData | undefined): AgendaEventSyncData | undefined => {
+      // 🪄 Aggiunto il generico C per permettere la corretta inferenza del tipo
+      const updateGlobalCache = <C extends EventCacheData>(oldData: C | undefined): C | undefined => {
         if (!oldData) return oldData;
         
-        const currentEvents = oldData.events || [];
+        const currentEvents: CachedEvent[] = Array.isArray(oldData) 
+            ? oldData as CachedEvent[]
+            : (oldData as CacheWithEvents).events as CachedEvent[] || [];
+
         const existingEvent = isUpdate ? currentEvents.find(e => e.id === newEvent.id) : undefined;
 
         const fakeEvent: DbEvent = {
@@ -59,34 +60,42 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
           data_inizio: newEvent.data_inizio || new Date().toISOString(),
         } as DbEvent;
 
-        return {
-          ...oldData,
-          events: isUpdate
+        const newEvents = isUpdate
             ? currentEvents.map(e => (e.id === newEvent.id ? fakeEvent : e))
-            : [...currentEvents, fakeEvent]
-        };
+            : [...currentEvents, fakeEvent];
+
+        if (Array.isArray(oldData)) {
+           return newEvents as C;
+        }
+
+        return { ...oldData, events: newEvents } as C;
       };
 
-      // Applichiamo la modifica visiva immediata
-      queryClient.setQueriesData<AgendaEventSyncData>({ queryKey: ['daySync'] }, updateGlobalCache);
-      queryClient.setQueriesData<AgendaEventSyncData>({ queryKey: ['weekSync'] }, updateGlobalCache);
+      queryClient.setQueriesData<EventCacheData>({ queryKey: ['daySync'] }, updateGlobalCache);
+      queryClient.setQueriesData<EventCacheData>({ queryKey: ['weekSync'] }, updateGlobalCache);
 
       return { tempId };
     },
 
     onSuccess: (savedEvent, newEvent, context) => {
       if (!newEvent.id && context?.tempId && savedEvent) {
-        const swapId = (oldData: AgendaEventSyncData | undefined): AgendaEventSyncData | undefined => {
+        const swapId = <C extends EventCacheData>(oldData: C | undefined): C | undefined => {
           if (!oldData) return oldData;
-          return {
-            ...oldData,
-            events: (oldData.events || []).map(e => 
-              e.id === context.tempId ? savedEvent : e
-            )
-          };
+          
+          const currentEvents: CachedEvent[] = Array.isArray(oldData) 
+            ? oldData as CachedEvent[]
+            : (oldData as CacheWithEvents).events as CachedEvent[] || [];
+            
+          const newEvents = currentEvents.map(e => e.id === context.tempId ? savedEvent : e);
+          
+          if (Array.isArray(oldData)) {
+             return newEvents as C;
+          }
+          return { ...oldData, events: newEvents } as C;
         };
-        queryClient.setQueriesData<AgendaEventSyncData>({ queryKey: ['daySync'] }, swapId);
-        queryClient.setQueriesData<AgendaEventSyncData>({ queryKey: ['weekSync'] }, swapId);
+        
+        queryClient.setQueriesData<EventCacheData>({ queryKey: ['daySync'] }, swapId);
+        queryClient.setQueriesData<EventCacheData>({ queryKey: ['weekSync'] }, swapId);
       }
     },
 
@@ -154,29 +163,22 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
       }
     },
     
-    // 🪄 1. AGGIORNAMENTO OTTIMISTICO (L'evento sparisce all'istante dallo schermo!)
     onMutate: async (payload) => {
       await queryClient.cancelQueries({ 
         predicate: (query) => ['events', 'daySync', 'weekSync'].includes(query.queryKey[0] as string) 
       });
 
-      // 🪄 1. Definiamo il tipo dei dati in entrata estendendo DbEvent con le proprietà calcolate
-      type CachedEvent = DbEvent & { originalId?: number | string; dateStr?: string };
-      type EventCacheData = CachedEvent[] | { events?: CachedEvent[]; [key: string]: unknown };
-
-      // 🪄 2. Tipizziamo oldData e il ritorno della funzione
-      const updateCache = (oldData: EventCacheData | undefined): EventCacheData | undefined => {
+      // 🪄 Funzione completamente Type-Safe
+      const updateCache = <C extends EventCacheData>(oldData: C | undefined): C | undefined => {
         if (!oldData) return oldData;
         
-        // Estraiamo l'array in modo Type-Safe
-        const currentEvents: CachedEvent[] = 'events' in oldData && oldData.events 
-            ? oldData.events 
-            : (Array.isArray(oldData) ? oldData : []);
+        const currentEvents: CachedEvent[] = Array.isArray(oldData) 
+            ? oldData as CachedEvent[]
+            : (oldData as CacheWithEvents).events as CachedEvent[] || [];
             
         let newEvents = [...currentEvents];
         
         if (payload.mode === 'all') {
-           // 🪄 Avvolgiamo in String() per comparare sempre stringhe con stringhe!
            newEvents = newEvents.filter(e => String(e.originalId) !== String(payload.id) && String(e.id) !== String(payload.id));
         } else if (payload.mode === 'single') {
            const targetId = `${payload.id}-${payload.dateStr}`;
@@ -191,22 +193,19 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
            });
         }
         
-        // Se era un oggetto, ricreiamo l'oggetto. Altrimenti restituiamo l'array.
-        if ('events' in oldData) {
-           return { ...oldData, events: newEvents };
+        if (Array.isArray(oldData)) {
+           return newEvents as C;
         }
-        return newEvents;
+        
+        return { ...oldData, events: newEvents } as C;
       };
 
-      queryClient.setQueriesData({ 
+      queryClient.setQueriesData<EventCacheData>({ 
         predicate: (query) => ['events', 'daySync', 'weekSync'].includes(query.queryKey[0] as string) 
       }, updateCache);
     },
 
-    // 🪄 2. INVALIDAZIONE CACHE (Ricarica i dati in background)
     onSettled: () => {
-      // Quando il server ci dà l'ok, chiediamo di scaricare in silenzio i nuovi dati.
-      // In questo modo, la prossima volta che apri un evento, avrà la lista delle "esclusioni" aggiornata!
       queryClient.invalidateQueries({ 
         predicate: (query) => ['events', 'daySync', 'weekSync'].includes(query.queryKey[0] as string) 
       });
@@ -215,7 +214,6 @@ export function useEventMutations<T extends CacheWithEvents>(queryKey: QueryKey)
     onError: (error) => {
       console.error("Errore durante l'eliminazione dell'evento:", error);
       alert("Si è verificato un errore durante l'eliminazione.");
-      // In caso di errore, scarica i dati reali per correggere lo schermo
       queryClient.invalidateQueries({ 
         predicate: (query) => ['events', 'daySync', 'weekSync'].includes(query.queryKey[0] as string) 
       });

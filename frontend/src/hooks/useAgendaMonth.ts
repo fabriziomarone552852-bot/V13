@@ -5,19 +5,16 @@ import { useTaskMutations } from './mutations/useTaskMutations';
 import { useNoteMutations } from './mutations/useNoteMutations';
 import { useDailyEntryMutations } from './mutations/useDailyEntryMutations';
 import { useEventMutations } from './mutations/useEventMutations';
-import type { DbTask, DbEvent, DailyEntry, MonthlyEntry } from '@/types'; 
+import type { SyncMonthResponse, DailyEntry } from '@/types'; 
 
-export interface SyncMonthResponse {
-  start_date: string;
-  end_date: string;
-  tasks: DbTask[];
-  events: DbEvent[]; 
-  note: DailyEntry[]; 
+// 1. IL CONTRATTO DELLA CACHE (Frontend Model)
+// Estendiamo i dati grezzi del server creando i cassetti che servono alle mutazioni
+export interface MonthCacheData extends SyncMonthResponse {
+  note: DailyEntry[];
   obiettivi: DailyEntry[];
   priorita: DailyEntry[];
   eventi_positivi: DailyEntry[]; 
-  eventi_negativi: DailyEntry[]; 
-  tracker_entries: MonthlyEntry[]; 
+  eventi_negativi: DailyEntry[];
 }
 
 export const useAgendaMonth = (startStr: string, endStr: string) => {
@@ -25,29 +22,31 @@ export const useAgendaMonth = (startStr: string, endStr: string) => {
 
   const taskMutations = useTaskMutations(['tasks']);
   
-  // Ora TypeScript è felice perché SyncMonthResponse ha note: DailyEntry[]
-  const noteMutations = useNoteMutations<SyncMonthResponse>(queryKey);
-  const entryMutations = useDailyEntryMutations<SyncMonthResponse>(queryKey);
-  const eventMutations = useEventMutations<SyncMonthResponse>(queryKey);
+  // 2. Diciamo alle mutazioni di lavorare su MonthCacheData
+  const noteMutations = useNoteMutations<MonthCacheData>(queryKey);
+  const entryMutations = useDailyEntryMutations<MonthCacheData>(queryKey);
+  const eventMutations = useEventMutations<MonthCacheData>(queryKey);
 
   const { data: monthData, isLoading, isError } = useQuery({
     queryKey,
-    queryFn: async (): Promise<SyncMonthResponse> => {
+    queryFn: async (): Promise<MonthCacheData> => {
+      // Chiamata API rigorosa con il contratto del server
       const data = await api.get<SyncMonthResponse>(`/sync/month?start_date=${startStr}&end_date=${endStr}`);
       
       if (!data) throw new Error("Impossibile caricare i dati mensili");
       
+      // 🪄 3. LA MAGIA (Data Mapper): Smistiamo i dati in RAM!
+      const entries = data.daily_entries || [];
+
       return {
-        start_date: data.start_date || startStr,
-        end_date: data.end_date || endStr,
-        tasks: data.tasks ?? [],
-        events: data.events ?? [],
-        note: data.note ?? [], 
-        obiettivi: data.obiettivi ?? [],
-        priorita: data.priorita ?? [],
-        eventi_positivi: data.eventi_positivi ?? [],
-        eventi_negativi: data.eventi_negativi ?? [],
-        tracker_entries: data.tracker_entries ?? []
+        ...data, // Mantiene start_date, end_date, tasks, events, monthly_entries
+        
+        // Creiamo i cassetti filtrando il grande array in RAM
+        note: entries.filter(e => ['N1', 'N2', 'N3', 'N4'].includes(e.tipo)),
+        obiettivi: entries.filter(e => e.tipo === 'OM'),
+        priorita: entries.filter(e => e.tipo === 'PM'),
+        eventi_positivi: entries.filter(e => e.tipo === 'EP'),
+        eventi_negativi: entries.filter(e => e.tipo === 'EN'),
       };
     },
     staleTime: 5 * 60 * 1000,

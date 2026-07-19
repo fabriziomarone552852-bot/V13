@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 from backend.core.schemas import ORMBaseModel
 from backend.domains.categories.schemas import CategoryResponse
@@ -47,3 +47,5 @@ class SyncMonthResponse(ORMBaseModel):
     tasks: List[TaskResponse] = Field(default_factory=list)
     daily_entries: List[DailyEntryResponse] = Field(default_factory=list)
     monthly_entries: List[MonthlyEntryResponse] = Field(default_factory=list)
+    
+SyncMonthResponse.model_rebuild()
