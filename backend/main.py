@@ -1,12 +1,15 @@
 # Selezione ambiente + caricamento .env in base ad APP_ENV (nessuna scrittura su disco).
 # DEVE stare in cima, prima di qualsiasi import che legga le variabili d'ambiente.
 from backend.core import config as _config  # noqa: F401
+from backend.core.models import import_all_models
+
+import_all_models()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 # Import all models to register them with SQLAlchemy
 # This MUST be done before any API imports that use models
-from backend.core.models import *  # noqa: F401, F403
+# from backend.core.models import *  # noqa: F401, F403
 
 # Router migrati ai dominio (architettura modulare router/service/repository)
 from backend.domains.categories.router import router as categories_router

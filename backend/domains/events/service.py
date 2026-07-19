@@ -12,7 +12,7 @@ from backend.domains.events import schemas
 from backend.domains.events.models import Event
 from backend.domains.users.models import User
 from backend.pagination_schemas import PaginatedEvents
-from backend.utils import expand_events_for_range
+from backend.domains.events.recurrence import expand_events_for_range
 
 
 _NOT_FOUND = "Impegno non trovato o non accessibile"

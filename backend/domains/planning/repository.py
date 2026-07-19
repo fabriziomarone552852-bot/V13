@@ -1,6 +1,11 @@
-"""Repository del dominio Planning (daily entries) — solo accesso ai dati."""
+"""
+Repository del dominio Planning (daily entries).
+Solo accesso ai dati, nessuna business rule.
+"""
+from __future__ import annotations
+
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -14,8 +19,9 @@ def list_for_user(
     tipo: Optional[str] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-) -> List[DailyEntry]:
+) -> list[DailyEntry]:
     query = db.query(DailyEntry).filter(DailyEntry.user_id == user_id)
+
     if data_riferimento is not None:
         query = query.filter(DailyEntry.data_riferimento == data_riferimento)
     if start_date is not None:
@@ -24,6 +30,7 @@ def list_for_user(
         query = query.filter(DailyEntry.data_riferimento <= end_date)
     if tipo is not None:
         query = query.filter(DailyEntry.tipo == tipo)
+
     return query.order_by(
         DailyEntry.data_riferimento.desc(),
         DailyEntry.id.desc(),
@@ -39,20 +46,21 @@ def get_owned(db: Session, entry_id: int, user_id: int) -> Optional[DailyEntry]:
 
 
 def entry_exists_by_type(
-    db: Session, 
-    user_id: int, 
-    data_riferimento: date, 
-    tipo: str, 
-    exclude_id: int = None
+    db: Session,
+    user_id: int,
+    data_riferimento: date,
+    tipo: str,
+    exclude_id: Optional[int] = None,
 ) -> bool:
     query = db.query(DailyEntry).filter(
         DailyEntry.user_id == user_id,
         DailyEntry.data_riferimento == data_riferimento,
-        DailyEntry.tipo == tipo 
+        DailyEntry.tipo == tipo,
     )
+
     if exclude_id is not None:
         query = query.filter(DailyEntry.id != exclude_id)
-        
+
     return db.query(query.exists()).scalar()
 
 

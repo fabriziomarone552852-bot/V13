@@ -10,9 +10,11 @@ from sqlalchemy.orm import Session
 from backend.core import deps
 from backend.domains.users.models import User
 from backend.domains.sync import service
-
-# 🪄 ECCO LA CORREZIONE: Abbiamo aggiunto SyncMonthResponse all'importazione!
-from backend.domains.sync.schemas import SyncDayResponse, SyncWeekResponse, SyncMonthResponse
+from backend.domains.sync.schemas import (
+    SyncDayResponse,
+    SyncWeekResponse,
+    SyncMonthResponse,
+)
 
 router = APIRouter(prefix="/sync", tags=["sync"])
 

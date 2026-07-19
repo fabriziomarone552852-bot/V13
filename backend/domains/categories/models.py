@@ -15,6 +15,7 @@ from backend.core.database import Base
 
 if TYPE_CHECKING:
     from backend.domains.events.models import Event
+    from backend.domains.planning.models import DailyEntry
     from backend.domains.tasks.models import Task
     from backend.domains.users.models import User
 
@@ -73,6 +74,12 @@ class UserCategory(Base):
 
     events: Mapped[List["Event"]] = relationship(
         "Event",
+        back_populates="category",
+        passive_deletes=True,
+    )
+
+    daily_entries: Mapped[List["DailyEntry"]] = relationship(
+        "DailyEntry",
         back_populates="category",
         passive_deletes=True,
     )

@@ -102,8 +102,8 @@ class User(Base):
 
     shopping_groups: Mapped[List["ShoppingGroup"]] = relationship(
         "ShoppingGroup",
-        back_populates="owner",
         foreign_keys="ShoppingGroup.owner_id",
+        back_populates="owner",
     )
     shopping_group_memberships: Mapped[List["ShoppingGroupMember"]] = relationship(
         "ShoppingGroupMember",
@@ -118,8 +118,8 @@ class User(Base):
 
     shopping_lists: Mapped[List["ShoppingList"]] = relationship(
         "ShoppingList",
-        back_populates="owner",
         foreign_keys="ShoppingList.owner_id",
+        back_populates="owner",
     )
 
     shopping_items_created: Mapped[List["ShoppingListItem"]] = relationship(
@@ -178,7 +178,7 @@ class User(Base):
 
     shared_logs: Mapped[List["SharedActivityLog"]] = relationship(
         "SharedActivityLog",
-        foreign_keys="SharedActivityLog.performed_by_user_id",
+        back_populates="performed_by_user",
     )
     notifications: Mapped[List["Notification"]] = relationship(
         "Notification",
