@@ -6,7 +6,7 @@ Uso:
     python -m backend.BOOTDB --env dev
     python -m backend.BOOTDB --env test
     python -m backend.BOOTDB --env prod
-    python -m backend.BOOTDB            # menu interattivo
+    python -m backend.BOOTDB         # menu interattivo
 
 Flags opzionali:
     --skip-seed     Salta il seed dopo la creazione delle tabelle.
@@ -14,24 +14,24 @@ Flags opzionali:
 from __future__ import annotations
 
 import argparse
-import importlib
-import os
 import sys
-from pathlib import Path
 
-# ──────────────────────────────────────────────────────────────────────────────
+from dotenv import dotenv_values
+from sqlalchemy import text
+
+from backend.core.env import BACKEND_DIR
+from backend.core.database import build_engine, build_session_factory
+from backend.core.database import Base
+
+
 VALID_ENVS = ("dev", "test", "prod")
 
 ENV_DESCRIPTIONS = {
-    "dev":  "Sviluppo   — Docker PostgreSQL locale, porta 5433 (non persistente)",
+    "dev": "Sviluppo   — Docker PostgreSQL locale, porta 5433 (non persistente)",
     "test": "Test       — Docker PostgreSQL locale, porta 5432 (persistente)",
-    "prod": "Produzione — PostgreSQL su NAS in LAN,  porta 5432 (persistente)",
+    "prod": "Produzione — PostgreSQL su NAS in LAN, porta 5432 (persistente)",
 }
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# UI HELPERS
-# ──────────────────────────────────────────────────────────────────────────────
 
 def _banner(text: str, char: str = "─", width: int = 62) -> None:
     print(f"\n  {char * width}")
@@ -41,7 +41,7 @@ def _banner(text: str, char: str = "─", width: int = 62) -> None:
 
 def _pick_env_interactive() -> str:
     print("\n╔══════════════════════════════════════════════════════════════╗")
-    print("║         BOOTDB — Selezione ambiente target                   ║")
+    print("║         BOOTDB — Selezione ambiente target                  ║")
     print("╠══════════════════════════════════════════════════════════════╣")
     for i, env in enumerate(VALID_ENVS, 1):
         print(f"║  [{i}] {ENV_DESCRIPTIONS[env]:<57}║")
@@ -56,7 +56,6 @@ def _pick_env_interactive() -> str:
 
 
 def _parse_args() -> tuple[str | None, bool]:
-    """Ritorna (env_or_None, skip_seed)."""
     parser = argparse.ArgumentParser(
         description="Bootstrap del database + seed per l'ambiente selezionato.",
     )
@@ -83,141 +82,114 @@ def _confirm_prod() -> bool:
     return answer == "PROD"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CORE
-# ──────────────────────────────────────────────────────────────────────────────
-
-def _load_env_file(target_env: str) -> str:
+def _load_env_values(target_env: str) -> dict[str, str]:
     """
-    Imposta APP_ENV, ricarica core.config e legge DATABASE_URL dal .env.
-    Ritorna la DATABASE_URL.
+    Legge il file .env.<env> in modo deterministico, senza dipendere
+    dall'environment del processo.
     """
-    os.environ["APP_ENV"] = target_env
-
-    # Forza reload di core.config per rieseguire load_environment()
-    import backend.core.config as _cfg_module
-    importlib.reload(_cfg_module)
-
-    backend_dir = Path(__file__).resolve().parent
-    env_file = backend_dir / f".env.{target_env}"
+    env_file = BACKEND_DIR / f".env.{target_env}"
 
     if not env_file.is_file():
         print(f"\n  ✗ File '{env_file}' non trovato.")
         print("    Assicurati che esista e contenga DATABASE_URL.")
         sys.exit(1)
 
-    from dotenv import dotenv_values
-    env_vars = dotenv_values(env_file)
-    database_url = env_vars.get("DATABASE_URL") or os.environ.get("DATABASE_URL")
+    env_vars = {
+        key: value
+        for key, value in dotenv_values(env_file).items()
+        if value is not None
+    }
 
-    if not database_url:
+    if "DATABASE_URL" not in env_vars or not str(env_vars["DATABASE_URL"]).strip():
         print(f"\n  ✗ DATABASE_URL non trovata in '{env_file.name}'.")
         sys.exit(1)
 
-    return database_url
-
-
-def _build_engine(database_url: str):
-    """Costruisce un engine locale (non il singleton globale di core.database)."""
-    from sqlalchemy import create_engine
-    kwargs: dict = {"pool_pre_ping": True, "future": True}
-    if database_url.startswith("sqlite"):
-        kwargs["connect_args"] = {"check_same_thread": False}
-    return create_engine(database_url, **kwargs)
+    return env_vars
 
 
 def _import_all_models() -> None:
-    """Importa tutti i modelli di dominio così che vengano registrati in Base.metadata."""
-    import backend.domains.users.models           # noqa: F401
-    import backend.domains.categories.models      # noqa: F401
-    import backend.domains.tasks.models           # noqa: F401
-    import backend.domains.events.models          # noqa: F401
-    import backend.domains.planning.models        # noqa: F401
-    import backend.domains.shopping.models        # noqa: F401
-    import backend.domains.habits.models          # noqa: F401
-    import backend.domains.countdowns.models      # noqa: F401
-    import backend.domains.notifications.models   # noqa: F401
-    import backend.domains.audit.models           # noqa: F401
-    import backend.domains.config.models          # noqa: F401
-    import backend.domains.monthly_entries.models # noqa: F401
+    from backend.core.models import import_all_models
+    import_all_models()
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# STEP 1 — CREATE TABLES
-# ──────────────────────────────────────────────────────────────────────────────
+def _print_db_fingerprint(local_engine) -> None:
+    with local_engine.connect() as conn:
+        row = conn.execute(
+            text(
+                """
+                select
+                    current_database(),
+                    current_user,
+                    inet_server_addr(),
+                    inet_server_port(),
+                    version()
+                """
+            )
+        ).fetchone()
+
+    if row is None:
+        print("\n  ✗ Impossibile determinare il fingerprint del database.")
+        sys.exit(1)
+
+    print(
+        "\n  [DB CHECK] "
+        f"database={row[0]} "
+        f"user={row[1]} "
+        f"host={row[2]} "
+        f"port={row[3]}"
+    )
+    print(f"  [DB CHECK] version={row[4]}")
+
 
 def _step_create_tables(local_engine) -> int:
-    """Esegue create_all e ritorna il numero di tabelle registrate."""
-    from backend.core.database import Base
     _import_all_models()
-
     Base.metadata.create_all(bind=local_engine)
 
     tables = sorted(Base.metadata.tables.keys())
     print(f"\n  ✔  Tabelle create/verificate: {len(tables)}")
-    for t in tables:
-        print(f"      - {t}")
+    for table_name in tables:
+        print(f"      - {table_name}")
     return len(tables)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# STEP 2 — SEED
-# ──────────────────────────────────────────────────────────────────────────────
+def _step_seed(local_engine, env_values: dict[str, str]) -> None:
+    local_session_factory = build_session_factory(local_engine)
 
-def _step_seed(local_engine) -> None:
-    """
-    Lancia seed_database() di SEEDDB.py iniettando il SessionLocal
-    costruito sull'engine locale — senza toccare il singleton globale.
-    """
-    from sqlalchemy.orm import sessionmaker
-    LocalSession = sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=local_engine,
-        future=True,
+    from backend.SEEDDB import seed_database
+
+    seed_database(
+        session_factory=local_session_factory,
+        env_values=env_values,
     )
 
-    # Import diretto della funzione di seed
-    from backend.SEEDDB import seed_database
-    seed_database(session_factory=LocalSession)
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ORCHESTRATORE PRINCIPALE
-# ──────────────────────────────────────────────────────────────────────────────
 
 def bootstrap_db(target_env: str, skip_seed: bool = False) -> None:
     _banner(f"BOOTDB — ambiente: {target_env.upper()}", char="═")
 
-    # 1. Carica il .env corretto e ottieni DATABASE_URL
-    database_url = _load_env_file(target_env)
+    env_values = _load_env_values(target_env)
+    database_url = env_values["DATABASE_URL"].strip()
+
     print(f"\n  ✔  Ambiente : {target_env.upper()}")
     print(f"  ✔  DB target: {database_url}")
 
-    # 2. Engine locale isolato
-    local_engine = _build_engine(database_url)
+    local_engine = build_engine(database_url)
 
     try:
-        # ── FASE 1: Creazione tabelle ──────────────────────────────────────
+        _print_db_fingerprint(local_engine)
+
         _banner("FASE 1 / 2 — Creazione tabelle")
         _step_create_tables(local_engine)
 
-        # ── FASE 2: Seed dati iniziali ─────────────────────────────────────
         if skip_seed:
             print("\n  ⏭   --skip-seed attivo: seed saltato.\n")
         else:
             _banner("FASE 2 / 2 — Seed dati iniziali")
-            _step_seed(local_engine)
-
+            _step_seed(local_engine, env_values)
     finally:
         local_engine.dispose()
 
     _banner(f"✅  Bootstrap completato per ambiente '{target_env}'.", char="═")
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ENTRY POINT
-# ──────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     chosen_env, skip_seed = _parse_args()
