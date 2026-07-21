@@ -151,7 +151,7 @@ export const MonthDayCell: React.FC<MonthDayCellProps> = ({
                     </div>
                   ))}
                   {userMoods.length === 0 && (
-                     <div className="px-3 py-3 text-xs text-center text-gray-400">Nessun mood.</div>
+                     <div className="px-3 py-3 text-xs text-center text-gray-400">Nessuna emozione</div>
                   )}
                 </div>
                 
