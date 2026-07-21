@@ -12,8 +12,7 @@ from typing import Literal
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-import backend.core.env as _env  # noqa: F401
-
+import backend.core.env as _env
 
 DEV_FALLBACK_SECRET = "dev-insecure-default-key-change-me"
 
@@ -26,6 +25,15 @@ class Settings(BaseSettings):
     )
 
     app_env: Literal["dev", "test", "prod"] = "dev"
+
+    @field_validator("app_env", mode="before")
+    @classmethod
+    def normalize_app_env(cls, value: str | None) -> str:
+        if value is None:
+            return "dev"
+        if isinstance(value, str):
+            return value.strip().lower().strip("\"'")
+        return value
 
     database_url: str = Field(..., min_length=1)
     db_pool_size: int = Field(10, ge=1)
@@ -69,7 +77,6 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Ritorna l'istanza singleton delle impostazioni validate."""
     return Settings()
 
 

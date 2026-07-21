@@ -25,9 +25,15 @@ DEFAULT_ENV: Final[str] = "dev"
 BACKEND_DIR: Final[Path] = Path(__file__).resolve().parent.parent
 
 
+def _normalize_app_env(value: str | None) -> str:
+    if value is None:
+        return DEFAULT_ENV
+    return value.strip().lower().strip("\"'")
+
+
 def select_app_env() -> str:
     """Restituisce l'ambiente applicativo valido, con fallback a DEFAULT_ENV."""
-    raw = os.environ.get("APP_ENV", DEFAULT_ENV).strip().lower()
+    raw = _normalize_app_env(os.environ.get("APP_ENV", DEFAULT_ENV))
     if raw not in VALID_ENVS:
         logger.warning(
             "APP_ENV=%r non valido; valori ammessi: %s. Uso default=%r.",
@@ -41,18 +47,13 @@ def select_app_env() -> str:
 
 def get_env_file(app_env: str | None = None) -> Path:
     """Restituisce il path del file .env relativo all'ambiente richiesto."""
-    resolved_env = app_env or select_app_env()
+    resolved_env = _normalize_app_env(app_env) if app_env is not None else select_app_env()
+    if resolved_env not in VALID_ENVS:
+        resolved_env = DEFAULT_ENV
     return BACKEND_DIR / f".env.{resolved_env}"
 
 
 def load_environment() -> tuple[str, Path | None]:
-    """
-    Carica il file .env corrispondente in memoria, se presente.
-
-    - non scrive mai su disco
-    - non sovrascrive variabili già presenti nell'ambiente reale
-    - ritorna (app_env, env_file|None)
-    """
     app_env = select_app_env()
     env_file = get_env_file(app_env)
 
