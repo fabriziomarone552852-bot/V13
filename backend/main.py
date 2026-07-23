@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Import all models to register them with SQLAlchemy
 # This MUST be done before any API imports that use models
 # from backend.core.models import *  # noqa: F401, F403
-
+from backend.domains.system_boot import router as system_boot_router
 # Router migrati ai dominio (architettura modulare router/service/repository)
 from backend.domains.categories.router import router as categories_router
 from backend.domains.users.router import router as users_router
@@ -30,7 +30,7 @@ from backend.domains.catalogs.router_admin import router as admin_catalogs_route
 from backend.domains.monthly_entries.router import router as monthly_entries_router
 
 
-app = FastAPI(title="Smart Agenda API", version="3.0")
+app = FastAPI(title="Smart Agenda API", version="4.0")
 
 origins = [
     "http://localhost:5173",
@@ -47,6 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(system_boot_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(users_router, prefix="/users")
 app.include_router(tasks_router)
