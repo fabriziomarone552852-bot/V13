@@ -9,7 +9,7 @@ export interface DbTask {
   data_start: string;
   data_scadenza?: string | null;
   priorita: 'Alta' | 'Media' | 'Bassa';
-  category_id?: number | null;
+  user_category_id?: number | null;
   category?: Category | null;
   category_name?: string | null;
   luogo?: string | null;

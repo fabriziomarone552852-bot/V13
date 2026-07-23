@@ -59,7 +59,7 @@ export const MoodPixelSelector: React.FC<MoodPixelSelectorProps> = ({
 
     // Controllo duplicati strictly typed[cite: 10]
     const existingCat = dbCategories.find(
-      (c: Category) => c.name.toLowerCase() === nomePulito.toLowerCase()
+      (c: Category) => c.category_name.toLowerCase() === nomePulito.toLowerCase()
     );
 
     try {
@@ -70,8 +70,8 @@ export const MoodPixelSelector: React.FC<MoodPixelSelectorProps> = ({
 
       // Salvataggio tramite la mutazione di React Query[cite: 10]
       const newCat: Category = await addCategory({ 
-        name: nomePulito, 
-        color: newMoodForm.color, 
+        category_name: nomePulito, 
+        colore: newMoodForm.color, 
         genre: CategoryGenre.MOOD 
       });
       
@@ -100,8 +100,8 @@ export const MoodPixelSelector: React.FC<MoodPixelSelectorProps> = ({
         <div className="flex items-center gap-2">
           {selectedMood ? (
             <>
-              <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: selectedMood.color || '#9CA3AF' }}></span>
-              <span className="text-gray-700 font-medium truncate">{selectedMood.name}</span>
+              <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: selectedMood.colore || '#9CA3AF' }}></span>
+              <span className="text-gray-700 font-medium truncate">{selectedMood.category_name}</span>
             </>
           ) : (
             <span className="text-gray-400">Inserisci Mood...</span>
@@ -122,8 +122,8 @@ export const MoodPixelSelector: React.FC<MoodPixelSelectorProps> = ({
                 onClick={() => { if(cat.id) { onChange(cat.id); setIsDropdownOpen(false); } }} 
                 className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-2 transition-colors"
               >
-                <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.color || '#9CA3AF' }}></span>
-                <span className="text-gray-700 truncate">{cat.name}</span>
+                <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.colore || '#9CA3AF' }}></span>
+                <span className="text-gray-700 truncate">{cat.category_name}</span>
               </div>
             ))}
             

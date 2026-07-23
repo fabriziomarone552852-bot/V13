@@ -69,6 +69,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const liveTask = tasks.find((t: DbTask) => t.id === selectedTask.id);
   const isTaskDone = liveTask ? liveTask.fatto : selectedTask.done;
 
+  const taskCategoryName = liveTask?.category_name || selectedTask.category;
+  const taskCategoryColor = liveTask?.category?.colore || selectedTask.categoryColor;
+
   const handleTaskToggle = async (taskId: number, isCurrentlyDone: boolean) => {
     // 1. Troviamo se ci sono sottotask dirette non completate
     const activeSubtasks = tasks.filter((t: DbTask) => t.parent_id === taskId && !t.fatto);
@@ -141,7 +144,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   const HeaderTags = (
   <div className="flex items-center gap-2">
-      <Badge variant="category" colorHex={selectedTask.categoryColor}>
+      <Badge variant="category" colorHex={taskCategoryColor}>
         {selectedTask.category}
       </Badge>
       <Badge variant="priority" priorityLevel={selectedTask.priority}>

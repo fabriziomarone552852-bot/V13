@@ -134,8 +134,8 @@ def get_admin_max_depth(db: Session) -> int:
 def get_effective_max_depth(user: User, db: Session) -> int:
     admin_limit = get_admin_max_depth(db)
     user_limit = (
-        user.maxsubtaskdepthuser
-        if user.maxsubtaskdepthuser is not None
+        user.max_subtask_depth_user
+        if user.max_subtask_depth_user is not None
         else settings.default_max_subtask_depth
     )
     return min(user_limit, admin_limit)

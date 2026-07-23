@@ -45,8 +45,8 @@ const CategoryEditPage: React.FC = () => {
 
         const data = (await res.json()) as Category;
         setInitialValues({
-          name: data.name,
-          color: data.color || '#cccccc',
+          name: data.category_name,
+          color: data.colore || '#cccccc',
           genre: data.genre,
         });
       } catch (err) {

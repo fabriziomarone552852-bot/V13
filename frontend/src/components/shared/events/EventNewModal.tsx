@@ -43,7 +43,7 @@ interface EventPayload {
   data_inizio: string;
   data_fine: string | null;
   tutto_il_giorno: boolean;
-  category_id?: number;
+  user_category_id?: number;
   luogo: string | null;
   rrule: string | null;
 }
@@ -125,7 +125,7 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
   // 1. OTTIMA UX: Accendiamo il caricamento
   setIsSaving(true); 
 
-  const categoriaScelta = dbCategories.find((c: Category) => c.name === newEventForm.category);
+  const categoriaScelta = dbCategories.find((c: Category) => c.category_name === newEventForm.category);
   const categoryId = categoriaScelta ? Number(categoriaScelta.id) : undefined;
 
   // 2. OTTIMA ARCHITETTURA: Usiamo le utility esterne pulite
@@ -162,7 +162,7 @@ const NewEventModal: React.FC<NewEventModalProps> = ({
       data_inizio: dataInizioStr,
       data_fine: dataFineStr,
       tutto_il_giorno: èTuttoIlGiorno, 
-      category_id: categoryId,
+      user_category_id: categoryId,
       luogo: newEventForm.luogo || null,
       rrule: rruleString 
     };

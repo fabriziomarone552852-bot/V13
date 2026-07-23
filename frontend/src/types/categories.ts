@@ -1,7 +1,7 @@
 export interface Category {
   id: number;
-  name: string;
-  color: string | null;
+  category_name: string;
+  colore: string | null;
   user_id: number | null;
   genre: number;
 }
@@ -16,7 +16,7 @@ export const CategoryGenre = {
 export type CategoryGenre = typeof CategoryGenre[keyof typeof CategoryGenre];
 
 export interface CategoryCreatePayload {
-  name: string;
+  category_name: string;
   colore?: string | null;
   genre?: number;
 }

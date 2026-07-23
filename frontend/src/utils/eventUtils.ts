@@ -15,6 +15,13 @@ export interface DailyLayoutResult {
   overlayEvents: Array<DayEventItem & { overlayTop: number; overlayHeight: number; colIdx: number; totalCols: number }>;
 }
 
+export type OverlayEventItem = DayEventItem & { 
+  overlayTop: number; 
+  overlayHeight: number; 
+  colIdx: number; 
+  totalCols: number 
+};
+
 export const isEventInDay = (event: CalendarEvent, targetDateStr: string): boolean => {
   if (!event.dateStr) return true; 
   const start = event.dateStr;
@@ -136,7 +143,7 @@ export const calculateDailyEventLayout = (
       return baseHourY !== undefined ? baseHourY + (m / 60) * hHeight : currentY;
   };
 
-  const overlayEvents = rawDayEvents.map(item => ({
+  const overlayEvents: OverlayEventItem[] = rawDayEvents.map(item => ({
       ...item,
       overlayTop: getY(item.seg.startMins),
       overlayHeight: Math.max(20, getY(item.seg.endMins) - getY(item.seg.startMins)), 
@@ -145,7 +152,7 @@ export const calculateDailyEventLayout = (
   }));
 
   // Uso sicuro del tipo Array per i gruppi invece di typeof
-  const groups: Array<typeof overlayEvents> = [];
+  const groups: OverlayEventItem[][] = [];
   
   overlayEvents.forEach(ev => {
       const group = groups.find(g => g.some(other => ev.seg.startMins < other.seg.endMins && ev.seg.endMins > other.seg.startMins));
@@ -153,7 +160,7 @@ export const calculateDailyEventLayout = (
   });
 
   groups.forEach(group => {
-      const cols: Array<typeof overlayEvents> = [];
+      const cols: OverlayEventItem[][] = [];
       group.sort((a, b) => a.seg.startMins - b.seg.startMins).forEach(ev => {
         let placed = false;
         for (let i = 0; i < cols.length; i++) {
@@ -220,8 +227,8 @@ export const mapDbEventsToCalendarEvents = (
       endTime: endTime,
       dateStr: baseDateStr,
       endDateStr: safeDataFine.length >= 10 ? safeDataFine.substring(0, 10) : undefined,
-      category: e.category?.name || e.category_name || 'Generico',
-      categoryColor: e.category?.color || '#9ca3af',
+      category: e.category?.category_name || e.category_name || 'Generico',
+      categoryColor: e.category?.colore || '#9ca3af',
       description: typeof e.descrizione === 'string' ? e.descrizione : undefined,
       location: typeof e.luogo === 'string' ? e.luogo : undefined,
       

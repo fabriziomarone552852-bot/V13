@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Category } from '@/types/tasks';
+import type { Category } from '@/types';
 
 interface TaskFiltersProps {
   filtroStato: 'tutti' | 'aperti' | 'completati';
@@ -91,7 +91,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
             <option value="">Tutte le categorie</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.category_name}
               </option>
             ))}
           </select>

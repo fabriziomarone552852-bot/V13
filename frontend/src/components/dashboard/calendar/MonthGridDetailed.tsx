@@ -52,9 +52,9 @@ const MonthGridDetailed: React.FC<MonthGridDetailedProps> = ({
             id: `task-${t.id}`,
             title: t.titolo, 
             type: 'task', 
-            category: t.category?.name || 'Generico',
+            category: t.category?.category_name || 'Generico',
             isMultiDay: false, 
-            categoryColor: t.category?.color || '#9CA3AF', // Fallback sicuro
+            categoryColor: t.category?.colore || '#9CA3AF', // Fallback sicuro
             done: !!t.fatto // Assicura che sia un booleano
           });
         }
