@@ -4,6 +4,7 @@ import { CategoryGenre, type Category } from '@/types';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { PlusIcon, DropdownIcon, CloseIcon } from './Icons';
 import { useCategories } from '@/hooks/useCategories';
+import { formatName } from '@/utils/uiUtils';
 
 interface CategorySelectProps {
   value: string;
@@ -18,11 +19,11 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
-  const [newCatForm, setNewCatForm] = useState({ name: '', color: '#3B82F6' });
+  const [newCatForm, setNewCatForm] = useState({ name: '', colore: '#3B82F6' });
   const [errorMsg, setErrorMsg] = useState('');
   const [openUpwards, setOpenUpwards] = useState(false);
 
-  const activeColor = categories.find((c: Category) => c.name === value)?.color || '#9CA3AF';
+  const activeColor = categories.find((c: Category) => c.category_name === value)?.colore || '#9CA3AF';
 
   const wrapperRef = useOutsideClick<HTMLDivElement>(() => {
     if (isDropdownOpen) setIsDropdownOpen(false);
@@ -41,7 +42,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
     const nomePulito = newCatForm.name.trim();
     if (!nomePulito) return;
 
-    const existingCat = dbCategories.find((c: Category) => c.name.toLowerCase() === nomePulito.toLowerCase());
+    const existingCat = dbCategories.find((c: Category) => c.category_name.toLowerCase() === nomePulito.toLowerCase());
 
     try {
       if (existingCat) {
@@ -56,25 +57,25 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
           data: { genre: CategoryGenre.COMMON } 
         });
         
-        onChange(promotedCat.name || nomePulito);
+        onChange(promotedCat.category_name || nomePulito);
         setIsNewModalOpen(false);
-        setNewCatForm({ name: '', color: '#3B82F6' });
+        setNewCatForm({ name: '', colore: '#3B82F6' });
         setErrorMsg('');
         return; 
       }
 
       // 🪄 FIX: Sintassi React Query (Singolo oggetto payload)
       const cat = await addCategory({ 
-        name: nomePulito, 
-        color: newCatForm.color, 
+        category_name: nomePulito, 
+        colore: newCatForm.colore, 
         genre: genreType 
       });
       
-      onChange(cat.name || nomePulito);
+      onChange(cat.category_name || nomePulito);
       setIsNewModalOpen(false);
-      setNewCatForm({ name: '', color: '#3B82F6' });
+      setNewCatForm({ name: '', colore: '#3B82F6' });
       setErrorMsg('');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       setErrorMsg("Errore durante l'operazione.");
     }
@@ -92,7 +93,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
       <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer flex justify-between items-center hover:border-blue-500 transition-colors">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: activeColor }}></span>
-          <span className="text-gray-700 truncate">{value || 'Seleziona...'}</span>
+          <span className="text-gray-700 truncate">{formatName(value || 'Seleziona...')}</span>
         </div>
         <DropdownIcon isDropdownOpen={isDropdownOpen} />
       </div>
@@ -102,9 +103,9 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
           openUpwards ? 'bottom-full mb-2' : 'top-full mt-1'
         }`}>
           {categories.map((cat: Category) => (
-            <div key={cat.id} onClick={() => { onChange(cat.name); setIsDropdownOpen(false); }} className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-2 transition-colors">
-              <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.color || '#9CA3AF' }}></span>
-              <span className="text-gray-700 truncate">{cat.name}</span>
+            <div key={cat.id} onClick={() => { onChange(cat.category_name); setIsDropdownOpen(false); }} className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-2 transition-colors">
+              <span className="w-3 h-3 rounded-full border border-gray-200 shrink-0" style={{ backgroundColor: cat.colore || '#9CA3AF' }}></span>
+              <span className="text-gray-700 truncate">{formatName(cat.category_name)}</span>
             </div>
           ))}
         </div>
@@ -126,8 +127,8 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Colore (HEX)</label>
                 <div className="flex gap-2">
-                  <input type="color" value={newCatForm.color} onChange={e => setNewCatForm({...newCatForm, color: e.target.value})} className="w-10 h-10 p-0.5 border rounded-lg cursor-pointer" />
-                  <input type="text" value={newCatForm.color} onChange={e => setNewCatForm({...newCatForm, color: e.target.value})} className="flex-1 px-3 py-2 border rounded-lg text-sm uppercase outline-none focus:border-blue-500" />
+                  <input type="color" value={newCatForm.colore} onChange={e => setNewCatForm({...newCatForm, colore: e.target.value})} className="w-10 h-10 p-0.5 border rounded-lg cursor-pointer" />
+                  <input type="text" value={newCatForm.colore} onChange={e => setNewCatForm({...newCatForm, colore: e.target.value})} className="flex-1 px-3 py-2 border rounded-lg text-sm uppercase outline-none focus:border-blue-500" />
                 </div>
               </div>
               {errorMsg && <p className="text-xs text-red-500 font-bold">{errorMsg}</p>}

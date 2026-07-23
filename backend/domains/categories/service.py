@@ -16,7 +16,7 @@ from backend.domains.users.models import User
 def _to_response(user_category: UserCategory) -> schemas.CategoryResponse:
     return schemas.CategoryResponse(
         id=user_category.id,
-        name=user_category.category_name,
+        category_name=user_category.category_name,
         colore=user_category.colore,
         user_id=user_category.user_id,
         genre=user_category.genre,
@@ -34,7 +34,7 @@ def create_category(
 
     user_category = UserCategory(
         user_id=current_user.id,
-        category_name=data.name,
+        category_name=data.category_name,
         colore=data.colore,
         genre=data.genre,
     )

@@ -9,7 +9,7 @@ export interface DbEvent {
   tutto_il_giorno: boolean;
   luogo?: string | null;
   user_id: number;
-  category_id?: number | null;
+  user_category_id?: number | null;
   category?: Category | null;
   category_name?: string | null;
   rrule?: string | null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Category, Priorita, TaskCreateFormState } from '@/types/tasks';
+import type { Category, Priorita, TaskCreateFormState } from '@/types';
 
 interface TaskCreateFormProps {
   form: TaskCreateFormState;
@@ -168,7 +168,7 @@ const TaskCreateForm: React.FC<TaskCreateFormProps> = ({
               <option value="">Nessuna categoria</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.category_name}
                 </option>
               ))}
             </select>

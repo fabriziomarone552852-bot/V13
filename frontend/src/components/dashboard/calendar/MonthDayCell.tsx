@@ -89,7 +89,7 @@ export const MonthDayCell: React.FC<MonthDayCellProps> = ({
   // --- STILI DINAMICI BASATI SULLA TABELLA CATEGORIES ---
   // 1. Dichiariamo una variabile sicura: se il colore è null o vuoto, usiamo un grigio di default.
   // In questo modo 'moodColor' sarà SEMPRE e SOLO una 'string'.
-  const moodColor: string = activeMood?.color || '#9CA3AF'; 
+  const moodColor: string = activeMood?.colore || '#9CA3AF'; 
 
   // 2. Ora possiamo passare la stringa sicura a React senza che TypeScript si lamenti.
   const cellBgStyle = activeMood ? { backgroundColor: `${moodColor}15` } : {};
@@ -123,13 +123,13 @@ export const MonthDayCell: React.FC<MonthDayCellProps> = ({
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsMoodMenuOpen(!isMoodMenuOpen); }}
               className="text-base transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-40 hover:!opacity-100 p-1 rounded-md"
-              title={activeMood ? activeMood.name : "Aggiungi umore"}
+              title={activeMood ? activeMood.category_name : "Aggiungi umore"}
             >
               {/* Utilizziamo il Pallino colorato invece del testo per un look minimale */}
               {activeMood ? (
                 <div 
                   className="w-3.5 h-3.5 rounded-full shadow-sm" 
-                  style={{ backgroundColor: activeMood.color || '#9CA3AF' }} 
+                  style={{ backgroundColor: activeMood.colore || '#9CA3AF' }} 
                 />
               ) : (
                 <span className="text-gray-400 font-bold leading-none">+</span>
@@ -146,8 +146,8 @@ export const MonthDayCell: React.FC<MonthDayCellProps> = ({
                       onClick={(e) => handleMoodSelect(e, mood.id!)} 
                       className={`px-3 py-2 text-xs cursor-pointer flex items-center gap-2 transition-colors ${moodCategoryId === mood.id ? 'bg-blue-50 font-black' : 'hover:bg-gray-50 font-medium text-gray-700'}`}
                     >
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: mood.color || '#9CA3AF' }} />
-                      <span className="truncate">{mood.name}</span>
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: mood.colore || '#9CA3AF' }} />
+                      <span className="truncate">{mood.category_name}</span>
                     </div>
                   ))}
                   {userMoods.length === 0 && (

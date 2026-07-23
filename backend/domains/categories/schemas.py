@@ -98,7 +98,7 @@ class CategoryUpdate(StrictBaseModel):
 
 class CategoryResponse(ORMBaseModel):
     id: int
-    name: str
+    category_name: str
     colore: Optional[str] = None
     user_id: int
     genre: CategoryGenre

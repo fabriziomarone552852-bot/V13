@@ -13,7 +13,6 @@ export const getTextColorForBackground = (hexColor?: string) => {
   return luminosita > 128 ? 'text-gray-900' : 'text-white';
 };
 
-// Da aggiungere a uiUtils.ts
 export const getHexColor = (colorValue?: string) => {
   if (!colorValue) return '#9ca3af'; 
   if (colorValue.startsWith('#')) return colorValue; 
@@ -57,4 +56,9 @@ export const getOriginClass = (index: number, cols: number) => {
       if (colIndex === 0) return 'origin-bottom-left'; // Elemento tutto a sinistra, si espande verso destra
       if (colIndex === cols - 1) return 'origin-bottom-right'; // Elemento tutto a destra, si espande verso sinistra
       return 'origin-bottom'; // Elemento centrale, si espande ai lati
+};
+
+export const formatName = (name: string): string => {
+  if (!name) return '';
+  return name.charAt(0).toUpperCase() + name.slice(1);
 };

@@ -132,7 +132,7 @@ const TaskNewModal: React.FC<TaskNewModalProps> = ({ isOpen, onClose, taskToEdit
     }
 
     try {
-      const categoriaScelta = dbCategories.find(c => c.name === newTaskForm.category);
+      const categoriaScelta = dbCategories.find(c => c.category_name === newTaskForm.category);
       const categoryId = categoriaScelta ? Number(categoriaScelta.id) : undefined;
 
       const pacchettoPerIlServer: Partial<DbTask> = {
@@ -141,7 +141,7 @@ const TaskNewModal: React.FC<TaskNewModalProps> = ({ isOpen, onClose, taskToEdit
         data_start: newTaskForm.data_start,
         data_scadenza: newTaskForm.data_scadenza || null,
         priorita: newTaskForm.priorita,
-        category_id: categoryId,
+        user_category_id: categoryId,
         luogo: newTaskForm.luogo || null,
         parent_id: newTaskForm.parent_id ? Number(newTaskForm.parent_id) : null
       };
