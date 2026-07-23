@@ -14,7 +14,6 @@ from backend.domains.users.models import User
 router = APIRouter(
     prefix="/admin/catalogs",
     tags=["admin-catalogs"],
-    dependencies=[Depends(deps.require_superuser)],
 )
 
 

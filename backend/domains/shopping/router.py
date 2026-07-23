@@ -16,8 +16,19 @@ from backend.domains.shopping.schemas.groups import (
     ShoppingGroupResponse,
     ShoppingGroupUpdate,
 )
-from backend.domains.shopping.schemas.inventory import InventoryBatchCreate, InventoryBatchResponse, InventoryBatchUpdate
-from backend.domains.shopping.schemas.lists import ShoppingListItemCreate, ShoppingListItemResponse, ShoppingListItemUpdate, ShoppingListCreate, ShoppingListResponse, ShoppingListUpdate
+from backend.domains.shopping.schemas.inventory import (
+    InventoryBatchCreate,
+    InventoryBatchResponse,
+    InventoryBatchUpdate,
+)
+from backend.domains.shopping.schemas.lists import (
+    ShoppingListItemCreate,
+    ShoppingListItemResponse,
+    ShoppingListItemUpdate,
+    ShoppingListCreate,
+    ShoppingListResponse,
+    ShoppingListUpdate,
+)
 from backend.domains.shopping.schemas.catalog import (
     ShoppingProductResponse,
     ShoppingSupplierCreate,
@@ -30,11 +41,10 @@ from backend.domains.users.models import User
 router = APIRouter(prefix="/shopping", tags=["shopping"])
 
 
-# ------------------------------------------------------------------ Groups
 @router.get("/groups", response_model=List[ShoppingGroupResponse])
 def list_groups(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_groups(db, current_user)
 
@@ -47,7 +57,7 @@ def list_groups(
 def create_group(
     group_in: ShoppingGroupCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_group(db, current_user, group_in)
 
@@ -57,7 +67,7 @@ def update_group(
     group_id: int,
     group_in: ShoppingGroupUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_group(db, current_user, group_id, group_in)
 
@@ -70,18 +80,17 @@ def update_group(
 def delete_group(
     group_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_group(db, current_user, group_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------------------------------------------------------ Group Members
 @router.get("/groups/{group_id}/members", response_model=List[ShoppingGroupMemberResponse])
 def list_members(
     group_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_members(db, current_user, group_id)
 
@@ -95,7 +104,7 @@ def add_member(
     group_id: int,
     member_in: ShoppingGroupMemberCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.add_member(db, current_user, group_id, member_in)
 
@@ -109,7 +118,7 @@ def invite_member(
     group_id: int,
     invite_in: ShoppingGroupMemberInvite,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.invite_member(db, current_user, group_id, invite_in)
 
@@ -120,7 +129,7 @@ def update_member_role(
     user_id: int,
     role_in: ShoppingGroupMemberRoleUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_member_role(db, current_user, group_id, user_id, role_in)
 
@@ -134,17 +143,16 @@ def remove_member(
     group_id: int,
     user_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.remove_member(db, current_user, group_id, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------------------------------------------------------ Lists
 @router.get("/lists", response_model=List[ShoppingListResponse])
 def list_shopping_lists(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_lists(db, current_user)
 
@@ -157,7 +165,7 @@ def list_shopping_lists(
 def create_shopping_list(
     list_in: ShoppingListCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_list(db, current_user, list_in)
 
@@ -167,7 +175,7 @@ def update_shopping_list(
     list_id: int,
     list_in: ShoppingListUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_list(db, current_user, list_id, list_in)
 
@@ -180,18 +188,18 @@ def update_shopping_list(
 def delete_shopping_list(
     list_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_list(db, current_user, list_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------------------------------------------------------ Products
 @router.get("/products", response_model=List[ShoppingProductResponse])
 def list_products(
     search: Optional[str] = Query(None, min_length=1, max_length=255),
     limit: int = Query(20, ge=1, le=100),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_products(db, search=search, limit=limit)
 
@@ -200,18 +208,17 @@ def list_products(
 def get_product(
     product_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_product(db, current_user, product_id)
 
 
-# ------------------------------------------------------------------ Items
 @router.get("/items", response_model=List[ShoppingListItemResponse])
 def list_shopping_items(
     is_purchased: Optional[bool] = Query(None),
     shopping_list_id: Optional[int] = Query(None),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_items(
         db=db,
@@ -229,7 +236,7 @@ def list_shopping_items(
 def create_shopping_item(
     item_in: ShoppingListItemCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_item(db, current_user, item_in)
 
@@ -239,7 +246,7 @@ def update_shopping_item(
     item_id: int,
     item_in: ShoppingListItemUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_item(db, current_user, item_id, item_in)
 
@@ -252,28 +259,26 @@ def update_shopping_item(
 def delete_shopping_item(
     item_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_item(db, current_user, item_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------------------------------------------------------ Config
 @router.get("/config", response_model=ShoppingConfigBundle)
 def get_shopping_config(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_config_bundle(db)
 
 
-# ------------------------------------------------------------------ Suppliers
 @router.get("/suppliers", response_model=List[ShoppingSupplierResponse])
 def list_suppliers(
     search: Optional[str] = Query(None, min_length=1, max_length=255),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_suppliers(db, current_user, search=search, limit=limit)
 
@@ -286,7 +291,7 @@ def list_suppliers(
 def create_supplier(
     supplier_in: ShoppingSupplierCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_supplier(db, current_user, supplier_in)
 
@@ -296,7 +301,7 @@ def update_supplier(
     supplier_id: int,
     supplier_in: ShoppingSupplierUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_supplier(db, current_user, supplier_id, supplier_in)
 
@@ -309,13 +314,12 @@ def update_supplier(
 def delete_supplier(
     supplier_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_supplier(db, current_user, supplier_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ------------------------------------------------------------------ Inventory Batches
 @router.post(
     "/items/{item_id}/inventory-batches",
     response_model=InventoryBatchResponse,
@@ -325,7 +329,7 @@ def add_inventory_batch(
     item_id: int,
     batch_in: InventoryBatchCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.add_inventory_batch(db, current_user, item_id, batch_in)
 
@@ -335,7 +339,7 @@ def update_inventory_batch(
     batch_id: int,
     batch_in: InventoryBatchUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_inventory_batch(db, current_user, batch_id, batch_in)
 
@@ -348,7 +352,7 @@ def update_inventory_batch(
 def delete_inventory_batch(
     batch_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_inventory_batch(db, current_user, batch_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

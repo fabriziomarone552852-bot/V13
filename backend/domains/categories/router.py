@@ -6,7 +6,7 @@ e nessuna regola di business qui.
 """
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status, Response
 from sqlalchemy.orm import Session
 
 from backend.core import deps
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 @router.post("", response_model=schemas.CategoryResponse, status_code=201)
 def create_category(
     category_in: schemas.CategoryCreate,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.create_category(db, current_user, category_in)
@@ -28,7 +28,7 @@ def create_category(
 @router.get("", response_model=List[schemas.CategoryResponse])
 def get_categories(
     genre: Optional[int] = None,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.list_categories(db, current_user, genre)
@@ -37,7 +37,7 @@ def get_categories(
 @router.get("/{category_id}", response_model=schemas.CategoryResponse)
 def get_category(
     category_id: int,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.get_category(db, current_user, category_id)
@@ -47,17 +47,17 @@ def get_category(
 def update_category(
     category_id: int,
     category_in: schemas.CategoryUpdate,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.update_category(db, current_user, category_id, category_in)
 
 
-@router.delete("/{category_id}", status_code=204)
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def delete_category(
     category_id: int,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     service.delete_category(db, current_user, category_id)
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

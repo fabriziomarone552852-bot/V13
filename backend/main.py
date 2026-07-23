@@ -10,7 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 # Import all models to register them with SQLAlchemy
 # This MUST be done before any API imports that use models
 # from backend.core.models import *  # noqa: F401, F403
+
 from backend.domains.system_boot import router as system_boot_router
+from backend.domains.system_boot.guards import system_boot_guard
+
 # Router migrati ai dominio (architettura modulare router/service/repository)
 from backend.domains.categories.router import router as categories_router
 from backend.domains.users.router import router as users_router
@@ -46,6 +49,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.middleware("http")(system_boot_guard)
 
 app.include_router(system_boot_router)
 app.include_router(auth_router, prefix="/auth")

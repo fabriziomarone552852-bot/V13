@@ -15,7 +15,7 @@ router = APIRouter(prefix="/events", tags=["events"])
 @router.post("", response_model=schemas.EventResponse, status_code=status.HTTP_201_CREATED)
 def create_event(
     event_in: schemas.EventCreate,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.create_event(db, current_user, event_in)
@@ -41,7 +41,7 @@ def get_events(
     tutto_il_giorno: Optional[bool] = None,
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.list_events(
@@ -63,7 +63,7 @@ def get_events(
 def update_event(
     event_id: int,
     event_in: schemas.EventUpdate,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     return service.update_event(db, current_user, event_id, event_in)
@@ -76,7 +76,7 @@ def update_event(
 )
 def delete_event(
     event_id: int,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     service.delete_event(db, current_user, event_id)

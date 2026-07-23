@@ -22,7 +22,7 @@ router = APIRouter(prefix="/sync", tags=["sync"])
 @router.get("/day", response_model=SyncDayResponse)
 def get_day_sync(
     data_riferimento: date = Query(...),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     """
@@ -32,11 +32,12 @@ def get_day_sync(
     """
     return service.get_day_sync(db, current_user, data_riferimento)
 
+
 @router.get("/week", response_model=SyncWeekResponse)
 def get_week_sync(
     start_date: date = Query(...),
     end_date: date = Query(...),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     """
@@ -44,11 +45,12 @@ def get_week_sync(
     """
     return service.get_week_sync(db, current_user, start_date, end_date)
 
+
 @router.get("/month", response_model=SyncMonthResponse)
 def get_month_sync(
     start_date: date = Query(...),
     end_date: date = Query(...),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
     db: Session = Depends(deps.get_db),
 ):
     """

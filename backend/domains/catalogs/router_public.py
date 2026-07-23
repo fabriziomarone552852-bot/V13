@@ -19,7 +19,7 @@ router = APIRouter(prefix="/catalogs", tags=["catalogs"])
 @router.get("/config", response_model=List[schemas.ConfigResponse])
 def list_config(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_config(db, current_user)
 
@@ -28,7 +28,7 @@ def list_config(
 def get_config(
     key: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_config(db, current_user, key)
 
@@ -39,7 +39,7 @@ def list_codes(
     active: Optional[bool] = Query(True),
     search: Optional[str] = Query(None),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_codes(db, current_user, code_type, active, search)
 
@@ -48,7 +48,7 @@ def list_codes(
 def list_code_options(
     code_type: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_code_options(db, current_user, code_type)
 
@@ -57,6 +57,6 @@ def list_code_options(
 def get_code(
     code_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_code(db, current_user, code_id)

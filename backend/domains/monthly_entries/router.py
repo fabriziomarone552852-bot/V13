@@ -58,7 +58,7 @@ def list_entries(
     year: Optional[int] = Query(default=None),
     month: Optional[int] = Query(default=None),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_entries(db, current_user, year, month)
 
@@ -68,7 +68,7 @@ def list_entries_by_month(
     year: int,
     month: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_entries(db, current_user, year, month)
 
@@ -81,7 +81,7 @@ def list_entries_by_month(
 def create_entry(
     entry_in: schemas.MonthlyEntryCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_entry(db, current_user, entry_in)
 
@@ -91,7 +91,7 @@ def update_entry(
     entry_id: int,
     entry_in: schemas.MonthlyEntryUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_entry(db, current_user, entry_id, entry_in)
 
@@ -100,7 +100,7 @@ def update_entry(
 def delete_entry(
     entry_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_entry(db, current_user, entry_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
