@@ -5,10 +5,10 @@ Pydantic models for API request/response validation.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import EmailStr, Field, field_validator, model_validator
 
+from backend.core.password_policy import PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH
 from backend.core.schemas import ORMBaseModel, StrictBaseModel
 
 
@@ -16,7 +16,11 @@ class UserCreate(StrictBaseModel):
     """Request model for user registration."""
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-    password: str = Field(..., min_length=6, max_length=255)
+    password: str = Field(
+        ...,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
 
     @field_validator("username")
     @classmethod
@@ -34,7 +38,7 @@ class UserResponse(ORMBaseModel):
     id: int
     username: str
     email: EmailStr
-    max_subtask_depth_user: Optional[int] = 3
+    max_subtask_depth_user: int | None = 3
     is_superuser: bool = False
     must_change_password: bool = False
 
@@ -50,7 +54,7 @@ class UserSettingsResponse(ORMBaseModel):
     id: int
     username: str
     email: EmailStr
-    max_subtask_depth_user: Optional[int] = 3
+    max_subtask_depth_user: int | None = 3
     is_superuser: bool = False
     must_change_password: bool = False
 
@@ -60,20 +64,32 @@ class UserAdminResponse(ORMBaseModel):
     id: int
     username: str
     email: EmailStr
-    max_subtask_depth_user: Optional[int] = 3
+    max_subtask_depth_user: int | None = 3
     is_superuser: bool = False
     must_change_password: bool = False
-    deleted_at: Optional[datetime] = None
-    deleted_by_user_id: Optional[int] = None
+    deleted_at: datetime | None = None
+    deleted_by_user_id: int | None = None
 
 
 class UserSettingsUpdate(StrictBaseModel):
     """Request model for updating user settings."""
-    email: Optional[EmailStr] = None
-    current_password: Optional[str] = Field(None, min_length=6, max_length=255)
-    new_password: Optional[str] = Field(None, min_length=6, max_length=255)
-    confirm_new_password: Optional[str] = Field(None, min_length=6, max_length=255)
-    max_subtask_depth_user: Optional[int] = Field(None, ge=1, le=15)
+    email: EmailStr | None = None
+    current_password: str | None = Field(
+        None,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
+    new_password: str | None = Field(
+        None,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
+    confirm_new_password: str | None = Field(
+        None,
+        min_length=PASSWORD_MIN_LENGTH,
+        max_length=PASSWORD_MAX_LENGTH,
+    )
+    max_subtask_depth_user: int | None = Field(None, ge=1, le=15)
 
     @model_validator(mode="after")
     def validate_password_change(self) -> "UserSettingsUpdate":
@@ -89,7 +105,7 @@ class UserSettingsUpdate(StrictBaseModel):
 
     @field_validator("email")
     @classmethod
-    def normalize_email(cls, value: Optional[EmailStr]) -> Optional[str]:
+    def normalize_email(cls, value: EmailStr | None) -> str | None:
         if value is None:
             return value
         return str(value).strip().lower()

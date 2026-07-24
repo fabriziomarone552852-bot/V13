@@ -2,7 +2,7 @@
 from datetime import date
 from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from backend.core import deps
@@ -21,7 +21,7 @@ def list_daily_entries(
     end_date: Optional[date] = Query(default=None),
     tipo: Optional[DailyEntryType] = Query(default=None),
     db: Session = Depends(deps.get_db),
-    user: User = Depends(deps.get_current_user),
+    user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_entries(
         db=db,
@@ -29,14 +29,15 @@ def list_daily_entries(
         data_riferimento=data_riferimento,
         start_date=start_date,
         end_date=end_date,
-        tipo=tipo
+        tipo=tipo,
     )
+
 
 @router.get("/{entry_id}", response_model=schemas.DailyEntryResponse)
 def get_daily_entry(
     entry_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_entry(db, current_user, entry_id)
 
@@ -45,7 +46,7 @@ def get_daily_entry(
 def create_daily_entry(
     payload: schemas.DailyEntryCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_entry(db, current_user, payload)
 
@@ -55,15 +56,16 @@ def update_daily_entry(
     entry_id: int,
     payload: schemas.DailyEntryUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_entry(db, current_user, entry_id, payload)
 
 
-@router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def delete_daily_entry(
     entry_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_entry(db, current_user, entry_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

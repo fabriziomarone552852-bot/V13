@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Response
 from sqlalchemy.orm import Session
 
 from backend.core import deps
@@ -20,7 +20,7 @@ def list_countdowns(
     target_date_from: Optional[datetime] = Query(default=None),
     target_date_to: Optional[datetime] = Query(default=None),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.list_countdowns(
         db, current_user, status_filter, target_date_from, target_date_to
@@ -31,7 +31,7 @@ def list_countdowns(
 def get_countdown(
     countdown_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.get_countdown(db, current_user, countdown_id)
 
@@ -40,7 +40,7 @@ def get_countdown(
 def create_countdown(
     payload: schemas.CountdownCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.create_countdown(db, current_user, payload)
 
@@ -50,7 +50,7 @@ def update_countdown(
     countdown_id: int,
     payload: schemas.CountdownUpdate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.update_countdown(db, current_user, countdown_id, payload)
 
@@ -59,7 +59,7 @@ def update_countdown(
 def close_countdown(
     countdown_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.close_countdown(db, current_user, countdown_id)
 
@@ -68,15 +68,16 @@ def close_countdown(
 def reopen_countdown(
     countdown_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     return service.reopen_countdown(db, current_user, countdown_id)
 
 
-@router.delete("/{countdown_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{countdown_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def delete_countdown(
     countdown_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_app_user),
 ):
     service.delete_countdown(db, current_user, countdown_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

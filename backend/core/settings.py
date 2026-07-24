@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     default_habit_log_lookback_days: int = Field(30, ge=1)
     default_completed_task_lookback_days: int = Field(90, ge=1)
 
+    password_min_length: int = 5
+    password_max_length: int = 128
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: str) -> str:
@@ -78,6 +81,5 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
-
 
 __all__ = ["Settings", "get_settings", "DEV_FALLBACK_SECRET"]
