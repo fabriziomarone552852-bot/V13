@@ -3,34 +3,38 @@ import React, { useState } from 'react';
 import type { DbTask } from '@/types';
 import { getHexColor } from '@/utils/uiUtils';
 
-interface TaskCategoryFields {
-  colore?: string;
-  color?: string;
-}
-
-type SafeTask = DbTask & {
-  category?: TaskCategoryFields;
-  category_color?: string;
-  categoryColor?: string;
-  color?: string;
-  priorita?: string | number | null;
-};
-
 interface DayTasksPopoverProps {
   dayTasks: DbTask[];
   onSelectTask?: (task: DbTask) => void;
   onToggleTask?: (task: DbTask, newStatus: boolean) => void;
 }
 
-const getTaskColorHex = (task: SafeTask): string => {
-  const rawColor = 
-    task.category?.color || 
-    task.category?.color || 
-    task.category_color || 
-    task.categoryColor || 
-    task.color ||
-    '#3b82f6';
-  return getHexColor(rawColor);
+// 🛡️ VIA LUNGA: Zero 'any', Zero 'as'. 
+// Leggiamo dinamicamente l'oggetto verificando prima l'esistenza della chiave e il suo tipo
+const getTaskColorHex = (task: DbTask): string => {
+  let rawColor: string | undefined = undefined;
+
+  // 1. Controlliamo in modo sicuro dentro 'category' (se esiste ed è un oggetto)
+  if (typeof task.category === 'object' && task.category !== null) {
+    if ('color' in task.category && typeof task.category.color === 'string') {
+      rawColor = task.category.color;
+    } else if ('colore' in task.category && typeof task.category.colore === 'string') {
+      rawColor = task.category.colore;
+    }
+  }
+
+  // 2. Se non abbiamo trovato nulla, controlliamo nella radice del task
+  if (!rawColor) {
+    if ('category_color' in task && typeof task.category_color === 'string') {
+      rawColor = task.category_color;
+    } else if ('categoryColor' in task && typeof task.categoryColor === 'string') {
+      rawColor = task.categoryColor;
+    } else if ('color' in task && typeof task.color === 'string') {
+      rawColor = task.color;
+    }
+  }
+
+  return getHexColor(rawColor || '#3b82f6');
 };
 
 export const DayTasksPopover: React.FC<DayTasksPopoverProps> = ({ 
@@ -48,7 +52,8 @@ export const DayTasksPopover: React.FC<DayTasksPopoverProps> = ({
       {/* PANNELLO LISTA TASK */}
       {isExpanded && (
         <div className="w-full max-h-[250px] overflow-y-auto custom-scrollbar pointer-events-auto bg-gray-50/90 backdrop-blur-md p-1.5 rounded-lg shadow-xl border border-gray-200 flex flex-col gap-1 transition-all">
-          {(dayTasks as SafeTask[]).map(task => {
+          {/* Mappiamo direttamente su DbTask senza alcuna conversione (cast) */}
+          {dayTasks.map((task: DbTask) => {
             const taskColor = getTaskColorHex(task);
             return (
               <div 
@@ -64,7 +69,6 @@ export const DayTasksPopover: React.FC<DayTasksPopoverProps> = ({
                 }`}
                 style={{ borderColor: task.fatto ? '#9ca3af' : taskColor }}
               >
-                {/* Checkbox rotondo custom originario */}
                 <button 
                   type="button"
                   onClick={(e) => {

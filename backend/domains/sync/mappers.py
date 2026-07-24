@@ -27,7 +27,7 @@ WEEK_NOTE_TYPES = {"N1", "N2", "N3", "N4"}
 def _category_to_response(category) -> CategoryResponse:
     return CategoryResponse(
         id=category.id,
-        name=category.category_name,
+        category_name=category.category_name,
         colore=category.colore,
         user_id=category.user_id,
         genre=category.genre,

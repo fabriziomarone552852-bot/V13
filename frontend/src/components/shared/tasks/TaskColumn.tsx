@@ -3,7 +3,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { Pagination } from '@/components/shared/utils/Pagination';
 import { EmptyState } from '@/components/shared/utils/EmptyState';
 import { AddButton } from '@/components/shared/utils/AddButton';
-import { filterAndSortTree } from '@/utils/taskUtils';
+import { filterAndSortTree, promoteSubtasks } from '@/utils/taskUtils';
 import { formatToItalianShortDate, getLocalTodayStr } from '@/utils/dateUtils';
 import { useAutoFitPagination } from '@/hooks/useAutoFitPagination';
 import { CalendarIcon, CalendarXIcon, SwitchIcon } from '@/components/shared/utils/Icons';
@@ -45,9 +45,17 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
     const isPastDay = selectedDate ? refDateStr < getLocalTodayStr() : false;
 
   // 🪄 Ottimizzazione del filtro e dell'ordinamento
+  // 🪄 Ottimizzazione del filtro e dell'ordinamento con Promozione Sottotask
   const sortedTasks = useMemo(() => {
-    const filteredTasks = tasks.filter(task => showWithDeadline ? !!task.deadline : !task.deadline);
+    // 1. Prima verifichiamo le sottotask e promuoviamo quelle più urgenti
+    const tasksWithPromotions = promoteSubtasks(tasks);
+
+    // 2. Poi applichiamo il filtro "Con Data" / "Senza Data"
+    const filteredTasks = tasksWithPromotions.filter(task => 
+      showWithDeadline ? !!task.deadline : !task.deadline
+    );
     
+    // 3. Infine ordiniamo e filtriamo per data/archivio
     return filterAndSortTree(filteredTasks, false, selectedDate ? 'priority' : sortMode, refDateStr);
   }, [tasks, showWithDeadline, selectedDate, sortMode, refDateStr]);
 

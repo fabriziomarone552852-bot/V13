@@ -56,10 +56,6 @@ class DailyEntry(Base):
         back_populates="daily_entries",
     )
 
-    __table_args__ = (
-        UniqueConstraint("user_id", "data_riferimento", "tipo", name="uq_user_date_type"),
-    )
-
     def __repr__(self) -> str:
         return (
             f"<DailyEntry id={self.id} user_id={self.user_id} "

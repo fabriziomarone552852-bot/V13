@@ -34,7 +34,7 @@ def create_category(
 
     user_category = UserCategory(
         user_id=current_user.id,
-        category_name=data.category_name,
+        category_name=data.name,
         colore=data.colore,
         genre=data.genre,
     )

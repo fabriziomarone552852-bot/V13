@@ -38,8 +38,12 @@ class TaskCreate(StrictBaseModel):
 
     @model_validator(mode="after")
     def validate_dates(self) -> "TaskCreate":
-        if self.data_start and self.data_scadenza and self.data_scadenza < self.data_start:
-            raise ValueError("data_scadenza non può essere precedente a data_start.")
+        if self.data_start and self.data_scadenza:
+            inizio_puro = self.data_start.replace(tzinfo=None)
+            scadenza_pura = self.data_scadenza.replace(tzinfo=None)
+            
+            if scadenza_pura < inizio_puro:
+                raise ValueError("data_scadenza non può essere precedente a data_start.")
         return self
 
 
@@ -69,8 +73,12 @@ class TaskUpdate(StrictBaseModel):
 
     @model_validator(mode="after")
     def validate_dates_and_completion(self) -> "TaskUpdate":
-        if self.data_start and self.data_scadenza and self.data_scadenza < self.data_start:
-            raise ValueError("La data di scadenza non può essere precedente alla data di inizio")
+        if self.data_start and self.data_scadenza:
+            inizio_puro = self.data_start.replace(tzinfo=None)
+            scadenza_pura = self.data_scadenza.replace(tzinfo=None)
+            
+            if scadenza_pura < inizio_puro:
+                raise ValueError("La data di scadenza non può essere precedente alla data di inizio")
 
         if self.fatto is True and self.data_fatto is None:
             self.data_fatto = datetime.now(timezone.utc)

@@ -85,7 +85,14 @@ const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange, genreT
     <div className="relative" ref={wrapperRef}>
       <div className="flex justify-between items-center mb-1">
         <label className="text-xs font-bold text-gray-500 uppercase">Categoria</label>
-        <button type="button" onClick={() => setIsNewModalOpen(true)} className="hover:bg-blue-100 text-gray-500 hover:text-blue-500 rounded p-0.5 transition-colors">
+        <button 
+          type="button" 
+          onClick={() => {
+            setIsNewModalOpen(true);
+            setIsDropdownOpen(false);
+          }} 
+          className="hover:bg-blue-100 text-gray-500 hover:text-blue-500 rounded p-0.5 transition-colors"
+        >
           <PlusIcon className="h-4 w-4" />
         </button>
       </div>

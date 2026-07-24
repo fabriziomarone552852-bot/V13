@@ -18,8 +18,8 @@ export const mapTaskToSummary = (
     data_fatto: t.data_fatto,
     priority: t.priorita,
     // 🪄 MAGIA: Sostituiti tutti i || con ??
-    category: t.category?.name ?? t.category_name ?? 'Generico',
-    categoryColor: t.category?.color ?? '#9ca3af',
+    category: t.category?.category_name ?? t.category_name ?? 'Generico',
+    categoryColor: t.category?.colore ?? '#9ca3af',
     description: t.descrizione ?? "",
     location: t.luogo ?? "",
     parent_id: t.parent_id,
@@ -161,4 +161,86 @@ export const filterAndSortTree = (
     const dateB = b.dateStr ? new Date(b.dateStr).getTime() : Infinity;
     return dateA - dateB;
   });
+};
+
+/**
+ * Analizza l'albero delle task e, se una o più sottotask hanno una scadenza 
+ * più recente della task principale (o se la principale non ha data), 
+ * sostituisce la principale con la/le sottotask più urgenti.
+ */
+export const promoteSubtasks = (rootTasks: UITask[]): UITask[] => {
+  if (!rootTasks || rootTasks.length === 0) return [];
+
+  // Helper interno tipizzato per raccogliere tutte le sottotask attive in modo ricorsivo
+  const getAllActiveSubtasks = (task: UITask): UITask[] => {
+    let result: UITask[] = [];
+    if (!task.subtasks || task.subtasks.length === 0) return result;
+
+    for (const sub of task.subtasks) {
+      if (!sub.done) {
+        result.push(sub);
+        result = result.concat(getAllActiveSubtasks(sub));
+      }
+    }
+    return result;
+  };
+
+  const promotedList: UITask[] = [];
+
+  for (const root of rootTasks) {
+    // Se la task principale è già completata, la lasciamo così com'è
+    if (root.done) {
+      promotedList.push(root);
+      continue;
+    }
+
+    const activeSubtasks = getAllActiveSubtasks(root);
+
+    // Se non ci sono sottotask attive, manteniamo la task principale
+    if (activeSubtasks.length === 0) {
+      promotedList.push(root);
+      continue;
+    }
+
+    // Isoliamo solo le sottotask attive che hanno una data di scadenza valida
+    const subtasksWithDeadline = activeSubtasks.filter(
+      s => !!s.deadline && s.deadline !== 'Nessuna'
+    );
+
+    // Calcoliamo la data della principale (se assente vale Infinity, cioè meno urgente di qualsiasi data)
+    const rootDeadlineTime = (root.deadline && root.deadline !== 'Nessuna')
+      ? new Date(root.deadline).getTime()
+      : Infinity;
+
+    if (subtasksWithDeadline.length > 0) {
+      // Troviamo il timestamp di scadenza più piccolo (più recente/urgente) tra le sottotask
+      const minSubtaskTime = Math.min(
+        ...subtasksWithDeadline.map(s => new Date(s.deadline).getTime())
+      );
+
+      // Se la sottotask ha una data STRETTAMENTE PIÙ RECENTE della principale (o se la principale non ha data)
+      if (minSubtaskTime < rootDeadlineTime) {
+        // Troviamo TUTTE le sottotask che condividono questa stessa data minima
+        const urgentSubtasks = subtasksWithDeadline.filter(
+          s => new Date(s.deadline).getTime() === minSubtaskTime
+        );
+
+        // Aggiungiamo tutte le sottotask idonee al posto della principale
+        urgentSubtasks.forEach(sub => {
+          promotedList.push({
+            ...sub,
+            isPromotedSubtask: true,
+            isUrgentFromSubtask: true
+          });
+        });
+
+        continue;
+      }
+    }
+
+    // Se la principale è più urgente o ha la stessa data, manteniamo la principale
+    promotedList.push(root);
+  }
+
+  return promotedList;
 };

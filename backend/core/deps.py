@@ -142,7 +142,7 @@ def get_effective_max_depth(user: User, db: Session) -> int:
 
 
 def get_task_owned(task_id: int, current_user: User, db: Session) -> Task:
-    stmt = select(Task).where(Task.id == task_id, Task.userid == current_user.id)
+    stmt = select(Task).where(Task.id == task_id, Task.user_id == current_user.id)
     task = db.execute(stmt).scalar_one_or_none()
 
     if task is None:
