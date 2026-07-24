@@ -7,7 +7,7 @@ import { DatePickerMonthGrid } from './DatePickerMonthGrid';
 import { DatePickerDayGrid } from './DatePickerDayGrid';
 
 interface DatePickerProps {
-  value: string; // Formato YYYY-MM-DD
+  value: string | null | undefined; // Formato YYYY-MM-DD
   onChange: (newDate: string) => void;
   isOpen: boolean;
   onClose: () => void;
@@ -38,11 +38,21 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      if (value) {
+      // Controlliamo che value esista e sia una stringa non vuota
+      if (value && typeof value === 'string' && value.trim() !== '') {
         const [yyyy, mm, dd] = value.split('-');
-        setPickerMonthDate(new Date(Number(yyyy), Number(mm) - 1, Number(dd)));
+        const parsedYear = Number(yyyy);
+        const parsedMonth = Number(mm) - 1;
+        const parsedDay = Number(dd);
+
+        // Controllo rigoroso: se la conversione fallisce, isNaN ci protegge
+        if (!isNaN(parsedYear) && !isNaN(parsedMonth) && !isNaN(parsedDay)) {
+          setPickerMonthDate(new Date(parsedYear, parsedMonth, parsedDay));
+        } else {
+          setPickerMonthDate(new Date()); // Salvagente
+        }
       } else {
-        setPickerMonthDate(new Date());
+        setPickerMonthDate(new Date()); // Salvagente per stringhe vuote o null
       }
     }
   }, [isOpen, value]);
@@ -133,7 +143,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               year={year} 
               currentYear={currentYear} 
               currentMonth={currentMonth} 
-              value={value} 
+              value={value || ''} 
               onChange={onChange} 
               onClose={onClose} 
             />
@@ -146,7 +156,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               currentYear={currentYear}
               currentMonth={currentMonth}
               currentDay={currentDay}
-              value={value}
+              value={value || ''}
               selectionMode={selectionMode}
               onChange={onChange}
               onClose={onClose}
