@@ -220,15 +220,15 @@ def would_create_cycle(
         return True
 
     ancestor_cte = (
-        select(Task.id, Task.parentid)
-        .where(Task.id == new_parent_id, Task.userid == current_user.id)
+        select(Task.id, Task.parent_id)
+        .where(Task.id == new_parent_id, Task.user_id == current_user.id)
         .cte(name="cycle_ancestors", recursive=True)
     )
 
     recursive_part = (
-        select(Task.id, Task.parentid)
-        .join(ancestor_cte, Task.id == ancestor_cte.c.parentid)
-        .where(Task.userid == current_user.id)
+        select(Task.id, Task.parent_id)
+        .join(ancestor_cte, Task.id == ancestor_cte.c.parent_id)
+        .where(Task.user_id == current_user.id)
     )
 
     ancestor_cte = ancestor_cte.union_all(recursive_part)
